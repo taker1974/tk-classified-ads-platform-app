@@ -1,0 +1,63 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /tk-classified-ads-platform
+  error:
+    whitelabel:
+      enabled: false
+
+spring:
+  application:
+    name: tk-classified-ads-platform
+  sql:
+    init:
+      mode: never
+  output:
+    ansi:
+      enabled: always
+  thymeleaf:
+    check-template-location: false
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500, expireAfterWrite=10m
+
+  datasource:
+    ads:
+        jdbc-url: jdbc:postgresql://localhost:5432/tk_ads
+        username: ads_god
+        password: 87654321
+        maximum-pool-size: 10
+        minimum-idle: 5
+        connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    open-in-view: false
+
+  liquibase:
+      enabled: true
+      change-log: classpath:db/changelog/changelog-master.yml
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/tk_ads
+      user: bank_god
+      password: 87654321
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,beans,loggers,threaddump,prometheus
+
+advertising:
+  check-new:
+    cron: "0/30 * * * * ?"

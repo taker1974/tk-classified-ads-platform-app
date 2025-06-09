@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"ru.spb.tksoft.common.controller.advice","l":"AbstractBaseControllerAdvice"},{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"ru.spb.tksoft.common.controller.advice","l":"CommonControllerAdvice"},{"p":"ru.spb.tksoft.common.controller.dto","l":"CommonErrorResponseDto"}];updateSearchResults();
