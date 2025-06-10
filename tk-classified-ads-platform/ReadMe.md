@@ -1,4 +1,4 @@
-# tk-classified-ads-platform-app
+# tk-classified-ads-platform
 
 ## О приложении
 
@@ -9,7 +9,7 @@ Java, Spring Boot.
 
 ## Подготовка к развёртыванию, запуск, документирование
 
-См. ../ReadMe.md
+Смотри [../ReadMe.md](https://github.com/taker1974/tk-classified-ads-platform-app/blob/main/ReadMe.md)
 
 ## Особенности текущей реализации
 

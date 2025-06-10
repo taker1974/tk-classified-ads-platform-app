@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"ru.spb.tksoft.ads"},{"l":"ru.spb.tksoft.ads.config"},{"l":"ru.spb.tksoft.ads.controller"},{"l":"ru.spb.tksoft.ads.dto"},{"l":"ru.spb.tksoft.ads.enumeration"},{"l":"ru.spb.tksoft.ads.service"},{"l":"ru.spb.tksoft.ads.service.impl"}];updateSearchResults();

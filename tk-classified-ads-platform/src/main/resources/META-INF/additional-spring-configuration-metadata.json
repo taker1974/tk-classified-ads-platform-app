@@ -5,6 +5,10 @@
             "description": "Ads DB properties"
         },
         {
+            "name": "advertising.recieve-from",
+            "description": "WebUI origin."
+        },
+        {
             "name": "advertising.check-new.cron",
             "description": "Period of check new ads in crontab format"
         }

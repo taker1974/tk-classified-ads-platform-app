@@ -47,9 +47,12 @@ $mvn clean install
 $java -jar target/tk-classified-ads-platform-<ваша.версия.ПО>.jar
 ```
 
+Смотри application.yml, context-path.  
+По условию для приложения на выбранном порту используется путь "/".  
+
 В браузере:
 
-http://localhost:<ваш-порт>/tk-classified-ads-platform/swagger-ui/index.html
+http://localhost:<ваш-порт>/swagger-ui/index.html
 
 ## Документация
 
@@ -65,7 +68,7 @@ npx @redocly/cli build-docs <путь-к-openapi-файлу>
 Генерирование статического HTML из Swagger на примере основного приложения tk-classified-ads-platform:
 
 ```Bash
-curl http://localhost:<порт>/tk-classified-ads-platform/api-docs -o tk-classified-ads-platform-api-spec.json
+curl http://localhost:<порт>/api-docs -o tk-classified-ads-platform-api-spec.json
 npx @redocly/cli build-docs tk-classified-ads-platform-api-spec.json -o tk-classified-ads-platform-swagger.html 
 ```
 
