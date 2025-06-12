@@ -14,7 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import ru.spb.tksoft.ads.dto.RegisterRequestDto;
 import ru.spb.tksoft.ads.enumeration.UserRole;
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +71,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         var config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(
+                List.of("${advertising.recieve-from:http://localhost:3000}"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
 
@@ -84,14 +87,18 @@ public class SecurityConfig {
      * @return UserDetailsService object.
      */
     @Bean
+    @SuppressWarnings("java:S1488") // Immediately return this expression instead of assigning it to
+                                    // the temporary variable "manager".
     public UserDetailsService userDetailsService(@NotNull PasswordEncoder encoder) {
 
         // TODO: Temporary in-memory users (replace with database later)
 
-        return new InMemoryUserDetailsManager(
+        var manager = new InMemoryUserDetailsManager(
                 User.builder()
                         .username("admin")
-                        .password("{noop}adminpass") // {noop} for plain text (remove in prod)
+                        .password("{noop}adminpass") // {noop} for plain
+                                                     // text (remove in
+                                                     // prod)
                         .passwordEncoder(encoder::encode)
                         .roles(UserRole.ADMIN.name())
                         .build(),
@@ -100,6 +107,7 @@ public class SecurityConfig {
                         .password("{noop}userpass")
                         .roles(UserRole.USER.name())
                         .build());
+        return manager;
     }
 
     /**
@@ -111,5 +119,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

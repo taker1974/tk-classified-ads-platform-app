@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "user" (
         LENGTH("last_name") BETWEEN 2 AND 16
     ),
     "phone" VARCHAR(16) UNIQUE NOT NULL CHECK (
-        LENGTH("last_name") BETWEEN 11 AND 16
+        LENGTH("phone") BETWEEN 11 AND 16
     ),
     "role_id" BIGINT NOT NULL,
     FOREIGN KEY ("role_id") REFERENCES "user_role" ("id")

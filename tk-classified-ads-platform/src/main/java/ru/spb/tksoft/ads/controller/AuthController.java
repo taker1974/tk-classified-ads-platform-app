@@ -23,23 +23,6 @@ public class AuthController {
     private final AuthService authService;
 
     /**
-     * POST /login - Authentication endpoint.
-     * 
-     * @RequestBody - LoginRequestDto - object with user credentials.
-     * @return ResponseEntity<Void> - 200 OK if authentication is successful, 401 Unauthorized if
-     *         authentication fails.
-     */
-    @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequestDto login) {
-
-        if (authService.login(login.getUsername(), login.getPassword())) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
-
-    /**
      * POST /register - Registration endpoint.
      * 
      * @RequestBody - RegisterRequestDto - object with user registration data.
@@ -53,6 +36,23 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    /**
+     * POST /login - Authentication endpoint.
+     * 
+     * @RequestBody - LoginRequestDto - object with user credentials.
+     * @return ResponseEntity<Void> - 200 OK if authentication is successful, 401 Unauthorized if
+     *         authentication fails.
+     */
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody LoginRequestDto login) {
+
+        if (authService.login(login.getUsername(), login.getPassword())) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 }
