@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.spb.tksoft.ads.dto.LoginRequestDto;
 import ru.spb.tksoft.ads.dto.RegisterRequestDto;
-import ru.spb.tksoft.ads.service.AuthService;
+import ru.spb.tksoft.ads.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;

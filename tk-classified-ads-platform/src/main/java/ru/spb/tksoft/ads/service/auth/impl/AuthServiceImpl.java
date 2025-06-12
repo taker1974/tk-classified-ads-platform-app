@@ -1,11 +1,11 @@
-package ru.spb.tksoft.ads.service.impl;
+package ru.spb.tksoft.ads.service.auth.impl;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.RegisterRequestDto;
-import ru.spb.tksoft.ads.service.AuthService;
+import ru.spb.tksoft.ads.service.auth.AuthService;
 
 /**
  * Authentication service implementation.

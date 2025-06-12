@@ -23,8 +23,8 @@ public class LoginRequestDto {
     @Size(min = 4, max = 32)
     private String username;
 
-    /** Password. */
+    /** Password. Password can/will be encoded in bcrypt so it's length can be larger than 16. */
     @NotBlank
-    @Size(min = 8, max = 16)
+    @Size(min = 8, max = 64)
     private String password;
 }

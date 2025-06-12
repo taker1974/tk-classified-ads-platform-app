@@ -1,4 +1,4 @@
-package ru.spb.tksoft.ads.service;
+package ru.spb.tksoft.ads.service.auth;
 
 import ru.spb.tksoft.ads.dto.RegisterRequestDto;
 

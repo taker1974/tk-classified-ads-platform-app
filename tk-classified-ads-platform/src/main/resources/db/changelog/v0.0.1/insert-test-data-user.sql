@@ -10,7 +10,7 @@ INSERT INTO
         "phone",
         "role_id"
     )
-SELECT 'anton', '12345678', 'Anton', 'Gavrilov', '+79223334455', r.id
+SELECT 'anton', '12345678', 'Anton', 'Antonov', '+79223334455', r.id
 FROM "user_role" r
 WHERE
     r.name = 'ADMIN';

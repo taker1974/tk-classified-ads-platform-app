@@ -1,25 +1,32 @@
 package ru.spb.tksoft.ads.enumeration;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
 /**
  * User's role type.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
 public enum UserRole {
+    
+    ADMIN, USER;
+    
+    public static UserRole fromId(Long id) {
 
-    USER("USER"), ADMIN("ADMIN");
+        if (id == null) {
+            return null;
+        }
 
-    @NotBlank
-    private final String roleName;
+        return switch (id.intValue()) {
+            case 1 -> ADMIN;
+            case 2 -> USER;
+            default -> throw new IllegalArgumentException("Unknown role ID: " + id);
+        };
+    }
 
-    /**
-     * User's role type.
-     * @param roleName User's role type name.
-     */
-    UserRole(@NotBlank @Size(min = 4, max = 5) String roleName) {
-        this.roleName = roleName.toUpperCase();
+    public Long getId() {
+
+        return switch (this) {
+            case USER -> 1L;
+            case ADMIN -> 2L;
+        };
     }
 }

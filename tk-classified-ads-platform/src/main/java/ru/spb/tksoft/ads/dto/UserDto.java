@@ -9,26 +9,22 @@ import lombok.NoArgsConstructor;
 import ru.spb.tksoft.ads.enumeration.UserRole;
 
 /**
- * Register request, basic authentication.
- * 
- * No response DTO. Http response: 200 (OK) or 401 (Unauthorized).
+ * User DTO.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterRequestDto {
+public class UserDto {
 
-    /** Login aka username. */
+    /** User ID. */
+    private long id;
+
+    /** Login as username as email. */
     @NotBlank
     @Size(min = 4, max = 32)
-    private String username;
-
-    /** Password. Password can/will be encoded in bcrypt so it's length can be larger than 16. */
-    @NotBlank
-    @Size(min = 8, max = 64)
-    private String password;
+    private String email;
 
     /** First name. */
     @NotBlank
@@ -49,4 +45,9 @@ public class RegisterRequestDto {
     /** User's role. */
     @NotBlank
     private UserRole role;
+
+    /** Link to the user's avatar. */
+    @NotBlank
+    @Size(min = 10, max = 512)
+    private String image;
 }
