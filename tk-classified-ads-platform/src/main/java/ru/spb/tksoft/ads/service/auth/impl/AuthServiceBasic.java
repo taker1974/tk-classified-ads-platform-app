@@ -75,6 +75,9 @@ public class AuthServiceBasic implements AuthService {
     /**
      * {@inheritDoc}
      * 
+     * All this logic is just for demonstration purposes: returns true anyway because we already
+     * logged in via basic auth. See loadUserByUsername()
+     * 
      * @param userName User name.
      * @param password Password.
      */
@@ -83,14 +86,18 @@ public class AuthServiceBasic implements AuthService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        // All this logic is just for demonstration purposes:
-        // returns true anyway because we already logged in via basic auth. See loadUserByUsername()
-        if (userService.existsByNameAndPassword(
-                userName, passwordEncoder.encode(password))) {
+        try {
+            if (userService.existsByNameAndPassword(
+                    userName, passwordEncoder.encode(password))) {
 
-            // We don't want to explain the reason to the user, but log it.
-            LogEx.warn(log, LogEx.getThisMethodName(),
-                    "User with given credentials not exists: %s", userName);
+                // We don't want to explain the reason to the user, but log it.
+                LogEx.warn(log, LogEx.getThisMethodName(),
+                        "User with given credentials not exists: %s", userName);
+                return false;
+            }
+
+        } catch (Exception ex) { // Unexpected exception only.
+            LogEx.error(log, LogEx.getThisMethodName(), ex);
             return false;
         }
 
