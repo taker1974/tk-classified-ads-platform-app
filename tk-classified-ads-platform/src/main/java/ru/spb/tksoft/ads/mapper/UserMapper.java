@@ -2,6 +2,7 @@ package ru.spb.tksoft.ads.mapper;
 
 import javax.annotation.concurrent.ThreadSafe;
 import jakarta.validation.constraints.NotNull;
+import ru.spb.tksoft.ads.dto.RegisterRequestDto;
 import ru.spb.tksoft.ads.dto.UserDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 
@@ -20,7 +21,7 @@ public final class UserMapper {
     /**
      * Entity to DTO.
      * 
-     * @param userEntity User entity.
+     * @param entity User entity.
      * @return user DTO.
      */
     @NotNull
@@ -34,5 +35,19 @@ public final class UserMapper {
                 entity.getPhone(),
                 entity.getRole(),
                 "link-to-avatar");
+    }
+
+    /**
+     * DTO to entity.
+     * 
+     * @param dto New user DTO.
+     * @return User entity.
+     */
+    public static UserEntity toEntity(@NotNull final RegisterRequestDto dto) {
+
+        return new UserEntity(dto.getUsername(), dto.getPassword(),
+                dto.getFirstName(), dto.getLastName(),
+                dto.getPhone(),
+                dto.getRole());
     }
 }

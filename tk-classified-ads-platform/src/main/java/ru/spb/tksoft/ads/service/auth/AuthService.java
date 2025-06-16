@@ -21,8 +21,8 @@ public interface AuthService {
     /**
      * Register user.
      * 
-     * @param register User data.
+     * @param registerRequest User data.
      * @return True if registration was successful
      */
-    boolean register(RegisterRequestDto register);
+    boolean register(RegisterRequestDto registerRequest);
 }

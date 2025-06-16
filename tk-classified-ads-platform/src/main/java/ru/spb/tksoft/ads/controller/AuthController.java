@@ -1,20 +1,17 @@
 package ru.spb.tksoft.ads.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.spb.tksoft.ads.dto.LoginRequestDto;
 import ru.spb.tksoft.ads.dto.RegisterRequestDto;
 import ru.spb.tksoft.ads.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-@Slf4j
-@CrossOrigin(value = "${advertising.recieve-from:http://localhost:3000}")
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -30,9 +27,10 @@ public class AuthController {
      *         registration fails.
      */
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequestDto register) {
+    @Valid
+    public ResponseEntity<Void> register(@RequestBody RegisterRequestDto registerRequest) {
 
-        if (authService.register(register)) {
+        if (authService.register(registerRequest)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
