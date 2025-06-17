@@ -9,11 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequiredArgsConstructor
+@Valid
 public class AuthController {
 
     @NotNull
@@ -26,8 +29,9 @@ public class AuthController {
      * @return ResponseEntity<Void> - 201 Created if registration is successful, 400 Bad Request if
      *         registration fails.
      */
+    @Operation(summary = "Регистрация пользователя")
+    @Tag(name = "Регистрация")
     @PostMapping("/register")
-    @Valid
     public ResponseEntity<Void> register(@RequestBody RegisterRequestDto registerRequest) {
 
         if (authService.register(registerRequest)) {
@@ -44,6 +48,8 @@ public class AuthController {
      * @return ResponseEntity<Void> - 200 OK if authentication is successful, 401 Unauthorized if
      *         authentication fails.
      */
+    @Operation(summary = "Авторизация пользователя")
+    @Tag(name = "Авторизация")
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequestDto login) {
 

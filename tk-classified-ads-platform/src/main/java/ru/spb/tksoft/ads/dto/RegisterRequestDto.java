@@ -12,7 +12,9 @@ import ru.spb.tksoft.ads.enumeration.UserRole;
 /**
  * Register request, basic authentication.
  * 
- * No response DTO. Http response: 200 (OK) or 401 (Unauthorized).
+ * No response DTO. Http response: <br>
+ * "200": description: OK <br>
+ * "400": description: Bad request <br>
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
@@ -26,9 +28,9 @@ public class RegisterRequestDto {
     @Size(min = 4, max = 32)
     private String username;
 
-    /** Password. Password can/will be encoded in bcrypt so it's length can be larger than 16. */
+    /** Password. NOT ENCRYPTED. */
     @NotBlank
-    @Size(min = 8, max = 64)
+    @Size(min = 8, max = 16)
     private String password;
 
     /** First name. */

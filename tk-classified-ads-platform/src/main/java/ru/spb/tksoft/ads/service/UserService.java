@@ -5,13 +5,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import ru.spb.tksoft.ads.dto.UserDto;
+import ru.spb.tksoft.ads.dto.NewPasswordRequestDto;
+import ru.spb.tksoft.ads.dto.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
-import ru.spb.tksoft.ads.exception.TkNotFoundException;
+import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.ads.tools.PageTools;
@@ -31,18 +35,21 @@ public class UserService {
     @NotNull
     private final UserRepository userRepository;
 
+    @NotNull
+    private final PasswordEncoder passwordEncoder;
+
     /**
      * Get paginated list of users.
      * 
      * @return DTO.
      */
     @NotNull
-    public Page<UserDto> getAllUsers(Pageable pageable) {
+    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         Page<UserEntity> entity = userRepository.findAll(pageable);
-        List<UserDto> dto = entity.stream().map(UserMapper::toDto).toList();
+        List<UserResponseDto> dto = entity.stream().map(UserMapper::toDto).toList();
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return PageTools.convertListToPage(dto, pageable);
@@ -55,18 +62,18 @@ public class UserService {
      * @return DTO if created, empty DTO otherwise.
      */
     @NotNull
-    public UserDto createUser(@NotNull final UserEntity newUser) {
+    public UserResponseDto createUser(@NotNull final UserEntity newUser) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         UserEntity entity = userRepository.save(newUser);
-        UserDto dto = UserMapper.toDto(entity);
+        UserResponseDto dto = UserMapper.toDto(entity);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return dto;
     }
 
-        /**
+    /**
      * Check if user exists.
      * 
      * @param userName Name.
@@ -95,15 +102,14 @@ public class UserService {
      * @return DTO if found, empty DTO otherwise.
      */
     @NotNull
-    public UserDto findUserByName(@NotBlank final String userName) {
+    public UserResponseDto findUserByName(@NotBlank final String userName) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         UserEntity user = userRepository.findOneByName(userName)
-                .orElseThrow(() -> new TkNotFoundException(
-                        "User with given name is not exists: " + userName));
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
-        UserDto dto = UserMapper.toDto(user);
+        UserResponseDto dto = UserMapper.toDto(user);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return dto;
@@ -115,18 +121,42 @@ public class UserService {
      * @return DTO if found, empty DTO otherwise.
      */
     @NotNull
-    public UserDto findUserByNameAndPassword(@NotBlank final String userName,
+    public UserResponseDto findUserByNameAndPassword(@NotBlank final String userName,
             @NotBlank final String password) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         UserEntity user = userRepository.findOneByNameAndPassword(userName, password)
-                .orElseThrow(() -> new TkNotFoundException(
-                        "User " + userName + " with given credentials not found"));
+                .orElseThrow(() -> new TkUserNotFoundException(userName, true));
 
-        UserDto dto = UserMapper.toDto(user);
+        UserResponseDto dto = UserMapper.toDto(user);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return dto;
+    }
+
+    /**
+     * Set new password for user.
+     *
+     * No response DTO. Http response:<br>
+     * "200": description: OK <br>
+     * "401": description: Unauthorized <br>
+     * "403": description: Forbidden <br>
+     * 
+     * @param newPasswordRequest DTO.
+     */
+    public void setPassword(UserDetails userDetails, NewPasswordRequestDto newPasswordRequest) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        String userName = userDetails.getUsername();
+
+        UserEntity user = userRepository.findOneByName(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, true));
+
+        user.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
+        userRepository.save(user);
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }

@@ -1,6 +1,5 @@
 package ru.spb.tksoft.ads.service.auth.impl;
 
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,9 +8,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.RegisterRequestDto;
-import ru.spb.tksoft.ads.dto.UserDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
-import ru.spb.tksoft.ads.exception.TkAlreadyExistsException;
+import ru.spb.tksoft.ads.exception.TkUserExistsException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.service.UserService;
 import ru.spb.tksoft.ads.service.auth.AuthService;
@@ -54,14 +52,14 @@ public class AuthServiceBasic implements AuthService {
         final String userName = registerRequest.getUsername();
         try {
             if (userService.existsByName(userName)) {
-                throw new TkAlreadyExistsException("User " + userName + " already exists.");
+                throw new TkUserExistsException(userName);
             }
 
             UserEntity newUser = UserMapper.toEntity(registerRequest);
             newUser.setPassword(
                     passwordEncoder.encode(registerRequest.getPassword()));
 
-            userService.createUser(UserMapper.toEntity(registerRequest));
+            userService.createUser(newUser);
 
         } catch (Exception ex) { // Unexpected exception only.
             LogEx.error(log, LogEx.getThisMethodName(), ex);

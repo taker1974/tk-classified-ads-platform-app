@@ -3,7 +3,7 @@ package ru.spb.tksoft.ads.mapper;
 import javax.annotation.concurrent.ThreadSafe;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.RegisterRequestDto;
-import ru.spb.tksoft.ads.dto.UserDto;
+import ru.spb.tksoft.ads.dto.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 
 /**
@@ -25,9 +25,9 @@ public final class UserMapper {
      * @return user DTO.
      */
     @NotNull
-    public static UserDto toDto(@NotNull final UserEntity entity) {
+    public static UserResponseDto toDto(@NotNull final UserEntity entity) {
 
-        return new UserDto(
+        return new UserResponseDto(
                 entity.getId(),
                 entity.getName(), // as email/login
                 entity.getFirstName(),

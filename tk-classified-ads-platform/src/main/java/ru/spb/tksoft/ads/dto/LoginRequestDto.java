@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 /**
  * Login request, basic authentication.
  * 
- * No response DTO. Http response: 201 (Created) or 400 (Bad Request).
+ * No response DTO. Http response:<br>
+ * "201": description: Created <br>
+ * "401": description: Unauthorized <br>
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */

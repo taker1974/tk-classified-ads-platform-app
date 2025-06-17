@@ -20,8 +20,7 @@ public class CaffeinCacheConfig {
     @Bean
     public CacheManager cacheManager() {
 
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "userDetailed");
+        var cacheManager = new CaffeineCacheManager();
 
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .initialCapacity(100)

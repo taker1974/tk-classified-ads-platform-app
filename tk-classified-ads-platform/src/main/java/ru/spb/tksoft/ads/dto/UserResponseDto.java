@@ -10,14 +10,18 @@ import lombok.NoArgsConstructor;
 import ru.spb.tksoft.ads.enumeration.UserRole;
 
 /**
- * User DTO.
+ * User response DTO.
+ * 
+ * Http response:<br>
+ * "200": description: OK <br>
+ * "401": description: Unauthorized <br>
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserResponseDto {
 
     /** User ID. */
     private long id;
