@@ -1,5 +1,6 @@
 package ru.spb.tksoft.ads.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class LoginRequestDto {
 
     /** Login aka username. */
     @NotBlank
+    @Email
     @Size(min = 4, max = 32)
     private String username;
 

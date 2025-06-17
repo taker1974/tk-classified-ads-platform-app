@@ -16,7 +16,6 @@ import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequiredArgsConstructor
-@Valid
 public class AuthController {
 
     @NotNull
@@ -32,7 +31,7 @@ public class AuthController {
     @Operation(summary = "Регистрация пользователя")
     @Tag(name = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequestDto registerRequest) {
+    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequestDto registerRequest) {
 
         if (authService.register(registerRequest)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -51,7 +50,7 @@ public class AuthController {
     @Operation(summary = "Авторизация пользователя")
     @Tag(name = "Авторизация")
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequestDto login) {
+    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequestDto login) {
 
         if (authService.login(login.getUsername(), login.getPassword())) {
             return ResponseEntity.ok().build();

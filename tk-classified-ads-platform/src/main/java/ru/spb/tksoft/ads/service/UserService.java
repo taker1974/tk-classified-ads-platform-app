@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.NewPasswordRequestDto;
+import ru.spb.tksoft.ads.dto.UpdateUserDto;
 import ru.spb.tksoft.ads.dto.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
@@ -145,7 +146,8 @@ public class UserService {
      * 
      * @param newPasswordRequest DTO.
      */
-    public void setPassword(UserDetails userDetails, NewPasswordRequestDto newPasswordRequest) {
+    public void setPassword(@NotNull final UserDetails userDetails,
+            @NotNull final NewPasswordRequestDto newPasswordRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
@@ -158,5 +160,31 @@ public class UserService {
         userRepository.save(user);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
+    }
+
+    /**
+     * Update user.
+     * 
+     * @param userName Name.
+     * @param updateUserDto DTO.
+     * @return DTO.
+     */
+    @NotNull
+    public UpdateUserDto updateUser(@NotBlank final String userName,
+            @NotNull final UpdateUserDto updateRequest) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        UserEntity user = userRepository.findOneByName(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, true));
+
+        user.setFirstName(updateRequest.getFirstName());
+        user.setLastName(updateRequest.getLastName());
+        user.setPhone(updateRequest.getPhone());
+
+        userRepository.save(user);
+        
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
+        return updateRequest;
     }
 }

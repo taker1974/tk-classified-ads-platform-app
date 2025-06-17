@@ -9,11 +9,6 @@ import lombok.NoArgsConstructor;
 /**
  * Change password request, basic authentication.
  * 
- * No response DTO. Http response:<br>
- * "200": description: OK <br>
- * "401": description: Unauthorized <br>
- * "403": description: Forbidden <br>
- * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
 @Data

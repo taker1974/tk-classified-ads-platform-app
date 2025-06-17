@@ -1,5 +1,6 @@
 package ru.spb.tksoft.ads.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -11,10 +12,6 @@ import ru.spb.tksoft.ads.enumeration.UserRole;
 
 /**
  * User response DTO.
- * 
- * Http response:<br>
- * "200": description: OK <br>
- * "401": description: Unauthorized <br>
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
@@ -28,6 +25,7 @@ public class UserResponseDto {
 
     /** Login as username as email. */
     @NotBlank
+    @Email
     @Size(min = 4, max = 32)
     private String email;
 
