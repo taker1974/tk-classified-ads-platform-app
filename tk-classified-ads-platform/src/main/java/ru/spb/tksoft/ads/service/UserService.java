@@ -12,9 +12,10 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import ru.spb.tksoft.ads.dto.NewPasswordRequestDto;
-import ru.spb.tksoft.ads.dto.UpdateUserDto;
-import ru.spb.tksoft.ads.dto.UserResponseDto;
+import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
+import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
+import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
+import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
@@ -42,6 +43,7 @@ public class UserService {
     /**
      * Get paginated list of users.
      * 
+     * @param pageable Paging info.
      * @return DTO.
      */
     @NotNull
@@ -119,6 +121,8 @@ public class UserService {
     /**
      * Find user by name and password.
      * 
+     * @param userName Name.
+     * @param password Password.
      * @return DTO if found, empty DTO otherwise.
      */
     @NotNull
@@ -139,11 +143,7 @@ public class UserService {
     /**
      * Set new password for user.
      *
-     * No response DTO. Http response:<br>
-     * "200": description: OK <br>
-     * "401": description: Unauthorized <br>
-     * "403": description: Forbidden <br>
-     * 
+     * @param userDetails User details implementation.
      * @param newPasswordRequest DTO.
      */
     public void setPassword(@NotNull final UserDetails userDetails,
@@ -166,12 +166,12 @@ public class UserService {
      * Update user.
      * 
      * @param userName Name.
-     * @param updateUserDto DTO.
-     * @return DTO.
+     * @param updateRequest Request DTO.
+     * @return Response DTO.
      */
     @NotNull
-    public UpdateUserDto updateUser(@NotBlank final String userName,
-            @NotNull final UpdateUserDto updateRequest) {
+    public UpdateUserResponseDto updateUser(@NotBlank final String userName,
+            @NotNull final UpdateUserRequestDto updateRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
@@ -183,8 +183,11 @@ public class UserService {
         user.setPhone(updateRequest.getPhone());
 
         userRepository.save(user);
-        
+
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return updateRequest;
+        return new UpdateUserResponseDto(
+                updateRequest.getFirstName(),
+                updateRequest.getLastName(),
+                updateRequest.getPhone());
     }
 }

@@ -1,8 +1,5 @@
-package ru.spb.tksoft.ads.dto;
+package ru.spb.tksoft.ads.dto.response;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,21 +12,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateUserDto {
+public class UpdateUserResponseDto {
 
     /** First name. */
-    @NotBlank
-    @Size(min = 2, max = 16)
     private String firstName;
 
     /** Last name. */
-    @NotBlank
-    @Size(min = 2, max = 16)
     private String lastName;
 
     /** Phone number. */
-    @NotBlank
-    @Size(min = 11, max = 32)
-    @Pattern(regexp = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}")
     private String phone;
 }

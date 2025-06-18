@@ -1,6 +1,6 @@
 package ru.spb.tksoft.ads.service.auth;
 
-import ru.spb.tksoft.ads.dto.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 
 /**
  * Authentication and authorization service interface.

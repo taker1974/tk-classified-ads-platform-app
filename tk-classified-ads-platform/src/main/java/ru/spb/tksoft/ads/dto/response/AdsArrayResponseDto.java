@@ -1,16 +1,13 @@
-package ru.spb.tksoft.ads.dto;
+package ru.spb.tksoft.ads.dto.response;
 
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Comments array response DTO.
+ * Ads array response DTO.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
@@ -18,14 +15,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonPropertyOrder({"count", "items"})
-public class CommentsArrayResponseDto {
+public class AdsArrayResponseDto {
 
     /** Items count. */
-    @Min(value = 0)
-    @Max(value = 10_000)
     private int count;
 
     /** Items array. */
-    @NotNull
-    private Set<CommentResponseDto> items;
+    private Set<AdResponseDto> items;
 }

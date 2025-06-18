@@ -1,8 +1,8 @@
 package ru.spb.tksoft.ads.controller;
 
 import lombok.RequiredArgsConstructor;
-import ru.spb.tksoft.ads.dto.LoginRequestDto;
-import ru.spb.tksoft.ads.dto.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.request.LoginRequestDto;
+import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 import ru.spb.tksoft.ads.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

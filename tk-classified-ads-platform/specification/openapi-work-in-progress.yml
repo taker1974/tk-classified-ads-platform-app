@@ -7,7 +7,6 @@ servers:
   - url: http://localhost:8080
 
 paths:
-  # +
   /users/set_password:
     post:
       tags:
@@ -26,7 +25,6 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
-  # +
   /users/me:
     get:
       tags:
@@ -61,6 +59,7 @@ paths:
                 $ref: "#/components/schemas/UpdateUser"
         "401":
           description: Unauthorized
+  
   /users/me/image:
     patch:
       tags:
@@ -84,7 +83,6 @@ paths:
         "401":
           description: Unauthorized
 
-  # +
   /register:
     post:
       tags:
@@ -101,7 +99,6 @@ paths:
           description: Created
         "400":
           description: Bad Request
-  # +
   /login:
     post:
       tags:
@@ -118,9 +115,8 @@ paths:
           description: OK
         "401":
           description: Unauthorized
-  # ..
+
   /ads:
-    # +
     get:
       tags:
         - Объявления
@@ -133,7 +129,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Ads"
-    # ..
     post:
       tags:
         - Объявления
@@ -162,7 +157,7 @@ paths:
                 $ref: "#/components/schemas/Ad"
         "401":
           description: Unauthorized
-  # ..
+
   /ads/{id}/comments:
     get:
       tags:
@@ -291,6 +286,7 @@ paths:
           description: Unauthorized
         "404":
           description: Not found
+
   /ads/{adId}/comments/{commentId}:
     delete:
       tags:
@@ -371,6 +367,7 @@ paths:
           description: OK
         "401":
           description: Unauthorized
+
   /ads/{id}/image:
     patch:
       tags:

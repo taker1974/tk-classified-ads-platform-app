@@ -1,4 +1,4 @@
-package ru.spb.tksoft.ads.dto;
+package ru.spb.tksoft.ads.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.Max;

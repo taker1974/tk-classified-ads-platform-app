@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import ru.spb.tksoft.ads.dto.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkUserExistsException;
 import ru.spb.tksoft.ads.mapper.UserMapper;

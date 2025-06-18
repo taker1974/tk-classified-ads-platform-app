@@ -2,8 +2,8 @@ package ru.spb.tksoft.ads.mapper;
 
 import javax.annotation.concurrent.ThreadSafe;
 import jakarta.validation.constraints.NotNull;
-import ru.spb.tksoft.ads.dto.RegisterRequestDto;
-import ru.spb.tksoft.ads.dto.UserResponseDto;
+import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 
 /**

@@ -1,9 +1,10 @@
 package ru.spb.tksoft.ads.controller;
 
 import lombok.RequiredArgsConstructor;
-import ru.spb.tksoft.ads.dto.NewPasswordRequestDto;
-import ru.spb.tksoft.ads.dto.UpdateUserDto;
-import ru.spb.tksoft.ads.dto.UserResponseDto;
+import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
+import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
+import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
+import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -65,8 +66,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
-    public UpdateUserDto updateUser(@AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody UpdateUserDto updateRequest) {
+    public UpdateUserResponseDto updateUser(@AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UpdateUserRequestDto updateRequest) {
 
         return userService.updateUser(userDetails.getUsername(), updateRequest);
     }

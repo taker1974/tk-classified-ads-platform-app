@@ -1,10 +1,5 @@
-package ru.spb.tksoft.ads.dto;
+package ru.spb.tksoft.ads.dto.response;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,33 +19,20 @@ public class UserResponseDto {
     private long id;
 
     /** Login as username as email. */
-    @NotBlank
-    @Email
-    @Size(min = 4, max = 32)
     private String email;
 
     /** First name. */
-    @NotBlank
-    @Size(min = 2, max = 16)
     private String firstName;
 
     /** Last name. */
-    @NotBlank
-    @Size(min = 2, max = 16)
     private String lastName;
 
     /** Phone number. */
-    @NotBlank
-    @Size(min = 11, max = 32)
-    @Pattern(regexp = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}")
     private String phone;
 
     /** User's role. */
-    @NotNull
     private UserRole role;
 
     /** Link to the user's avatar. */
-    @NotBlank
-    @Size(min = 10, max = 512)
     private String image;
 }
