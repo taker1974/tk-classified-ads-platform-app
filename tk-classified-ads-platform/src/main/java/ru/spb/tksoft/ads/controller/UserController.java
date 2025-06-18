@@ -33,8 +33,9 @@ public class UserController {
     /**
      * POST /set_password - set new password endpoint.
      * 
+     * Return 200/OK, 401/Unauthorized, 403/Forbidden.
+     * 
      * @param newPasswordRequest - DTO for setting new password.
-     * @return 200/OK, 401/Unauthorized, 403/Forbidden.
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление пароля")
@@ -48,7 +49,9 @@ public class UserController {
     /**
      * GET /me - Info about authenticated user.
      * 
-     * @return 200/OK, 401/Unauthorized.
+     * Return 200/OK, 401/Unauthorized.
+     * 
+     * @return Response DTO.
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Получение информации об авторизованном пользователе")
@@ -61,7 +64,10 @@ public class UserController {
     /**
      * PATCH /me - Update authenticated user.
      * 
-     * @return 200/OK, 401/Unauthorized.
+     * Return 200/OK, 401/Unauthorized.
+     * 
+     * @param updateRequest - Update request DTO.
+     * @return Response DTO.
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление информации об авторизованном пользователе")

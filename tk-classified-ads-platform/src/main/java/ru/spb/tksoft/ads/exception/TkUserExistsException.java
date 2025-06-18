@@ -23,7 +23,7 @@ public class TkUserExistsException extends RuntimeException {
     /**
      * The only constructor.
      * 
-     * @param message Error message.
+     * @param userName User name.
      */
     public TkUserExistsException(@NotBlank final String userName) {
 
