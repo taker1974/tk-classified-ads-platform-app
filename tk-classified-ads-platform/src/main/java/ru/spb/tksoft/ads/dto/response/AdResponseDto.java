@@ -21,9 +21,9 @@ public class AdResponseDto {
     @JsonProperty("pk")
     private long id;
 
-    /** Author ID. */
+    /** User/creator/author ID. */
     @JsonProperty("author")
-    private long authorId;
+    private long userId;
 
     /** Image URL. */
     @JsonProperty("image")

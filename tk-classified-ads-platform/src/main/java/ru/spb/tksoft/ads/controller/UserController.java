@@ -41,7 +41,7 @@ public class UserController {
     @Operation(summary = "Обновление пароля")
     @PostMapping("/set_password")
     public void setPassword(@AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody NewPasswordRequestDto newPasswordRequest) {
+            @NotNull @Valid @RequestBody NewPasswordRequestDto newPasswordRequest) {
 
         userService.setPassword(userDetails, newPasswordRequest);
     }
@@ -73,7 +73,7 @@ public class UserController {
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
     public UpdateUserResponseDto updateUser(@AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody UpdateUserRequestDto updateRequest) {
+            @NotNull @Valid @RequestBody UpdateUserRequestDto updateRequest) {
 
         return userService.updateUser(userDetails.getUsername(), updateRequest);
     }

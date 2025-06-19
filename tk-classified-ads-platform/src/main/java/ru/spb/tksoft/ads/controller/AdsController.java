@@ -75,8 +75,8 @@ public class AdsController {
     @PostMapping(consumes = "multipart/form-data")
     @NotNull
     public AdResponseDto addAd(@AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestPart("properties") CreateOrUpdateAdRequestDto createAddDto,
-            @RequestPart("image") MultipartFile image) {
+            @NotNull @Valid @RequestPart("properties") CreateOrUpdateAdRequestDto createAddDto,
+            @NotNull @RequestPart("image") MultipartFile image) {
 
         return adsService.addAd(userDetails, createAddDto, image);
     }
@@ -107,7 +107,7 @@ public class AdsController {
     @NotNull
     public CommentResponseDto addComment(@AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(required = true) long id,
-            @Valid @RequestBody CreateOrUpdateCommentRequestDto createCommentDto) {
+            @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto createCommentDto) {
 
         return adsService.addComment(userDetails, id, createCommentDto);
     }
@@ -138,7 +138,7 @@ public class AdsController {
     @NotNull
     public AdResponseDto updateAds(@AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(required = true) long id,
-            @Valid @RequestBody CreateOrUpdateAdRequestDto updateAdsDto) {
+            @NotNull @Valid @RequestBody CreateOrUpdateAdRequestDto updateAdsDto) {
 
         return adsService.updateAds(userDetails, id, updateAdsDto);
     }
@@ -169,7 +169,7 @@ public class AdsController {
     public CommentResponseDto updateComment(@AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(required = true) long adId,
             @PathVariable(required = true) long commentId,
-            @Valid @RequestBody CreateOrUpdateCommentRequestDto updateCommentDto) {
+            @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto updateCommentDto) {
 
         return adsService.updateComment(userDetails, adId, commentId, updateCommentDto);
     }
@@ -199,7 +199,7 @@ public class AdsController {
     @PatchMapping(value = "/{id}/image", consumes = "multipart/form-data")
     public void updateImage(@AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(required = true) long id,
-            @RequestPart("image") MultipartFile image) {
+            @NotNull @RequestPart("image") MultipartFile image) {
 
         adsService.updateImage(userDetails, id, image);
     }
