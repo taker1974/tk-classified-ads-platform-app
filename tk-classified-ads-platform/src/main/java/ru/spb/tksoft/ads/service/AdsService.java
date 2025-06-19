@@ -102,7 +102,7 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        // TODO: Get all comments for ad with given id.
+        // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return new CommentsArrayResponseDto(0, Collections.emptySet());
@@ -122,7 +122,7 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        // TODO: Add new comment to add.
+        // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return new CommentResponseDto();
@@ -140,9 +140,63 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        // TODO: Add new comment to add.
+        // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return new AdExtendedResponseDto();
+    }
+
+    @NotNull
+    public AdResponseDto updateAds(UserDetails userDetails, long id,
+            CreateOrUpdateAdRequestDto updateAdsDto) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        // TODO: Implement this method.
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
+        return new AdResponseDto();
+    }
+
+    public void removeAd(UserDetails userDetails, long id) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        // TODO: Implement this method.
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
+    }
+
+    @NotNull
+    public CommentResponseDto updateComment(UserDetails userDetails,
+            long adId, long commentId,
+            CreateOrUpdateCommentRequestDto updateCommentDto) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        // TODO: Implement this method.
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
+        return new CommentResponseDto();
+    }
+
+    public void deleteComment(UserDetails userDetails,
+            long adId, long commentId) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        // TODO: Implement this method.
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
+    }
+
+    public void updateImage(UserDetails userDetails,
+            long id, MultipartFile image) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        // TODO: Implement this method.
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }
