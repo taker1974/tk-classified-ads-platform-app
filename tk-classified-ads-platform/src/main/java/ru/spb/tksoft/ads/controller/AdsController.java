@@ -146,7 +146,7 @@ public class AdsController {
     /**
      * Delete ad.
      * 
-     * @return 204/NO_CONTENT, 401/Unauthorized, 404/NOT_FOUND.
+     * Returns 204/NO_CONTENT, 401/Unauthorized, 404/NOT_FOUND.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Обновление информации об объявлении")
@@ -177,7 +177,7 @@ public class AdsController {
     /**
      * Delete comment of ad.
      * 
-     * @return 200/OK, 401/Unauthorized, 403/FORBIDDEN, 404/NOT_FOUND.
+     * Returns 200/OK, 401/Unauthorized, 403/FORBIDDEN, 404/NOT_FOUND.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Удаление комментария")
@@ -192,7 +192,7 @@ public class AdsController {
     /**
      * Update image of ad.
      * 
-     * @return 200/OK, 401/Unauthorized, 403/FORBIDDEN, 404/NOT_FOUND.
+     * Returns 200/OK, 401/Unauthorized, 403/FORBIDDEN, 404/NOT_FOUND.
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление картинки объявления")
