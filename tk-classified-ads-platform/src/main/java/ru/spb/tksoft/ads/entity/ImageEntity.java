@@ -1,7 +1,5 @@
 package ru.spb.tksoft.ads.entity;
 
-import java.util.List;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -23,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Ad entity.
+ * Image entity (ad's image).
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
@@ -32,54 +29,50 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "\"ad\"")
-public class AdEntity {
+@Table(name = "\"image\"")
+public class ImageEntity {
 
-    /** Ad ID. */
+    /** Image ID. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** User. */
+    /** Parent ad. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "ad_id", nullable = false)
     @NotNull
-    private UserEntity user;
+    private AdEntity ad;
 
-    /** Title. */
-    @Column(nullable = false, length = 32)
-    @Size(min = 4, max = 32)
+    /** Name. */
+    @Column(nullable = false, unique = true, length = 256)
+    @Size(min = 1, max = 256)
     @NotBlank
-    private String title;
+    private String name;
 
-    /** Price. */
-    @Column(nullable = false, length = 32)
+    /** Size. */
+    @Column(nullable = false)
     @Min(0)
     @Max(10_000_000)
-    private int price;
+    private int size;
 
-    /** Description. */
-    @Column(nullable = false, length = 64)
-    @Size(min = 8, max = 64)
+    /** Mediatype. */
+    @Column(nullable = false, unique = true, length = 128)
+    @Size(min = 1, max = 128)
     @NotBlank
-    private String description;
-
-    /** Images. */
-    @OneToMany(mappedBy = "ad", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    private List<ImageEntity> images;
+    private String mediatype;
     
     /** Full constructor. */
-    public AdEntity(long id, String title, int price, String description) {
+    public ImageEntity(long id, String name, int size, String mediatype) {
 
-        this(title, price, description);
+        this(name, size, mediatype);
         this.id = id;
     }
 
     /** Common constructor. */
-    public AdEntity(String title, int price, String description) {
+    public ImageEntity(String name, int size, String mediatype) {
 
-        this.title = title;
-        this.price = price;
-        this.description = description;
+        this.name = name;
+        this.size = size;
+        this.mediatype = mediatype;
     }
 }

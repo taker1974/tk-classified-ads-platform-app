@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateCommentRequestDto;
@@ -30,10 +29,7 @@ public class AdsService {
 
     private final Logger log = LoggerFactory.getLogger(AdsService.class);
 
-    @NotNull
     private final UserRepository userRepository;
-
-    @NotNull
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -42,10 +38,13 @@ public class AdsService {
      * @param userDetails UserDetails implementation.
      * @return DTO.
      */
-    @NotNull
-    public AdsArrayResponseDto getAllAds(@NotNull final UserDetails userDetails) {
+    public AdsArrayResponseDto getAllAds(final UserDetails userDetails) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Get list of all ads.
 
@@ -59,10 +58,13 @@ public class AdsService {
      * @param me UserDetails implementation.
      * @return DTO.
      */
-    @NotNull
-    public AdsArrayResponseDto getAdsMe(@NotNull final UserDetails me) {
+    public AdsArrayResponseDto getAdsMe(final UserDetails userDetails) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Get list of all my ads.
 
@@ -76,12 +78,15 @@ public class AdsService {
      * @param userDetails UserDetails implementation.
      * @return DTO.
      */
-    @NotNull
-    public AdResponseDto addAd(@NotNull final UserDetails userDetails,
-            @NotNull final CreateOrUpdateAdRequestDto createAddDto,
-            @NotNull final MultipartFile image) {
+    public AdResponseDto addAd(final UserDetails userDetails,
+            final CreateOrUpdateAdRequestDto createAddDto,
+            final MultipartFile image) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Create new ad from logged user and load image.
 
@@ -96,11 +101,13 @@ public class AdsService {
      * @param id Ad id.
      * @return DTO.
      */
-    @NotNull
-    public CommentsArrayResponseDto getComments(@NotNull final UserDetails userDetails,
-            final long id) {
+    public CommentsArrayResponseDto getComments(final UserDetails userDetails, long id) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Implement this method.
 
@@ -116,11 +123,14 @@ public class AdsService {
      * @param requestDto DTO.
      * @return Created DTO.
      */
-    @NotNull
-    public CommentResponseDto addComment(@NotNull final UserDetails userDetails,
-            final long adId, @NotNull final CreateOrUpdateCommentRequestDto requestDto) {
+    public CommentResponseDto addComment(final UserDetails userDetails, long adId,
+            final CreateOrUpdateCommentRequestDto requestDto) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Implement this method.
 
@@ -135,10 +145,13 @@ public class AdsService {
      * @param adId Ad id.
      * @return DTO.
      */
-    @NotNull
-    public AdExtendedResponseDto getAds(@NotNull final UserDetails userDetails, final long adId) {
+    public AdExtendedResponseDto getAds(final UserDetails userDetails, long adId) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Implement this method.
 
@@ -146,11 +159,14 @@ public class AdsService {
         return new AdExtendedResponseDto();
     }
 
-    @NotNull
     public AdResponseDto updateAds(UserDetails userDetails, long id,
             CreateOrUpdateAdRequestDto updateAdsDto) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Implement this method.
 
@@ -162,17 +178,24 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
+
         // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
-    @NotNull
-    public CommentResponseDto updateComment(UserDetails userDetails,
-            long adId, long commentId,
-            CreateOrUpdateCommentRequestDto updateCommentDto) {
+    public CommentResponseDto updateComment(final UserDetails userDetails, long adId,
+            long commentId,
+            final CreateOrUpdateCommentRequestDto updateCommentDto) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Implement this method.
 
@@ -180,20 +203,27 @@ public class AdsService {
         return new CommentResponseDto();
     }
 
-    public void deleteComment(UserDetails userDetails,
-            long adId, long commentId) {
+    public void deleteComment(final UserDetails userDetails, long adId, long commentId) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
-    public void updateImage(UserDetails userDetails,
-            long id, MultipartFile image) {
+    public void updateImage(final UserDetails userDetails, long id,
+            final MultipartFile image) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("userDeatails must not be null");
+        }
 
         // TODO: Implement this method.
 

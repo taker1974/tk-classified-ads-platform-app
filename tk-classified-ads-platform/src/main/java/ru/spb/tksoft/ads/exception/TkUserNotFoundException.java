@@ -1,8 +1,8 @@
 package ru.spb.tksoft.ads.exception;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.validation.constraints.NotBlank;
 import ru.spb.tksoft.utils.log.LogEx;
 
 /**
@@ -29,9 +29,12 @@ public class TkUserNotFoundException extends RuntimeException {
      * @param userName User name.
      * @param authenticationFailed True if authentication failed.
      */
-    public TkUserNotFoundException(@NotBlank final String userName,final boolean authenticationFailed) {
+    @SuppressWarnings("java:S3358") // Extract this nested ternary operation into an independent
+                                    // statement.
+    public TkUserNotFoundException(String userName, boolean authenticationFailed) {
 
-        super(authenticationFailed ? MESSAGE_AUTH : MESSAGE + ": " + userName);
+        super(authenticationFailed ? MESSAGE_AUTH
+                : MESSAGE + ": " + (Objects.isNull(userName) ? "null" : userName));
         LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, CODE, this);
     }
 }

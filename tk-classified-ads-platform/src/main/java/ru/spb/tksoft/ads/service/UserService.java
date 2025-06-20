@@ -8,14 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
 import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
+import ru.spb.tksoft.ads.exception.TkNullArgumentException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.repository.UserRepository;
@@ -33,10 +32,7 @@ public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    @NotNull
     private final UserRepository userRepository;
-
-    @NotNull
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -45,7 +41,6 @@ public class UserService {
      * @param pageable Paging info.
      * @return DTO.
      */
-    @NotNull
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
@@ -63,10 +58,13 @@ public class UserService {
      * @param newUser New user.
      * @return DTO if created, empty DTO otherwise.
      */
-    @NotNull
-    public UserResponseDto createUser(@NotNull final UserEntity newUser) {
+    public UserResponseDto createUser(UserEntity newUser) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (newUser == null) {
+            throw new TkNullArgumentException("newUser");
+        }
 
         UserEntity entity = userRepository.save(newUser);
         UserResponseDto dto = UserMapper.toDto(entity);
@@ -81,7 +79,12 @@ public class UserService {
      * @param userName Name.
      * @return True if user exists.
      */
-    public boolean existsByName(@NotBlank final String userName) {
+    public boolean existsByName(String userName) {
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+        if (userName == null) {
+            throw new TkNullArgumentException("userName");
+        }
+
         return userRepository.existsByName(userName);
     }
 
@@ -92,8 +95,15 @@ public class UserService {
      * @param password Password.
      * @return True if user exists.
      */
-    public boolean existsByNameAndPassword(@NotBlank final String userName,
-            @NotBlank final String password) {
+    public boolean existsByNameAndPassword(String userName, String password) {
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+        if (userName == null) {
+            throw new TkNullArgumentException("userName");
+        }
+        if (password == null) {
+            throw new TkNullArgumentException("password");
+        }
+
         return userRepository.existsByNameAndPassword(userName, password);
     }
 
@@ -103,10 +113,13 @@ public class UserService {
      * @param userName Name.
      * @return DTO if found, empty DTO otherwise.
      */
-    @NotNull
-    public UserResponseDto findUserByName(@NotBlank final String userName) {
+    public UserResponseDto findUserByName(String userName) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userName == null) {
+            throw new TkNullArgumentException("userName");
+        }
 
         UserEntity user = userRepository.findOneByName(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
@@ -124,11 +137,16 @@ public class UserService {
      * @param password Password.
      * @return DTO if found, empty DTO otherwise.
      */
-    @NotNull
-    public UserResponseDto findUserByNameAndPassword(@NotBlank final String userName,
-            @NotBlank final String password) {
+    public UserResponseDto findUserByNameAndPassword(String userName, String password) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userName == null) {
+            throw new TkNullArgumentException("userName");
+        }
+        if (password == null) {
+            throw new TkNullArgumentException("password");
+        }
 
         UserEntity user = userRepository.findOneByNameAndPassword(userName, password)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, true));
@@ -145,12 +163,22 @@ public class UserService {
      * @param userDetails User details implementation.
      * @param newPasswordRequest DTO.
      */
-    public void setPassword(@NotNull final UserDetails userDetails,
-            @NotNull final NewPasswordRequestDto newPasswordRequest) {
+    public void setPassword(final UserDetails userDetails,
+            final NewPasswordRequestDto newPasswordRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
+        if (userDetails == null) {
+            throw new TkNullArgumentException("userDetails");
+        }
+        if (newPasswordRequest == null) {
+            throw new TkNullArgumentException("newPasswordRequest");
+        }
+
         String userName = userDetails.getUsername();
+        if (userName == null) {
+            throw new TkNullArgumentException("userDetails.getUsername()");
+        }
 
         UserEntity user = userRepository.findOneByName(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, true));
@@ -168,11 +196,17 @@ public class UserService {
      * @param updateRequest Request DTO.
      * @return Response DTO.
      */
-    @NotNull
-    public UpdateUserResponseDto updateUser(@NotBlank final String userName,
-            @NotNull final UpdateUserRequestDto updateRequest) {
+    public UpdateUserResponseDto updateUser(String userName,
+            final UpdateUserRequestDto updateRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        if (userName == null) {
+            throw new TkNullArgumentException("userName");
+        }
+        if (updateRequest == null) {
+            throw new TkNullArgumentException("updateRequest");
+        }
 
         UserEntity user = userRepository.findOneByName(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, true));
