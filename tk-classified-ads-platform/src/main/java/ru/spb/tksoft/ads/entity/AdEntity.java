@@ -1,5 +1,6 @@
 package ru.spb.tksoft.ads.entity;
 
+import java.math.BigDecimal;
 import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,6 +13,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -53,10 +56,10 @@ public class AdEntity {
     private String title;
 
     /** Price. */
-    @Column(nullable = false, length = 32)
-    @Min(0)
-    @Max(10_000_000)
-    private int price;
+    @Column(nullable = false, precision = 10, scale = 0)
+    @DecimalMin(value = "0.00", inclusive = true)
+    @DecimalMax(value = "10000000.00", inclusive = true)
+    private BigDecimal price;
 
     /** Description. */
     @Column(nullable = false, length = 64)
@@ -67,16 +70,16 @@ public class AdEntity {
     /** Images. */
     @OneToMany(mappedBy = "ad", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<ImageEntity> images;
-    
+
     /** Full constructor. */
-    public AdEntity(long id, String title, int price, String description) {
+    public AdEntity(long id, String title, BigDecimal price, String description) {
 
         this(title, price, description);
         this.id = id;
     }
 
     /** Common constructor. */
-    public AdEntity(String title, int price, String description) {
+    public AdEntity(String title, BigDecimal price, String description) {
 
         this.title = title;
         this.price = price;

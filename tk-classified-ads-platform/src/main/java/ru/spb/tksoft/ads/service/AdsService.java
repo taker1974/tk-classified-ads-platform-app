@@ -58,11 +58,11 @@ public class AdsService {
      * @param me UserDetails implementation.
      * @return DTO.
      */
-    public AdsArrayResponseDto getAdsMe(final UserDetails userDetails) {
+    public AdsArrayResponseDto getAdsMe(final UserDetails me) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        if (userDetails == null) {
+        if (me == null) {
             throw new IllegalArgumentException("userDeatails must not be null");
         }
 
