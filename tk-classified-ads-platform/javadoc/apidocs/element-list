@@ -1,7 +1,15 @@
 ru.spb.tksoft.ads
 ru.spb.tksoft.ads.config
 ru.spb.tksoft.ads.controller
-ru.spb.tksoft.ads.dto
+ru.spb.tksoft.ads.controller.advice
+ru.spb.tksoft.ads.dto.request
+ru.spb.tksoft.ads.dto.response
+ru.spb.tksoft.ads.entity
 ru.spb.tksoft.ads.enumeration
+ru.spb.tksoft.ads.exception
+ru.spb.tksoft.ads.mapper
+ru.spb.tksoft.ads.repository
 ru.spb.tksoft.ads.service
-ru.spb.tksoft.ads.service.impl
+ru.spb.tksoft.ads.service.auth
+ru.spb.tksoft.ads.service.auth.impl
+ru.spb.tksoft.ads.tools

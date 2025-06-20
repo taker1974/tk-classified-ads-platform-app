@@ -1,6 +1,8 @@
-package ru.spb.tksoft.ads.dto;
+package ru.spb.tksoft.ads.dto.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -11,8 +13,6 @@ import ru.spb.tksoft.ads.enumeration.UserRole;
 /**
  * Register request, basic authentication.
  * 
- * No response DTO. Http response: 200 (OK) or 401 (Unauthorized).
- * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
 @Data
@@ -20,12 +20,13 @@ import ru.spb.tksoft.ads.enumeration.UserRole;
 @AllArgsConstructor
 public class RegisterRequestDto {
 
-    /** Login aka username. */
+    /** Login aka username aka email. */
     @NotBlank
+    @Email
     @Size(min = 4, max = 32)
     private String username;
 
-    /** Password. */
+    /** Password. NOT ENCRYPTED. */
     @NotBlank
     @Size(min = 8, max = 16)
     private String password;
@@ -47,6 +48,6 @@ public class RegisterRequestDto {
     private String phone;
 
     /** User's role. */
-    @NotBlank
+    @NotNull
     private UserRole role;
 }

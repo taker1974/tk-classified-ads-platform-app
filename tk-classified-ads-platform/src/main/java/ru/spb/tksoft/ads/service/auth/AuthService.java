@@ -1,6 +1,6 @@
-package ru.spb.tksoft.ads.service;
+package ru.spb.tksoft.ads.service.auth;
 
-import ru.spb.tksoft.ads.dto.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 
 /**
  * Authentication and authorization service interface.
@@ -21,8 +21,8 @@ public interface AuthService {
     /**
      * Register user.
      * 
-     * @param register User data.
+     * @param registerRequest User data.
      * @return True if registration was successful
      */
-    boolean register(RegisterRequestDto register);
+    boolean register(RegisterRequestDto registerRequest);
 }
