@@ -1,5 +1,6 @@
 package ru.spb.tksoft.ads.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -75,7 +76,9 @@ public class UserEntity {
     @NotNull
     private UserRole role;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    /** Avatar. */
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private AvatarEntity avatar;
 
     /** Full constructor. */

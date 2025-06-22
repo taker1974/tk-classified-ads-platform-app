@@ -25,7 +25,7 @@ public final class UserMapper {
      * @return user DTO.
      */
     @NotNull
-    public static UserResponseDto toDto(@NotNull final UserEntity entity) {
+    public static UserResponseDto toDto(final UserEntity entity) {
 
         return new UserResponseDto(
                 entity.getId(),
@@ -34,7 +34,7 @@ public final class UserMapper {
                 entity.getLastName(),
                 entity.getPhone(),
                 entity.getRole(),
-                "link-to-avatar");
+                entity.getAvatar() == null ? "no avatar" : entity.getAvatar().getName());
     }
 
     /**
@@ -43,7 +43,7 @@ public final class UserMapper {
      * @param dto New user DTO.
      * @return User entity.
      */
-    public static UserEntity toEntity(@NotNull final RegisterRequestDto dto) {
+    public static UserEntity toEntity(final RegisterRequestDto dto) {
 
         return new UserEntity(dto.getUsername(), dto.getPassword(),
                 dto.getFirstName(), dto.getLastName(),

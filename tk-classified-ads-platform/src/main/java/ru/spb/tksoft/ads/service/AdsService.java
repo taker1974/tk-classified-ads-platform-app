@@ -15,6 +15,7 @@ import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
+import ru.spb.tksoft.ads.repository.AdRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
 
@@ -31,6 +32,8 @@ public class AdsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final AdRepository adRepository;
 
     /**
      * Get list of all ads.

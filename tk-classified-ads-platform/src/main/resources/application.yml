@@ -47,6 +47,25 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+validation:
+  image:
+    min-file-size-bytes: 100
+    max-file-size-bytes: 10485760
+    min-width: 64
+    min-height: 64
+    max-width: 1920
+    max-height: 1080
+    allowed-mime-types:
+      - image/jpeg
+      - image/png
+      - image/webp
+
+media:
+  avatar-base-path: /users/avatar
+  avatar-path: /home/kostus/ad-user-avatar
+  ad-image-path: /home/kostus/ad-image
+  io-buffer-size: 10485760
+
 management:
   endpoints:
     web:

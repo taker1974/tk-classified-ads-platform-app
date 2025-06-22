@@ -3,6 +3,18 @@
         {
             "name": "spring.datasource.ads",
             "description": "Ads DB properties"
+        },
+        {
+            "name": "media",
+            "description": "Media properties"
+        },
+        {
+            "name": "validation.image.min-width",
+            "description": "Minimal image width"
+        },
+        {
+            "name": "validation.image.min-height",
+            "description": "Minimal image height"
         }
     ]
 }
