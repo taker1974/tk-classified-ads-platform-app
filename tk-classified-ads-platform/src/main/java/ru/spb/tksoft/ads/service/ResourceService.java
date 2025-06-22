@@ -201,7 +201,7 @@ public class ResourceService {
 
         if (fileName != null && !fileName.isBlank()) {
             try {
-                final Path path = Path.of(avatarImageProcessing.storagePath(), fileName);
+                final Path path = Path.of(properties.storagePath(), fileName);
                 Files.deleteIfExists(path);
             } catch (Exception ex) {
                 throw new TkDeletingMediaException(fileName);
