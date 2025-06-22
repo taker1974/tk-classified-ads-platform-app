@@ -46,7 +46,7 @@ public class AdsService {
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         if (userDetails == null) {
-            throw new TkNullArgumentException("userDeatails");
+            throw new TkNullArgumentException("userDetails");
         }
 
         Set<AdResponseDto> responseSet = adRepository.findAll().stream()
@@ -71,10 +71,12 @@ public class AdsService {
             throw new IllegalArgumentException("userDeatails must not be null");
         }
 
-        // TODO: Get list of all my ads.
+        Set<AdResponseDto> responseSet = adRepository.findByUserName(me.getUsername()).stream()
+            .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
+            .collect(Collectors.toSet());
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new AdsArrayResponseDto(0, Collections.emptySet());
+        return new AdsArrayResponseDto(responseSet.size(), responseSet);
     }
 
     /**
