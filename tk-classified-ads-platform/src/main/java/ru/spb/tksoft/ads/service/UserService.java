@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +56,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final ResourceService resourceService;
 
     private final ImageValidationProperties properties;
 
@@ -137,9 +138,6 @@ public class UserService {
         return userRepository.existsByNameAndPassword(userName, password);
     }
 
-    @Value("${media.avatar-base-path}")
-    private String avatarBasePath;
-
     /**
      * Find user by name.
      * 
@@ -158,11 +156,9 @@ public class UserService {
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
         UserResponseDto dto = UserMapper.toDto(user);
-        
+
         if (user.getAvatar() != null) {
-            final String path = Paths.get(avatarBasePath)
-                .resolve(user.getId().toString()).toString();
-            dto.setImage(path);
+            dto.setImage(resourceService.getAvatarUrl(user.getId()));
         }
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
@@ -238,9 +234,6 @@ public class UserService {
                 updateRequest.getPhone());
     }
 
-    @Value("${media.avatar-path}")
-    private String avatarPath;
-
     @Value("${media.io-buffer-size}")
     private int avatarIoBufferSize;
 
@@ -258,7 +251,7 @@ public class UserService {
         ImageValidator.validateImage(image, properties);
 
         final String fileName = ImageValidator.getImageUniqueFileName(image);
-        final Path filePath = Path.of(avatarPath, fileName);
+        final Path filePath = resourceService.getAvatarPath(fileName);
         try {
             Files.createDirectories(filePath.getParent());
             Files.deleteIfExists(filePath);
@@ -335,7 +328,7 @@ public class UserService {
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
         if (fileName != null && !fileName.isBlank()) {
             try {
-                Files.deleteIfExists(Path.of(avatarPath, fileName));
+                Files.deleteIfExists(resourceService.getAvatarPath(fileName));
             } catch (Exception ex) {
                 throw new TkDeletingMediaException(fileName);
             }
@@ -365,7 +358,7 @@ public class UserService {
             return ResponseEntity.notFound().build();
         }
 
-        Path filePath = Paths.get(avatarPath).resolve(filename);
+        Path filePath = resourceService.getAvatarPath(filename);
         if (!Files.exists(filePath)) {
             return ResponseEntity.notFound().build();
         }

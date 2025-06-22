@@ -1,10 +1,11 @@
 package ru.spb.tksoft.ads.service;
 
 import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,9 @@ import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
+import ru.spb.tksoft.ads.exception.TkNullArgumentException;
+import ru.spb.tksoft.ads.mapper.AdMapper;
 import ru.spb.tksoft.ads.repository.AdRepository;
-import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
 
 /**
@@ -30,11 +32,9 @@ public class AdsService {
 
     private final Logger log = LoggerFactory.getLogger(AdsService.class);
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-
     private final AdRepository adRepository;
-
+    private final ResourceService resourceService;
+    
     /**
      * Get list of all ads.
      * 
@@ -46,13 +46,15 @@ public class AdsService {
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
+            throw new TkNullArgumentException("userDeatails");
         }
 
-        // TODO: Get list of all ads.
+        Set<AdResponseDto> responseSet = adRepository.findAll().stream()
+            .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
+            .collect(Collectors.toSet());
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new AdsArrayResponseDto(0, Collections.emptySet());
+        return new AdsArrayResponseDto(responseSet.size(), responseSet);
     }
 
     /**
