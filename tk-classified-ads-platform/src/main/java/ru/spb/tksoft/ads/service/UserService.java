@@ -1,15 +1,10 @@
 package ru.spb.tksoft.ads.service;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -30,18 +25,12 @@ import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.AvatarEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
-import ru.spb.tksoft.ads.exception.TkDeletingMediaException;
 import ru.spb.tksoft.ads.exception.TkNullArgumentException;
-import ru.spb.tksoft.ads.exception.TkSavingMediaException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.repository.UserRepository;
-import ru.spb.tksoft.ads.tools.ImageValidationProperties;
-import ru.spb.tksoft.ads.tools.ImageValidator;
 import ru.spb.tksoft.ads.tools.PageTools;
 import ru.spb.tksoft.utils.log.LogEx;
-
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 /**
  * User service.
@@ -58,8 +47,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final ResourceService resourceService;
-
-    private final ImageValidationProperties properties;
 
     /**
      * Get paginated list of users.
@@ -158,7 +145,7 @@ public class UserService {
         UserResponseDto dto = UserMapper.toDto(user);
 
         if (user.getAvatar() != null) {
-            dto.setImage(resourceService.getAvatarUrl(user.getId()));
+            dto.setImage(resourceService.getAvatarImageUrl(user.getId()));
         }
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
@@ -234,40 +221,16 @@ public class UserService {
                 updateRequest.getPhone());
     }
 
-    @Value("${media.io-buffer-size}")
-    private int avatarIoBufferSize;
-
     /**
      * Save avatar file.
      * 
-     * @param userDetails User details implementation.
      * @param image Uploaded image.
      * @return Filename.
      */
     public String saveAvatarFile(final MultipartFile image) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        ImageValidator.validateImage(image, properties);
-
-        final String fileName = ImageValidator.getImageUniqueFileName(image);
-        final Path filePath = resourceService.getAvatarPath(fileName);
-        try {
-            Files.createDirectories(filePath.getParent());
-            Files.deleteIfExists(filePath);
-            try (
-                    InputStream is = image.getInputStream();
-                    OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
-                    BufferedInputStream bis = new BufferedInputStream(is, avatarIoBufferSize);
-                    BufferedOutputStream bos = new BufferedOutputStream(os, avatarIoBufferSize)) {
-                bis.transferTo(bos);
-            }
-        } catch (Exception e) {
-            throw new TkSavingMediaException(filePath.toString());
-        }
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return fileName;
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+        return resourceService.saveAvatarFile(image);
     }
 
     /**
@@ -298,7 +261,7 @@ public class UserService {
                         @Override
                         public void afterCompletion(int status) {
                             if (status == STATUS_COMMITTED) {
-                                deleteAvatar(oldFileName);
+                                resourceService.deleteAvatarImageFile(oldFileName);
                             }
                         }
                     });
@@ -324,16 +287,9 @@ public class UserService {
      * 
      * @param fileName Filename.
      */
-    public void deleteAvatar(final String fileName) {
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-        if (fileName != null && !fileName.isBlank()) {
-            try {
-                Files.deleteIfExists(resourceService.getAvatarPath(fileName));
-            } catch (Exception ex) {
-                throw new TkDeletingMediaException(fileName);
-            }
-        }
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
+    public void deleteAvatarFile(final String fileName) {
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+        resourceService.deleteAvatarImageFile(fileName);
     }
 
     /**
@@ -358,7 +314,7 @@ public class UserService {
             return ResponseEntity.notFound().build();
         }
 
-        Path filePath = resourceService.getAvatarPath(filename);
+        Path filePath = resourceService.getAvatarImagePath(filename);
         if (!Files.exists(filePath)) {
             return ResponseEntity.notFound().build();
         }

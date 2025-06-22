@@ -30,7 +30,7 @@ public final class AdMapper {
 
         String image = "";
         if (entity.getImages() != null && !entity.getImages().isEmpty()) {
-            image = resourceService.getAvatarUrl(entity.getImages().getFirst().getId());
+            image = resourceService.getAvatarImageUrl(entity.getImages().getFirst().getId());
         }
 
         return new AdResponseDto(entity.getId(), 

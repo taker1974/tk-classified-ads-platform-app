@@ -33,6 +33,7 @@ public class AdsService {
     private final Logger log = LoggerFactory.getLogger(AdsService.class);
 
     private final AdRepository adRepository;
+
     private final ResourceService resourceService;
     
     /**

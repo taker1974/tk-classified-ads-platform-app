@@ -1,16 +1,31 @@
 package ru.spb.tksoft.ads.service;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
+import ru.spb.tksoft.ads.config.ImageProcessingProperties;
+import ru.spb.tksoft.ads.exception.TkDeletingMediaException;
+import ru.spb.tksoft.ads.exception.TkNullArgumentException;
+import ru.spb.tksoft.ads.exception.TkSavingMediaException;
+import ru.spb.tksoft.ads.exception.TkSizeException;
+import ru.spb.tksoft.ads.exception.TkUnsupportedMediaTypeException;
 import ru.spb.tksoft.utils.log.LogEx;
 
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+
 /**
- * Get/transform resource address.
+ * Deal with [file] resource.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
@@ -18,19 +33,13 @@ import ru.spb.tksoft.utils.log.LogEx;
 @RequiredArgsConstructor
 public class ResourceService {
 
+    /** Maximul length of content-type string. */
+    public static final int CONTENTTYPE_LENGTH_MAX = 128;
+
     private final Logger log = LoggerFactory.getLogger(ResourceService.class);
 
-    @Value("${media.avatar-url-base-path}")
-    private String avatarUrlBasePath;
-
-    @Value("${media.avatar-storage-path}")
-    private String avatarStoragePath;
-
-    @Value("${media.image-url-base-path}")
-    private String imageUrlBasePath;
-
-    @Value("${media.image-storage-path}")
-    private String imageStoragePath;
+    private final ImageProcessingProperties avatarImageProcessing;
+    private final ImageProcessingProperties adImageProcessing;
 
     /**
      * Get avatar URL.
@@ -38,10 +47,8 @@ public class ResourceService {
      * @param userId User ID.
      * @return Avatar URL in a form of "/<avatar-base-path>/<user-id>".
      */
-    public String getAvatarUrl(long userId) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
-        return Paths.get(avatarUrlBasePath)
+    public String getAvatarImageUrl(long userId) {
+        return Paths.get(avatarImageProcessing.urlBasePath())
                 .resolve(String.valueOf(userId)).toString();
     }
 
@@ -51,10 +58,8 @@ public class ResourceService {
      * @param imageId Image ID.
      * @return Image URL in a form of "/<image-base-path>/<image-id>".
      */
-    public String getImageUrl(long imageId) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
-        return Paths.get(imageUrlBasePath)
+    public String getAdImageUrl(long imageId) {
+        return Paths.get(adImageProcessing.urlBasePath())
                 .resolve(String.valueOf(imageId)).toString();
     }
 
@@ -64,10 +69,8 @@ public class ResourceService {
      * @param avatarFileName Avatar file name.
      * @return Full avatar path.
      */
-    public Path getAvatarPath(String avatarFileName) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
-        return Path.of(avatarStoragePath, avatarFileName);
+    public Path getAvatarImagePath(String avatarFileName) {
+        return Path.of(avatarImageProcessing.storagePath(), avatarFileName);
     }
 
     /**
@@ -76,9 +79,155 @@ public class ResourceService {
      * @param imageFileName Image file name.
      * @return Full image path.
      */
-    public Path getImagePath(String imageFileName) {
+    public Path getAdImagePath(String imageFileName) {
+        return Path.of(adImageProcessing.storagePath(), imageFileName);
+    }
+
+    /**
+     * Validate image.
+     * 
+     * @param verb Verb for exception messages.
+     * @param image Uploaded image.
+     * @param properties Image validation properties.
+     * @throws TkNullArgumentException If any argument is null.
+     * @throws TkUnsupportedMediaTypeException If image's MIME type is not allowed.
+     * @throws TkSizeException If image's size is not allowed.
+     */
+    public static void validateImage(final String verb, final MultipartFile image,
+            final ImageProcessingProperties properties) {
+
+        if (image == null) {
+            throw new TkNullArgumentException("image");
+        }
+        if (properties == null) {
+            throw new TkNullArgumentException("properties");
+        }
+
+        final long imageSize = image.getSize();
+        if (image.isEmpty() ||
+                imageSize < properties.minFileSizeBytes()
+                || imageSize > properties.maxFileSizeBytes()) {
+            throw new TkSizeException(verb);
+        }
+
+        final String contentType = image.getContentType();
+        if (contentType == null || contentType.isBlank() ||
+                contentType.length() > CONTENTTYPE_LENGTH_MAX) {
+            throw new TkUnsupportedMediaTypeException("unknown");
+        }
+
+        if (!properties.allowedMimeTypes().contains(contentType)) {
+            throw new TkUnsupportedMediaTypeException(contentType);
+        }
+    }
+
+    /**
+     * Generate unique file name for uploaded image.
+     * 
+     * Call {@link #validateImage(MultipartFile, ImageValidationProperties)} first!
+     * 
+     * @param image Uploaded image.
+     * @return Generated unique file name.
+     * @throws TkNullArgumentException If any argument is null.
+     */
+    public static String getImageUniqueFileName(final MultipartFile image) {
+
+        if (image == null) {
+            throw new TkNullArgumentException("image");
+        }
+
+        final String contentType = image.getContentType();
+        if (contentType == null || contentType.isBlank() ||
+                contentType.length() > CONTENTTYPE_LENGTH_MAX) {
+            throw new TkUnsupportedMediaTypeException("unknown");
+        }
+
+        final String ext = contentType.substring(contentType.lastIndexOf('/') + 1);
+        return UUID.randomUUID().toString() + "." + ext;
+    }
+
+    private String saveImageFile(final String verb, final MultipartFile image,
+            final ImageProcessingProperties processingProperties) {
+
+        validateImage(verb, image, processingProperties);
+
+        final String fileName = getImageUniqueFileName(image);
+        final Path path = Path.of(processingProperties.storagePath(), fileName);
+        try {
+            Files.createDirectories(path.getParent());
+            Files.deleteIfExists(path);
+            try (
+                    InputStream is = image.getInputStream();
+                    OutputStream os = Files.newOutputStream(path, CREATE_NEW);
+                    BufferedInputStream bis =
+                            new BufferedInputStream(is, processingProperties.ioBufferSize());
+                    BufferedOutputStream bos =
+                            new BufferedOutputStream(os, processingProperties.ioBufferSize())) {
+                bis.transferTo(bos);
+            }
+        } catch (Exception e) {
+            throw new TkSavingMediaException(path.toString());
+        }
+
+        return fileName;
+    }
+
+    /**
+     * Save avatar file.
+     * 
+     * @param image Uploaded image.
+     * @return Filename.
+     */
+    public String saveAvatarFile(final MultipartFile image) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
-        return Path.of(imageStoragePath, imageFileName);
+        return saveImageFile("avatar", image, avatarImageProcessing);
+    }
+
+    /**
+     * Save ad's image file.
+     * 
+     * @param image Uploaded image.
+     * @return Filename.
+     */
+    public String saveAdImageFile(final MultipartFile image) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+        return saveImageFile("ad image", image, adImageProcessing);
+    }
+
+    private void deleteImageFile(final String fileName,
+            final ImageProcessingProperties properties) {
+
+        if (fileName != null && !fileName.isBlank()) {
+            try {
+                final Path path = Path.of(avatarImageProcessing.storagePath(), fileName);
+                Files.deleteIfExists(path);
+            } catch (Exception ex) {
+                throw new TkDeletingMediaException(fileName);
+            }
+        }
+    }
+
+    /**
+     * Delete avatar file.
+     * 
+     * @param fileName File name.
+     */
+    public void deleteAvatarImageFile(final String fileName) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+        deleteImageFile(fileName, avatarImageProcessing);
+    }
+
+    /**
+     * Delete ad image file.
+     * 
+     * @param fileName File name.
+     */
+    public void deleteAdImageFile(final String fileName) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+        deleteImageFile(fileName, adImageProcessing);
     }
 }
