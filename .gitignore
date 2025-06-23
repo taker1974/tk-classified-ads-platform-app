@@ -1,5 +1,3 @@
-javadoc/
-
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
@@ -35,3 +33,4 @@ build/
 .vscode/
 
 .gigaide/
+**/javadoc/
