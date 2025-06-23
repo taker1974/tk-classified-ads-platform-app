@@ -37,18 +37,13 @@ public class AdsService {
     private final ResourceService resourceService;
     
     /**
-     * Get list of all ads.
+     * Get a list of all ads.
      * 
-     * @param userDetails UserDetails implementation.
      * @return DTO.
      */
-    public AdsArrayResponseDto getAllAds(final UserDetails userDetails) {
+    public AdsArrayResponseDto getAllAds() {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        if (userDetails == null) {
-            throw new TkNullArgumentException("userDetails");
-        }
 
         Set<AdResponseDto> responseSet = adRepository.findAll().stream()
             .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
@@ -59,7 +54,7 @@ public class AdsService {
     }
 
     /**
-     * Get list of all my ads.
+     * Get a list of all my ads.
      * 
      * @param me UserDetails implementation.
      * @return DTO.
@@ -67,10 +62,6 @@ public class AdsService {
     public AdsArrayResponseDto getAdsMe(final UserDetails me) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        if (me == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
 
         Set<AdResponseDto> responseSet = adRepository.findByUserName(me.getUsername()).stream()
             .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
@@ -92,10 +83,6 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
-
         // TODO: Create new ad from logged user and load image.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
@@ -112,10 +99,6 @@ public class AdsService {
     public CommentsArrayResponseDto getComments(final UserDetails userDetails, long id) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
 
         // TODO: Implement this method.
 
@@ -136,10 +119,6 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
-
         // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
@@ -157,10 +136,6 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
-
         // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
@@ -172,10 +147,6 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
-
         // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
@@ -185,10 +156,6 @@ public class AdsService {
     public void removeAd(UserDetails userDetails, long id) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
 
         // TODO: Implement this method.
 
@@ -201,10 +168,6 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
-
         // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
@@ -215,10 +178,6 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
-
         // TODO: Implement this method.
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
@@ -228,10 +187,6 @@ public class AdsService {
             final MultipartFile image) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        if (userDetails == null) {
-            throw new IllegalArgumentException("userDeatails must not be null");
-        }
 
         // TODO: Implement this method.
 

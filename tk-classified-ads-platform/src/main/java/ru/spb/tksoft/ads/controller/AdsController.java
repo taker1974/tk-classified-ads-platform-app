@@ -46,9 +46,9 @@ public class AdsController {
     @Operation(summary = "Получение всех объявлений")
     @GetMapping()
     @NotNull
-    public AdsArrayResponseDto getAllAds(@AuthenticationPrincipal UserDetails userDetails) {
+    public AdsArrayResponseDto getAllAds() {
 
-        return adsService.getAllAds(userDetails);
+        return adsService.getAllAds();
     }
 
     /**
