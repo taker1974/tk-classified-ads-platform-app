@@ -23,7 +23,7 @@ public class TkDeletingMediaException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param argumentName Name of argument.
+     * @param path Media path.
      */
     public TkDeletingMediaException(String path) {
 

@@ -23,7 +23,7 @@ public class TkUnsupportedMediaTypeException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param argumentName Name of argument.
+     * @param mediaType Media type.
      */
     public TkUnsupportedMediaTypeException(String mediaType) {
 

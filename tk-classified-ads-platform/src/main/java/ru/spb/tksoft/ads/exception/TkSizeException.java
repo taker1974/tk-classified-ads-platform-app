@@ -23,7 +23,7 @@ public class TkSizeException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param argumentName Name of argument.
+     * @param objectName Name of object.
      */
     public TkSizeException(String objectName) {
 

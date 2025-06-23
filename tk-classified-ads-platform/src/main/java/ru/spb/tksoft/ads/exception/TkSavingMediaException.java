@@ -23,7 +23,7 @@ public class TkSavingMediaException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param argumentName Name of argument.
+     * @param path Media path.
      */
     public TkSavingMediaException(String path) {
 

@@ -239,11 +239,11 @@ public class UserService {
      * @param userName Name.
      * @param fileName Filename.
      * @param fileSize File size.
-     * @param fileType File type.
+     * @param contentType File type.
      * @throws TkNullArgumentException If any of arguments is null.
      */
     @Transactional
-    public String updateAvatarDb(String userName,
+    public void updateAvatarDb(String userName,
             String fileName, long fileSize, String contentType) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
@@ -278,8 +278,7 @@ public class UserService {
         avatar.setMediatype(contentType);
 
         userRepository.save(user);
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return oldFileName;
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -293,9 +292,9 @@ public class UserService {
     }
 
     /**
-     * Get avatar by user name.
+     * Get avatar by user id.
      * 
-     * @param userName User name.
+     * @param userId User ID.
      * @return Image resource.
      */
     public ResponseEntity<Resource> getAvatar(final long userId) {

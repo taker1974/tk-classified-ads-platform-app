@@ -61,7 +61,7 @@ image:
       - image/webp
     io-buffer-size: 10485760
     url-base-path: /users/avatar
-    storage-path: /home/kostus/ad-user-avatar
+    storage-path: /home/kostus/ad-avatar
   ad:
     min-file-size-bytes: 512
     max-file-size-bytes: 10485760

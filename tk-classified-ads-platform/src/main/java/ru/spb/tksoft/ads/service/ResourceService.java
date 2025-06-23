@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +32,8 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @RequiredArgsConstructor
 public class ResourceService {
 
-    /** Maximul length of content-type string. */
-    public static final int CONTENTTYPE_LENGTH_MAX = 128;
+    /** Maximum length of content-type string. */
+    public static final int CONTENT_TYPE_LENGTH_MAX = 128;
 
     private final Logger log = LoggerFactory.getLogger(ResourceService.class);
 
@@ -45,7 +44,7 @@ public class ResourceService {
      * Get avatar URL.
      * 
      * @param userId User ID.
-     * @return Avatar URL in a form of "/<avatar-base-path>/<user-id>".
+     * @return Avatar URL in a form of "/avatar-base-path/user-id".
      */
     public String getAvatarImageUrl(long userId) {
         return Paths.get(avatarImageProcessing.urlBasePath())
@@ -56,7 +55,7 @@ public class ResourceService {
      * Get ad's image URL.
      * 
      * @param imageId Image ID.
-     * @return Image URL in a form of "/<image-base-path>/<image-id>".
+     * @return Image URL in a form of "/image-base-path/image-id".
      */
     public String getAdImageUrl(long imageId) {
         return Paths.get(adImageProcessing.urlBasePath())
@@ -112,7 +111,7 @@ public class ResourceService {
 
         final String contentType = image.getContentType();
         if (contentType == null || contentType.isBlank() ||
-                contentType.length() > CONTENTTYPE_LENGTH_MAX) {
+                contentType.length() > CONTENT_TYPE_LENGTH_MAX) {
             throw new TkUnsupportedMediaTypeException("unknown");
         }
 
@@ -124,7 +123,7 @@ public class ResourceService {
     /**
      * Generate unique file name for uploaded image.
      * 
-     * Call {@link #validateImage(MultipartFile, ImageValidationProperties)} first!
+     * Call {@link #validateImage(String, MultipartFile, ImageProcessingProperties)} first!
      * 
      * @param image Uploaded image.
      * @return Generated unique file name.
@@ -138,7 +137,7 @@ public class ResourceService {
 
         final String contentType = image.getContentType();
         if (contentType == null || contentType.isBlank() ||
-                contentType.length() > CONTENTTYPE_LENGTH_MAX) {
+                contentType.length() > CONTENT_TYPE_LENGTH_MAX) {
             throw new TkUnsupportedMediaTypeException("unknown");
         }
 
