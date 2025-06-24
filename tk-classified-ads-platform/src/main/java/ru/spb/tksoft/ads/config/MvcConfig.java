@@ -14,8 +14,8 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/avatar/**")
-                .addResourceLocations("${media.avatar-path}")
+        registry.addResourceHandler("/users/avatar/**", "/ads/image/**")
+                .addResourceLocations("${image.avatar.storage-path}", "${image.ad.storage-path}")
                 .setCachePeriod(3600); // Caching for 1 hour
     }
 }

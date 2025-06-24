@@ -9,7 +9,7 @@
 -- changeSet kostusonline:cf3ff97a-6ab3-5f78-89f4-792055c27436 runOnChange:true
 CREATE TABLE IF NOT EXISTS "image" (
     id BIGINT PRIMARY KEY NOT NULL GENERATED ALWAYS AS IDENTITY,
-    "ad_id" BIGINT NOT NULL, -- no, not unique because of multiple images per ad allowed
+    "ad_id" BIGINT NOT NULL, -- multiple image per ad allowed (while not implemented at web ui)
     "name" VARCHAR(256) NOT NULL UNIQUE CHECK (
         LENGTH("name") BETWEEN 1 AND 256
     ),

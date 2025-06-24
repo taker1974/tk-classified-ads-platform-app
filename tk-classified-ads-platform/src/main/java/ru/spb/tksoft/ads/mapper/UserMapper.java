@@ -1,6 +1,5 @@
 package ru.spb.tksoft.ads.mapper;
 
-import javax.annotation.concurrent.ThreadSafe;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
@@ -13,7 +12,6 @@ import ru.spb.tksoft.ads.entity.UserEntity;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-@ThreadSafe
 public final class UserMapper {
 
     private UserMapper() {}

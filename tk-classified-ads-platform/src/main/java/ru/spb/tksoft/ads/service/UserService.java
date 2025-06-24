@@ -139,7 +139,7 @@ public class UserService {
             throw new TkNullArgumentException("userName");
         }
 
-        UserEntity user = userRepository.findOneByNameWithAvatar(userName)
+        UserEntity user = userRepository.findByName(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
         UserResponseDto dto = UserMapper.toDto(user);
@@ -176,10 +176,12 @@ public class UserService {
             throw new TkNullArgumentException("userDetails.getUsername()");
         }
 
-        UserEntity user = userRepository.findOneByName(userName)
+        UserEntity user = userRepository.findOneByNameRaw(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, true));
 
         user.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
+
+        // Save new entity.
         userRepository.save(user);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
@@ -205,14 +207,12 @@ public class UserService {
             throw new TkNullArgumentException("updateRequest");
         }
 
-        UserEntity user = userRepository.findOneByName(userName)
+        UserEntity user = userRepository.findOneByNameRaw(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, true));
 
         user.setFirstName(updateRequest.getFirstName());
         user.setLastName(updateRequest.getLastName());
         user.setPhone(updateRequest.getPhone());
-
-        userRepository.save(user);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return new UpdateUserResponseDto(
@@ -248,7 +248,7 @@ public class UserService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        UserEntity user = userRepository.findOneByNameWithAvatar(userName)
+        UserEntity user = userRepository.findByName(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
         AvatarEntity avatar = user.getAvatar();
@@ -267,17 +267,14 @@ public class UserService {
                     });
         }
 
-        if (avatar == null) {
-            avatar = new AvatarEntity();
-            avatar.setUser(user);
-            user.setAvatar(avatar);
-        }
-
+        avatar = avatar != null ? avatar : new AvatarEntity();
         avatar.setName(fileName);
         avatar.setSize((int) fileSize);
         avatar.setMediatype(contentType);
 
-        userRepository.save(user);
+        avatar.setUser(user);
+        user.setAvatar(avatar);
+
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
@@ -301,7 +298,7 @@ public class UserService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        UserEntity user = userRepository.findOneByIdWithAvatar(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new TkUserNotFoundException(String.valueOf(userId), false));
 
         if (user.getAvatar() == null) {

@@ -1,10 +1,5 @@
 package ru.spb.tksoft.ads.config;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;

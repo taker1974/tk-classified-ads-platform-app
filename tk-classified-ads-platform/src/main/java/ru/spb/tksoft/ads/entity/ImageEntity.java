@@ -1,5 +1,7 @@
 package ru.spb.tksoft.ads.entity;
 
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,7 +17,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,7 +27,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "\"image\"")
@@ -38,6 +38,7 @@ public class ImageEntity {
     private Long id;
 
     /** Parent ad. */
+    @JsonBackReference("ad-images")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ad_id", nullable = false)
     @NotNull
@@ -60,7 +61,7 @@ public class ImageEntity {
     @Size(min = 1, max = 128)
     @NotBlank
     private String mediatype;
-    
+
     /** Full constructor. */
     public ImageEntity(long id, String name, int size, String mediatype) {
 
@@ -74,5 +75,41 @@ public class ImageEntity {
         this.name = name;
         this.size = size;
         this.mediatype = mediatype;
+    }
+
+    /** Set back link. */
+    public void setAd(AdEntity ad) {
+
+        if (this.ad != null) {
+            this.ad.getImages().remove(this);
+        }
+
+        this.ad = ad;
+        if (ad != null && !ad.getImages().contains(this)) {
+            ad.getImages().add(this);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ImageEntity that = (ImageEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return getClass().hashCode(); // for transients
     }
 }

@@ -1,7 +1,9 @@
 package ru.spb.tksoft.ads.entity;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +21,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,7 +31,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "\"ad\"")
@@ -66,8 +66,12 @@ public class AdEntity {
     private String description;
 
     /** Images. */
-    @OneToMany(mappedBy = "ad", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    private List<ImageEntity> images;
+    @JsonManagedReference("ad-images")
+    @OneToMany(mappedBy = "ad",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
+    private List<ImageEntity> images = new ArrayList<>();
 
     /** Full constructor. */
     public AdEntity(long id, String title, BigDecimal price, String description) {
@@ -82,5 +86,21 @@ public class AdEntity {
         this.title = title;
         this.price = price;
         this.description = description;
+    }
+
+    /** Add image. */
+    public void addImage(ImageEntity image) {
+
+        // At this time supports only one image per ad
+        // so set all parents to null (remove back link) 
+        // and clear list befor adding new single image.
+        for (ImageEntity imageEntity : images) {
+            imageEntity.setAd(null);
+        }
+        images.clear(); 
+        images.add(image);
+
+        // Set back link.
+        image.setAd(this);
     }
 }

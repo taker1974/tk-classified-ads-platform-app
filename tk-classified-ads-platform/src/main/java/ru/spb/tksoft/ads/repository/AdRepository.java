@@ -1,6 +1,8 @@
 package ru.spb.tksoft.ads.repository;
 
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,11 +17,26 @@ import ru.spb.tksoft.ads.entity.AdEntity;
 public interface AdRepository extends JpaRepository<AdEntity, Long> {
 
     /**
-     * Returns list of {@link AdEntity} by user name.
-     * 
-     * @param name User name.
-     * @return List of {@link AdEntity}.
+     * @return List of {@link AdEntity} by name.
      */
-    @Query("SELECT ad FROM AdEntity ad JOIN FETCH ad.user u WHERE u.name = :name")
-    List<AdEntity> findByUserName(String name);
+    @Query("""
+        SELECT DISTINCT a
+        FROM AdEntity a
+        LEFT JOIN FETCH a.images
+        JOIN FETCH a.user u
+        WHERE u.name = :userName
+        """)
+    List<AdEntity> findByUserName(String userName);
+
+    /**
+     * @return List of AdEntity.
+     */
+    @EntityGraph(attributePaths = {"images"})
+    List<AdEntity> findAll();
+
+    /**
+     * @return Single AdEntity by ID.
+     */
+    @EntityGraph(attributePaths = {"images"})
+    Optional<AdEntity> findById(long id);
 }

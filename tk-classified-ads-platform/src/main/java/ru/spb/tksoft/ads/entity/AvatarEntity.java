@@ -1,5 +1,7 @@
 package ru.spb.tksoft.ads.entity;
 
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,7 +17,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,7 +27,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "\"avatar\"")
@@ -38,6 +38,7 @@ public class AvatarEntity {
     private Long id;
 
     /** Owner user. */
+    @JsonBackReference("user-avatar")
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull
@@ -75,4 +76,40 @@ public class AvatarEntity {
         this.size = size;
         this.mediatype = mediatype;
     }
+
+    // /** Set back link. */
+    // public void setUser(UserEntity user) {
+
+    //     if (this.user != null) {
+    //         this.user.setAvatar(null);
+    //     }
+
+    //     this.user = user;
+    //     if (user != null && user.getAvatar() != this) {
+    //         user.setAvatar(this);
+    //     }
+    // }
+
+    // /**
+    //  * {@inheritDoc}
+    //  */
+    // @Override
+    // public boolean equals(Object o) {
+    //     if (this == o) {
+    //         return true;
+    //     }
+    //     if (o == null || getClass() != o.getClass()) {
+    //         return false;
+    //     }
+    //     AvatarEntity that = (AvatarEntity) o;
+    //     return Objects.equals(id, that.id);
+    // }
+
+    // /**
+    //  * {@inheritDoc}
+    //  */
+    // @Override
+    // public int hashCode() {
+    //     return getClass().hashCode(); // for transients
+    // }
 }

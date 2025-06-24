@@ -1,5 +1,6 @@
 package ru.spb.tksoft.ads.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +17,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.spb.tksoft.ads.enumeration.UserRole;
@@ -28,7 +28,6 @@ import ru.spb.tksoft.ads.enumeration.UserRole;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "\"user\"")
@@ -77,6 +76,7 @@ public class UserEntity {
     private UserRole role;
 
     /** Avatar. */
+    @JsonManagedReference("user-avatar")
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private AvatarEntity avatar;
@@ -101,4 +101,14 @@ public class UserEntity {
         this.phone = phone;
         this.role = role;
     }
+
+    // /** Setter for avatar. */
+    // public void setAvatar(AvatarEntity avatar) {
+
+    //     avatar.setUser(null);
+    //     this.avatar = avatar;
+
+    //     // Set back link.
+    //     avatar.setUser(this);
+    // }
 }

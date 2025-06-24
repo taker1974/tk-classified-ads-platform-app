@@ -9,7 +9,9 @@ import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.service.AdsService;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -66,6 +68,21 @@ public class AdsController {
     }
 
     /**
+     * Get ad image by link.
+     * 
+     * Returns 200/OK, 404/Not Found.
+     * 
+     * @param adId - User ID.
+     * @return Image resource.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/image/{id}")
+    public ResponseEntity<Resource> getAdImage(@PathVariable(required = true) long id) {
+
+        return adsService.getAdImage(id);
+    }
+
+    /**
      * Create new ad.
      * 
      * @return 201/CREATED, 401/Unauthorized.
@@ -78,7 +95,17 @@ public class AdsController {
             @NotNull @Valid @RequestPart("properties") CreateOrUpdateAdRequestDto createAddDto,
             @NotNull @RequestPart("image") MultipartFile image) {
 
-        return adsService.addAd(userDetails, createAddDto, image);
+        // Plan:
+        // - create new ad in db; if ok:
+        // - update ad image (exactly the same as UserController.updateUserImage).
+
+        AdResponseDto dto = adsService.createAdd(userDetails, createAddDto);
+        final String fileName = adsService.saveImageFile(image);
+
+        adsService.updateAdDb(dto.getId(),
+                fileName, image.getSize(), image.getContentType());
+
+        return dto;
     }
 
     /**

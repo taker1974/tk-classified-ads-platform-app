@@ -45,7 +45,7 @@ public class UserDetailsServiceBasic implements UserDetailsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        UserEntity user = userRepository.findOneByName(userName)
+        UserEntity user = userRepository.findOneByNameRaw(userName)
             .orElseThrow(()->new TkUserNotFoundException(userName, false));
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);

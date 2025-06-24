@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class AuthServiceBasic implements AuthService {
      * @return true if the user is successfully created, false otherwise.
      */
     @Override
+    @Transactional
     public boolean register(@NotNull final RegisterRequestDto registerRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
