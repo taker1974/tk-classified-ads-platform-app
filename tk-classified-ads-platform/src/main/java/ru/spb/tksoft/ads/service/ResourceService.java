@@ -48,6 +48,7 @@ public class ResourceService {
      * @return Avatar URL in a form of "/avatar-base-path/user-id".
      */
     public String getAvatarImageUrl(long userId) {
+
         return Paths.get(avatarImageProcessing.urlBasePath())
                 .resolve(String.valueOf(userId)).toString();
     }
@@ -59,6 +60,7 @@ public class ResourceService {
      * @return Image URL in a form of "/image-base-path/image-id".
      */
     public String getAdImageUrl(long imageId) {
+        
         return Paths.get(adImageProcessing.urlBasePath())
                 .resolve(String.valueOf(imageId)).toString();
     }
@@ -70,6 +72,7 @@ public class ResourceService {
      * @return Full avatar path.
      */
     public Path getAvatarImagePath(String avatarFileName) {
+
         return Path.of(avatarImageProcessing.storagePath(), avatarFileName);
     }
 
@@ -80,6 +83,7 @@ public class ResourceService {
      * @return Full image path.
      */
     public Path getAdImagePath(String imageFileName) {
+
         return Path.of(adImageProcessing.storagePath(), imageFileName);
     }
 
@@ -155,6 +159,8 @@ public class ResourceService {
     private String saveImageFile(final String verb, final MultipartFile image,
             final ImageProcessingProperties processingProperties) {
 
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
         validateImage(verb, image, processingProperties);
 
         final String fileName = getImageUniqueFileName(image);
@@ -175,6 +181,7 @@ public class ResourceService {
             throw new TkSavingMediaException(path.toString());
         }
 
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return fileName;
     }
 
@@ -186,7 +193,6 @@ public class ResourceService {
      */
     public String saveAvatarFile(final MultipartFile image) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
         return saveImageFile("avatar", image, avatarImageProcessing);
     }
 
@@ -198,12 +204,13 @@ public class ResourceService {
      */
     public String saveAdImageFile(final MultipartFile image) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
         return saveImageFile("ad image", image, adImageProcessing);
     }
 
     private void deleteImageFile(final String fileName,
             final ImageProcessingProperties properties) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         if (fileName != null && !fileName.isBlank()) {
             try {
@@ -213,6 +220,8 @@ public class ResourceService {
                 throw new TkDeletingMediaException(fileName);
             }
         }
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -222,7 +231,6 @@ public class ResourceService {
      */
     public void deleteAvatarImageFile(final String fileName) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
         deleteImageFile(fileName, avatarImageProcessing);
     }
 
@@ -233,7 +241,6 @@ public class ResourceService {
      */
     public void deleteAdImageFile(final String fileName) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
         deleteImageFile(fileName, adImageProcessing);
     }
 }

@@ -2,7 +2,6 @@ package ru.spb.tksoft.ads.service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.PathResource;
@@ -29,7 +28,6 @@ import ru.spb.tksoft.ads.exception.TkNullArgumentException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.repository.UserRepository;
-import ru.spb.tksoft.ads.tools.PageTools;
 import ru.spb.tksoft.utils.log.LogEx;
 
 /**

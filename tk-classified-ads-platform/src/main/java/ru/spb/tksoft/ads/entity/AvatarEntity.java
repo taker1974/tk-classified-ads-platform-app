@@ -1,6 +1,5 @@
 package ru.spb.tksoft.ads.entity;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
