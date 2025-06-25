@@ -20,12 +20,12 @@ public interface AdRepository extends JpaRepository<AdEntity, Long> {
      * @return List of {@link AdEntity} by name.
      */
     @Query("""
-        SELECT DISTINCT a
-        FROM AdEntity a
-        LEFT JOIN FETCH a.images
-        JOIN FETCH a.user u
-        WHERE u.name = :userName
-        """)
+            SELECT DISTINCT a
+            FROM AdEntity a
+            LEFT JOIN FETCH a.images
+            JOIN FETCH a.user u
+            WHERE u.name = :userName
+            """)
     List<AdEntity> findByUserName(String userName);
 
     /**
@@ -37,6 +37,6 @@ public interface AdRepository extends JpaRepository<AdEntity, Long> {
     /**
      * @return Single AdEntity by ID.
      */
-    @EntityGraph(attributePaths = {"images"})
+    @EntityGraph(attributePaths = {"user", "images"})
     Optional<AdEntity> findById(long id);
 }

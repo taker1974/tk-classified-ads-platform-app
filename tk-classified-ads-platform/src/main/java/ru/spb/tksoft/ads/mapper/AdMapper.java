@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
+import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
+import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.service.ResourceService;
 
 /**
@@ -40,17 +42,14 @@ public final class AdMapper {
      * @param entity Ad entity.
      * @return user DTO.
      */
-    @SuppressWarnings("java:S1066") // Merge this if statement with the enclosing one.
     @NotNull
     public static AdResponseDto toDto(final ResourceService resourceService,
             final AdEntity entity) {
 
         String image = "";
         List<ImageEntity> images = entity.getImages();
-        if (images != null) {
-            if (!images.isEmpty()) {
-                image = resourceService.getAdImageUrl(entity.getImages().getFirst().getId());
-            }
+        if (images != null && !images.isEmpty()) {
+            image = resourceService.getAdImageUrl(entity.getImages().getFirst().getId());
         }
 
         return new AdResponseDto(entity.getId(),
@@ -58,6 +57,29 @@ public final class AdMapper {
                 image,
                 entity.getPrice().intValue(),
                 entity.getTitle());
+    }
+
+    /**
+     * Entity to extended DTO.
+     * 
+     * @param e Ad entity.
+     * @return user DTO.
+     */
+    @NotNull
+    public static AdExtendedResponseDto toExtendedDto(final ResourceService resourceService,
+            final AdEntity e) {
+
+        String image = "";
+        List<ImageEntity> images = e.getImages();
+        if (images != null && !images.isEmpty()) {
+            image = resourceService.getAdImageUrl(e.getImages().getFirst().getId());
+        }
+
+        UserEntity u = e.getUser();
+        return new AdExtendedResponseDto(
+                e.getId(), e.getTitle(), e.getPrice().intValue(), e.getDescription(),
+                image,
+                u.getFirstName(), u.getLastName(), u.getName(), u.getPhone());
     }
 
     /**

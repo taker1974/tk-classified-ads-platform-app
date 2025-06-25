@@ -1,9 +1,9 @@
 package ru.spb.tksoft.ads.service;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +31,7 @@ import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkAdNotFoundException;
+import ru.spb.tksoft.ads.exception.TkAdNotOwnedException;
 import ru.spb.tksoft.ads.exception.TkMediaNotFoundException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
@@ -121,7 +122,6 @@ public class AdsService {
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(resource);
-
     }
 
     /**
@@ -159,6 +159,18 @@ public class AdsService {
         return resourceService.saveAdImageFile(image);
     }
 
+    private AdEntity getOwnAdEntity(final String userName, final long adId) {
+
+        AdEntity ad = adRepository.findById(adId)
+                .orElseThrow(() -> new TkAdNotFoundException(adId));
+
+        if (!ad.getUser().getName().equals(userName)) {
+            throw new TkAdNotOwnedException(adId);
+        }
+
+        return ad;
+    }
+
     /**
      * Update ad image.
      * 
@@ -169,13 +181,12 @@ public class AdsService {
      * @throws TkAdNotFoundException Thrown when ad not found.
      */
     @Transactional
-    public void updateAdDb(long adId, final String fileName, long fileSize,
-            final String contentType) {
+    public void updateAdDb(final UserDetails userDetails,
+            long adId, final String fileName, long fileSize, final String contentType) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        AdEntity ad = adRepository.findById(adId)
-                .orElseThrow(() -> new TkAdNotFoundException(adId));
+        AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
 
         List<ImageEntity> images = ad.getImages();
         assert (images != null);
@@ -189,6 +200,9 @@ public class AdsService {
                         public void afterCompletion(int status) {
                             if (status == STATUS_COMMITTED) {
                                 resourceService.deleteAdImageFile(oldFileName);
+                            }
+                            if (status == STATUS_ROLLED_BACK) {
+                                resourceService.deleteAdImageFile(fileName);
                             }
                         }
                     });
@@ -204,13 +218,90 @@ public class AdsService {
     }
 
     /**
+     * Get info about ad with given id.
+     * 
+     * @param userDetails UserDetails implementation.
+     * @param adId Ad id.
+     * @return DTO.
+     */
+    public AdExtendedResponseDto getAdExtended(long adId) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        AdEntity entity = adRepository.findById(adId)
+                .orElseThrow(() -> new TkAdNotFoundException(adId));
+
+        AdExtendedResponseDto dto = AdMapper.toExtendedDto(resourceService, entity);
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
+        return dto;
+    }
+
+    /**
+     * Update ad user with given ID and owned by given user.
+     * 
+     * @param userDetails UserDetails implementation.
+     * @param id Ad id.
+     * @param requestDto Request DTO.
+     * @return Response DTO.
+     */
+    @Transactional
+    public AdResponseDto updateAd(UserDetails userDetails, long adId,
+            CreateOrUpdateAdRequestDto requestDto) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
+
+        ad.setTitle(requestDto.getTitle());
+        ad.setPrice(BigDecimal.valueOf(requestDto.getPrice()));
+        ad.setDescription(requestDto.getDescription());
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
+        return AdMapper.toDto(resourceService, ad);
+    }
+
+    /**
+     * Remove ad with given id and owned by given user.
+     * 
+     * @param userDetails UserDetails implementation.
+     * @param id Ad id.
+     */
+    @Transactional
+    public void removeAd(UserDetails userDetails, long adId) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
+        
+        List<ImageEntity> images = ad.getImages();
+        assert (images != null);
+
+        // Planning to delete ad image.
+        String imageFileName = AdMapper.getFirstImageFileName(ad);
+        if (!imageFileName.isBlank()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCompletion(int status) {
+                            if (status == STATUS_COMMITTED) {
+                                resourceService.deleteAdImageFile(imageFileName);
+                            }
+                        }
+                    });
+        }
+
+        adRepository.delete(ad);
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
+    }
+
+    /**
      * Get all comments for ad with given id.
      * 
      * @param userDetails UserDetails implementation.
      * @param id Ad id.
      * @return DTO.
      */
-    public CommentsArrayResponseDto getComments(final UserDetails userDetails, long id) {
+    public CommentsArrayResponseDto getComments(long adId) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
@@ -239,43 +330,6 @@ public class AdsService {
         return new CommentResponseDto();
     }
 
-    /**
-     * Get info about ad with given id.
-     * 
-     * @param userDetails UserDetails implementation.
-     * @param adId Ad id.
-     * @return DTO.
-     */
-    public AdExtendedResponseDto getAds(final UserDetails userDetails, long adId) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        // TODO: Implement this method.
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new AdExtendedResponseDto();
-    }
-
-    public AdResponseDto updateAds(UserDetails userDetails, long id,
-            CreateOrUpdateAdRequestDto updateAdsDto) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        // TODO: Implement this method.
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new AdResponseDto();
-    }
-
-    public void removeAd(UserDetails userDetails, long id) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        // TODO: Implement this method.
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
-    }
-
     public CommentResponseDto updateComment(final UserDetails userDetails, long adId,
             long commentId,
             final CreateOrUpdateCommentRequestDto updateCommentDto) {
@@ -289,16 +343,6 @@ public class AdsService {
     }
 
     public void deleteComment(final UserDetails userDetails, long adId, long commentId) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        // TODO: Implement this method.
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
-    }
-
-    public void updateImage(final UserDetails userDetails, long id,
-            final MultipartFile image) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 

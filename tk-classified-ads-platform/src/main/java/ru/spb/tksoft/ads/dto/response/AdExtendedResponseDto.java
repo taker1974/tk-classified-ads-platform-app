@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonPropertyOrder({"pk", "title", "price", "description", "image", "authorFirstName",
-        "authorLastName", "email", "phone"})
+@JsonPropertyOrder({"pk", "authorFirstName", "authorLastName", "description", "email", "image",
+        "phone", "price", "title"})
 public class AdExtendedResponseDto {
 
     /** Ad ID. */

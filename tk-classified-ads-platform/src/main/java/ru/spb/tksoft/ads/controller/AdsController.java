@@ -102,7 +102,7 @@ public class AdsController {
         AdResponseDto dto = adsService.createAdd(userDetails, createAddDto);
         final String fileName = adsService.saveImageFile(image);
 
-        adsService.updateAdDb(dto.getId(),
+        adsService.updateAdDb(userDetails, dto.getId(),
                 fileName, image.getSize(), image.getContentType());
 
         return dto;
@@ -115,12 +115,11 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Получение комментариев объявления")
-    @GetMapping("/{id}/comments")
+    @GetMapping("/{adId}/comments")
     @NotNull
-    public CommentsArrayResponseDto getComments(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id) {
+    public CommentsArrayResponseDto getComments(@PathVariable(required = true) long adId) {
 
-        return adsService.getComments(userDetails, id);
+        return adsService.getComments(adId);
     }
 
     /**
@@ -130,13 +129,13 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Добавление комментария к объявлению")
-    @PostMapping("/{id}/comments")
+    @PostMapping("/{adId}/comments")
     @NotNull
     public CommentResponseDto addComment(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id,
+            @PathVariable(required = true) long adId,
             @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto createCommentDto) {
 
-        return adsService.addComment(userDetails, id, createCommentDto);
+        return adsService.addComment(userDetails, adId, createCommentDto);
     }
 
     /**
@@ -146,12 +145,11 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Получение информации об объявлении")
-    @GetMapping("/{id}")
+    @GetMapping("/{adId}")
     @NotNull
-    public AdExtendedResponseDto getAds(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id) {
+    public AdExtendedResponseDto getAds(@PathVariable(required = true) long adId) {
 
-        return adsService.getAds(userDetails, id);
+        return adsService.getAdExtended(adId);
     }
 
     /**
@@ -161,13 +159,13 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление информации об объявлении")
-    @PatchMapping("/{id}")
+    @PatchMapping("/{adId}")
     @NotNull
     public AdResponseDto updateAds(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id,
+            @PathVariable(required = true) long adId,
             @NotNull @Valid @RequestBody CreateOrUpdateAdRequestDto updateAdsDto) {
 
-        return adsService.updateAds(userDetails, id, updateAdsDto);
+        return adsService.updateAd(userDetails, adId, updateAdsDto);
     }
 
     /**
@@ -177,11 +175,11 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Обновление информации об объявлении")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{adId}")
     public void removeAd(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id) {
+            @PathVariable(required = true) long adId) {
 
-        adsService.removeAd(userDetails, id);
+        adsService.removeAd(userDetails, adId);
     }
 
     /**
@@ -223,11 +221,13 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление картинки объявления")
-    @PatchMapping(value = "/{id}/image", consumes = "multipart/form-data")
+    @PatchMapping(value = "/{adId}/image", consumes = "multipart/form-data")
     public void updateImage(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id,
+            @PathVariable(required = true) long adId,
             @NotNull @RequestPart("image") MultipartFile image) {
 
-        adsService.updateImage(userDetails, id, image);
+        final String fileName = adsService.saveImageFile(image);
+        adsService.updateAdDb(userDetails, adId,
+                fileName, image.getSize(), image.getContentType());
     }
 }

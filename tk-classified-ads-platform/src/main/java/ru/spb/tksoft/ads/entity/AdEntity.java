@@ -91,16 +91,15 @@ public class AdEntity {
     /** Add image. */
     public void addImage(ImageEntity image) {
 
-        // At this time supports only one image per ad
-        // so set all parents to null (remove back link) 
-        // and clear list befor adding new single image.
-        for (ImageEntity imageEntity : images) {
-            imageEntity.setAd(null);
+        // Remove old image and it's back link.
+        if (!images.isEmpty()) {
+            ImageEntity imageOld = images.getFirst();
+            images.remove(imageOld);
+            imageOld.setAd(null);
         }
-        images.clear(); 
-        images.add(image);
 
-        // Set back link.
+        // Add new image and set new back link.
+        images.add(image);
         image.setAd(this);
     }
 }

@@ -101,14 +101,4 @@ public class UserEntity {
         this.phone = phone;
         this.role = role;
     }
-
-    // /** Setter for avatar. */
-    // public void setAvatar(AvatarEntity avatar) {
-
-    //     avatar.setUser(null);
-    //     this.avatar = avatar;
-
-    //     // Set back link.
-    //     avatar.setUser(this);
-    // }
 }
