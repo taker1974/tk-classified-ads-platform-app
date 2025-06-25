@@ -102,7 +102,7 @@ public class AdsController {
         AdResponseDto dto = adsService.createAdd(userDetails, createAddDto);
         final String fileName = adsService.saveImageFile(image);
 
-        adsService.updateAdDb(userDetails, dto.getId(),
+        adsService.updateAdImage(userDetails, dto.getId(),
                 fileName, image.getSize(), image.getContentType());
 
         return dto;
@@ -164,7 +164,7 @@ public class AdsController {
             @PathVariable(required = true) long adId,
             @NotNull @Valid @RequestBody CreateOrUpdateAdRequestDto updateAdsDto) {
 
-        return adsService.updateAd(userDetails, adId, updateAdsDto);
+        return adsService.updateAdInfo(userDetails, adId, updateAdsDto);
     }
 
     /**
@@ -226,7 +226,7 @@ public class AdsController {
             @NotNull @RequestPart("image") MultipartFile image) {
 
         final String fileName = adsService.saveImageFile(image);
-        adsService.updateAdDb(userDetails, adId,
+        adsService.updateAdImage(userDetails, adId,
                 fileName, image.getSize(), image.getContentType());
     }
 }

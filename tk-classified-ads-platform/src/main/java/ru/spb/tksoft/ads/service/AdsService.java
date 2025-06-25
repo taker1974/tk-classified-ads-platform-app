@@ -130,6 +130,8 @@ public class AdsService {
     public AdResponseDto createAdd(final UserDetails userDetails,
             final CreateOrUpdateAdRequestDto createAddDto) {
 
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
         final String userName = userDetails.getUsername();
         final UserEntity user = userRepository.findOneByNameRaw(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
@@ -137,6 +139,7 @@ public class AdsService {
         final AdEntity newAd = AdMapper.toEntity(createAddDto);
         newAd.setUser(user);
 
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return AdMapper.toDto(resourceService, adRepository.save(newAd));
     }
 
@@ -173,7 +176,7 @@ public class AdsService {
      * @throws TkAdNotFoundException Thrown when ad not found.
      */
     @Transactional
-    public void updateAdDb(final UserDetails userDetails,
+    public void updateAdImage(final UserDetails userDetails,
             long adId, final String fileName, long fileSize, final String contentType) {
 
         AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
@@ -183,7 +186,7 @@ public class AdsService {
 
         // Planning to delete old ad image.
         String oldFileName = AdMapper.getFirstImageFileName(ad);
-        if (!oldFileName.isBlank()) {
+        if (oldFileName != null && !oldFileName.isBlank()) {
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronization() {
                         @Override
@@ -229,7 +232,7 @@ public class AdsService {
      * @return Response DTO.
      */
     @Transactional
-    public AdResponseDto updateAd(UserDetails userDetails, long adId,
+    public AdResponseDto updateAdInfo(UserDetails userDetails, long adId,
             CreateOrUpdateAdRequestDto requestDto) {
 
         AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
@@ -249,6 +252,8 @@ public class AdsService {
      */
     @Transactional
     public void deleteAd(UserDetails userDetails, long adId) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
 
@@ -270,6 +275,7 @@ public class AdsService {
         }
 
         adRepository.delete(ad);
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -283,6 +289,8 @@ public class AdsService {
     public CommentResponseDto addComment(long adId,
             final CreateOrUpdateCommentRequestDto requestDto) {
 
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
         AdEntity ad = adRepository.findById(adId)
                 .orElseThrow(() -> new TkAdNotFoundException(adId));
 
@@ -291,6 +299,7 @@ public class AdsService {
         comment.setUser(ad.getUser());
         CommentEntity savedComment = commentRepository.save(comment);
 
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return CommentMapper.toDto(resourceService, savedComment);
     }
 
@@ -322,6 +331,15 @@ public class AdsService {
         return comment;
     }
 
+    /**
+     * Update comment with given ad ID and comment ID.
+     * 
+     * @param userDetails UserDetails implementation.
+     * @param adId Ad id.
+     * @param commentId Comment id.
+     * @param requestDto Request DTO.
+     * @return Response DTO.
+     */
     @Transactional
     public CommentResponseDto updateComment(final UserDetails userDetails,
             long adId, long commentId,
@@ -332,11 +350,22 @@ public class AdsService {
         return CommentMapper.toDto(resourceService, entity);
     }
 
+    /**
+     * Delete comment with given ad ID and comment ID.
+     * 
+     * @param userDetails UserDetails implementation.
+     * @param adId Ad id.
+     * @param commentId Comment id.
+     */
     @Transactional
     public void deleteComment(final UserDetails userDetails,
             long adId, long commentId) {
 
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
         CommentEntity entity = getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
         commentRepository.delete(entity);
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }
