@@ -76,40 +76,4 @@ public class AvatarEntity {
         this.size = size;
         this.mediatype = mediatype;
     }
-
-    // /** Set back link. */
-    // public void setUser(UserEntity user) {
-
-    //     if (this.user != null) {
-    //         this.user.setAvatar(null);
-    //     }
-
-    //     this.user = user;
-    //     if (user != null && user.getAvatar() != this) {
-    //         user.setAvatar(this);
-    //     }
-    // }
-
-    // /**
-    //  * {@inheritDoc}
-    //  */
-    // @Override
-    // public boolean equals(Object o) {
-    //     if (this == o) {
-    //         return true;
-    //     }
-    //     if (o == null || getClass() != o.getClass()) {
-    //         return false;
-    //     }
-    //     AvatarEntity that = (AvatarEntity) o;
-    //     return Objects.equals(id, that.id);
-    // }
-
-    // /**
-    //  * {@inheritDoc}
-    //  */
-    // @Override
-    // public int hashCode() {
-    //     return getClass().hashCode(); // for transients
-    // }
 }

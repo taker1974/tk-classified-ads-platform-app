@@ -28,14 +28,19 @@ import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
+import ru.spb.tksoft.ads.entity.CommentEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkAdNotFoundException;
 import ru.spb.tksoft.ads.exception.TkAdNotOwnedException;
+import ru.spb.tksoft.ads.exception.TkCommentNotFoundException;
+import ru.spb.tksoft.ads.exception.TkCommentNotOwnedException;
 import ru.spb.tksoft.ads.exception.TkMediaNotFoundException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
+import ru.spb.tksoft.ads.mapper.CommentMapper;
 import ru.spb.tksoft.ads.repository.AdRepository;
+import ru.spb.tksoft.ads.repository.CommentRepository;
 import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
@@ -53,6 +58,7 @@ public class AdsService {
 
     private final AdRepository adRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
     private final ImageRepository imageRepository;
 
     private final ResourceService resourceService;
@@ -267,12 +273,12 @@ public class AdsService {
      * @param id Ad id.
      */
     @Transactional
-    public void removeAd(UserDetails userDetails, long adId) {
+    public void deleteAd(UserDetails userDetails, long adId) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
-        
+
         List<ImageEntity> images = ad.getImages();
         assert (images != null);
 
@@ -295,59 +301,86 @@ public class AdsService {
     }
 
     /**
+     * Add comment to ad with given id.
+     * 
+     * @param adId Ad id.
+     * @param requestDto DTO.
+     * @return Response DTO.
+     */
+    @Transactional
+    public CommentResponseDto addComment(long adId,
+            final CreateOrUpdateCommentRequestDto requestDto) {
+
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
+        AdEntity ad = adRepository.findById(adId)
+                .orElseThrow(() -> new TkAdNotFoundException(adId));
+
+        CommentEntity comment = new CommentEntity(requestDto.getText());
+        comment.setAd(ad);
+        comment.setUser(ad.getUser());
+        CommentEntity savedComment = commentRepository.save(comment);
+
+        CommentResponseDto dto = CommentMapper.toDto(resourceService, savedComment);
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
+        return dto;
+    }
+
+    /**
      * Get all comments for ad with given id.
      * 
-     * @param userDetails UserDetails implementation.
-     * @param id Ad id.
-     * @return DTO.
+     * @param adId Ad id.
+     * @return Response DTO.
      */
     public CommentsArrayResponseDto getComments(long adId) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        // TODO: Implement this method.
+        Set<CommentResponseDto> responseSet = commentRepository.findAllByAd_Id(adId).stream()
+                .map(commentEntity -> CommentMapper.toDto(resourceService, commentEntity))
+                .collect(Collectors.toSet());
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new CommentsArrayResponseDto(0, Collections.emptySet());
+        return new CommentsArrayResponseDto(responseSet.size(), responseSet);
     }
 
-    /**
-     * Add comment to ad with given id.
-     * 
-     * @param userDetails UserDetails implementation.
-     * @param adId Ad id.
-     * @param requestDto DTO.
-     * @return Created DTO.
-     */
-    public CommentResponseDto addComment(final UserDetails userDetails, long adId,
+    private CommentEntity getOwnCommentEntity(final String userName,
+            final long adId, final long commentId) {
+
+        CommentEntity comment = commentRepository.findByAdAndCommentWithEagerFetch(adId, commentId)
+                .orElseThrow(() -> new TkCommentNotFoundException(adId));
+
+        if (!comment.getUser().getName().equals(userName)) {
+            throw new TkCommentNotOwnedException(commentId);
+        }
+
+        return comment;
+    }
+
+    @Transactional
+    public CommentResponseDto updateComment(final UserDetails userDetails,
+            long adId, long commentId,
             final CreateOrUpdateCommentRequestDto requestDto) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        // TODO: Implement this method.
+        CommentEntity entity = getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
+
+        entity.setText(requestDto.getText());
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new CommentResponseDto();
+        return CommentMapper.toDto(resourceService, entity);
     }
 
-    public CommentResponseDto updateComment(final UserDetails userDetails, long adId,
-            long commentId,
-            final CreateOrUpdateCommentRequestDto updateCommentDto) {
+    @Transactional
+    public void deleteComment(final UserDetails userDetails,
+            long adId, long commentId) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        // TODO: Implement this method.
+        CommentEntity entity = getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new CommentResponseDto();
-    }
-
-    public void deleteComment(final UserDetails userDetails, long adId, long commentId) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        // TODO: Implement this method.
-
+        commentRepository.delete(entity);
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }

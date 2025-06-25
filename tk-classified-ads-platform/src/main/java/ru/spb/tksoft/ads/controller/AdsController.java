@@ -131,11 +131,10 @@ public class AdsController {
     @Operation(summary = "Добавление комментария к объявлению")
     @PostMapping("/{adId}/comments")
     @NotNull
-    public CommentResponseDto addComment(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long adId,
+    public CommentResponseDto addComment(@PathVariable(required = true) long adId,
             @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto createCommentDto) {
 
-        return adsService.addComment(userDetails, adId, createCommentDto);
+        return adsService.addComment(adId, createCommentDto);
     }
 
     /**
@@ -179,7 +178,7 @@ public class AdsController {
     public void removeAd(@AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(required = true) long adId) {
 
-        adsService.removeAd(userDetails, adId);
+        adsService.deleteAd(userDetails, adId);
     }
 
     /**
