@@ -226,9 +226,8 @@ public class AdsService {
     /**
      * Get info about ad with given id.
      * 
-     * @param userDetails UserDetails implementation.
      * @param adId Ad id.
-     * @return DTO.
+     * @return Response DTO.
      */
     public AdExtendedResponseDto getAdExtended(long adId) {
 
@@ -246,7 +245,7 @@ public class AdsService {
      * Update ad user with given ID and owned by given user.
      * 
      * @param userDetails UserDetails implementation.
-     * @param id Ad id.
+     * @param adId Ad id.
      * @param requestDto Request DTO.
      * @return Response DTO.
      */
@@ -270,7 +269,7 @@ public class AdsService {
      * Remove ad with given id and owned by given user.
      * 
      * @param userDetails UserDetails implementation.
-     * @param id Ad id.
+     * @param adId Ad id.
      */
     @Transactional
     public void deleteAd(UserDetails userDetails, long adId) {

@@ -76,10 +76,10 @@ public class AdsController {
      * @return Image resource.
      */
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/image/{id}")
-    public ResponseEntity<Resource> getAdImage(@PathVariable(required = true) long id) {
+    @GetMapping("/image/{adId}")
+    public ResponseEntity<Resource> getAdImage(@PathVariable(required = true) long adId) {
 
-        return adsService.getAdImage(id);
+        return adsService.getAdImage(adId);
     }
 
     /**

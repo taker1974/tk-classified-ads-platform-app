@@ -22,7 +22,7 @@ public class TkMediaNotFoundException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param adId Ad ID.
+     * @param mediaId Media ID.
      */
     public TkMediaNotFoundException(String mediaId) {
 
