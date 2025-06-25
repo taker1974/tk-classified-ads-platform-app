@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
@@ -113,6 +114,12 @@ public class ResourceService {
         if (contentType == null || contentType.isBlank() ||
                 contentType.length() > CONTENT_TYPE_LENGTH_MAX) {
             throw new TkUnsupportedMediaTypeException("unknown");
+        }
+
+        try {
+            MediaType.parseMediaType(contentType);
+        } catch (Exception ex) {
+            throw new TkUnsupportedMediaTypeException(contentType);
         }
 
         if (!properties.allowedMimeTypes().contains(contentType)) {

@@ -2,6 +2,8 @@ package ru.spb.tksoft.ads.mapper;
 
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
+import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 
@@ -33,6 +35,21 @@ public final class UserMapper {
                 entity.getPhone(),
                 entity.getRole(),
                 entity.getAvatar() == null ? "no avatar" : entity.getAvatar().getName());
+    }
+
+    /**
+     * Entity to DTO.
+     * 
+     * @param updateRequest Update request DTO.
+     * @return Response DTO.
+     */
+    @NotNull
+    public static UpdateUserResponseDto toDto(final UpdateUserRequestDto updateRequest) {
+
+        return new UpdateUserResponseDto(
+                updateRequest.getFirstName(),
+                updateRequest.getLastName(),
+                updateRequest.getPhone());
     }
 
     /**

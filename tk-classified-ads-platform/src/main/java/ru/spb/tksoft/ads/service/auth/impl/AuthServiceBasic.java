@@ -27,10 +27,7 @@ public class AuthServiceBasic implements AuthService {
 
     private final Logger log = LoggerFactory.getLogger(AuthServiceBasic.class);
 
-    @NotNull
     private final UserService userService;
-
-    @NotNull
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -47,7 +44,7 @@ public class AuthServiceBasic implements AuthService {
      */
     @Override
     @Transactional
-    public boolean register(@NotNull final RegisterRequestDto registerRequest) {
+    public boolean register(final RegisterRequestDto registerRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
@@ -82,7 +79,7 @@ public class AuthServiceBasic implements AuthService {
      * @param password Password.
      */
     @Override
-    public boolean login(@NotBlank final String userName, @NotBlank final String password) {
+    public boolean login(final String userName, final String password) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 

@@ -1,3 +1,4 @@
+# https://www.javaguides.net/2025/03/spring-boot-performance-tuning.html
 server:
   port: 8080
   servlet:
@@ -5,6 +6,10 @@ server:
   error:
     whitelabel:
       enabled: false
+
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,application/json
 
 spring:
   application:
@@ -18,13 +23,26 @@ spring:
   thymeleaf:
     check-template-location: false
 
+  main:
+    lazy-initialization: true
+  autoconfigure:
+      exclude: org.springframework.boot.autoconfigure.jdbc.EmbeddedDatabaseConnectionAutoConfiguration
+
   datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 60000
+
     ads:
         jdbc-url: jdbc:postgresql://localhost:5432/tk_ads
         username: ads_god
         password: 87654321
-        maximum-pool-size: 10
+        maximum-pool-size: 20
         minimum-idle: 5
+        idle-timeout: 30000
+        max-lifetime: 60000
         connection-timeout: 30000
 
   jpa:

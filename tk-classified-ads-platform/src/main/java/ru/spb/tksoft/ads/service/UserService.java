@@ -56,13 +56,7 @@ public class UserService {
      */
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        Page<UserEntity> entity = userRepository.findAll(pageable);
-        List<UserResponseDto> dto = entity.stream().map(UserMapper::toDto).toList();
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return PageTools.convertListToPage(dto, pageable);
+        return userRepository.findAll(pageable).map(UserMapper::toDto);
     }
 
     /**
@@ -95,34 +89,30 @@ public class UserService {
      */
     public boolean existsByName(String userName) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
-
         if (userName == null) {
             throw new TkNullArgumentException("userName");
         }
-
         return userRepository.existsByName(userName);
     }
 
     /**
      * Check if user exists.
      * 
+     * Password must be encoded befor.
+     * 
      * @param userName Name.
-     * @param password Password.
+     * @param passwordEncoded Password.
      * @return True if user exists.
      */
-    public boolean existsByNameAndPassword(String userName, String password) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+    public boolean existsByNameAndPassword(String userName, String passwordEncoded) {
 
         if (userName == null) {
             throw new TkNullArgumentException("userName");
         }
-        if (password == null) {
+        if (passwordEncoded == null) {
             throw new TkNullArgumentException("password");
         }
-
-        return userRepository.existsByNameAndPassword(userName, password);
+        return userRepository.existsByNameAndPassword(userName, passwordEncoded);
     }
 
     /**
@@ -132,8 +122,6 @@ public class UserService {
      * @return DTO if found, empty DTO otherwise.
      */
     public UserResponseDto findUserByName(String userName) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         if (userName == null) {
             throw new TkNullArgumentException("userName");
@@ -148,7 +136,6 @@ public class UserService {
             dto.setImage(resourceService.getAvatarImageUrl(user.getId()));
         }
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return dto;
     }
 
@@ -171,18 +158,12 @@ public class UserService {
             throw new TkNullArgumentException("newPasswordRequest");
         }
 
-        String userName = userDetails.getUsername();
-        if (userName == null) {
-            throw new TkNullArgumentException("userDetails.getUsername()");
-        }
-
+        String userName = userDetails.getUsername(); // UserDetails.getUsername() cannot return
+                                                     // null.
         UserEntity user = userRepository.findOneByNameRaw(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, true));
 
         user.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
-
-        // Save new entity.
-        userRepository.save(user);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
@@ -215,10 +196,7 @@ public class UserService {
         user.setPhone(updateRequest.getPhone());
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return new UpdateUserResponseDto(
-                updateRequest.getFirstName(),
-                updateRequest.getLastName(),
-                updateRequest.getPhone());
+        return UserMapper.toDto(updateRequest);
     }
 
     /**
@@ -229,7 +207,6 @@ public class UserService {
      */
     public String saveAvatarFile(final MultipartFile image) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
         return resourceService.saveAvatarFile(image);
     }
 
@@ -246,8 +223,6 @@ public class UserService {
     public void updateAvatarDb(String userName,
             String fileName, long fileSize, String contentType) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         UserEntity user = userRepository.findByName(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
@@ -255,7 +230,7 @@ public class UserService {
 
         // Planning to delete old avatar image.
         String oldFileName = avatar != null ? avatar.getName() : "";
-        if (!oldFileName.isBlank()) {
+        if (oldFileName != null && !oldFileName.isBlank()) {
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronization() {
                         @Override
@@ -274,8 +249,6 @@ public class UserService {
 
         avatar.setUser(user);
         user.setAvatar(avatar);
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -284,7 +257,7 @@ public class UserService {
      * @param fileName Filename.
      */
     public void deleteAvatarFile(final String fileName) {
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
+
         resourceService.deleteAvatarImageFile(fileName);
     }
 
@@ -295,8 +268,6 @@ public class UserService {
      * @return Image resource.
      */
     public ResponseEntity<Resource> getAvatar(final long userId) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new TkUserNotFoundException(String.valueOf(userId), false));
@@ -318,10 +289,8 @@ public class UserService {
         Resource resource = new PathResource(filePath);
         MediaType mediaType = MediaType.parseMediaType(user.getAvatar().getMediatype());
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(resource);
-
     }
 }

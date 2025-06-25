@@ -3,7 +3,6 @@ package ru.spb.tksoft.ads.service;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,13 +69,10 @@ public class AdsService {
      */
     public AdsArrayResponseDto getAllAds() {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         Set<AdResponseDto> responseSet = adRepository.findAll().stream()
                 .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
                 .collect(Collectors.toSet());
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return new AdsArrayResponseDto(responseSet.size(), responseSet);
     }
 
@@ -88,13 +84,10 @@ public class AdsService {
      */
     public AdsArrayResponseDto getAdsMe(final UserDetails me) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         Set<AdResponseDto> responseSet = adRepository.findByUserName(me.getUsername()).stream()
                 .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
                 .collect(Collectors.toSet());
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return new AdsArrayResponseDto(responseSet.size(), responseSet);
     }
 
@@ -105,8 +98,6 @@ public class AdsService {
      * @return Image resource.
      */
     public ResponseEntity<Resource> getAdImage(final long id) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         ImageEntity image = imageRepository.findById(id)
                 .orElseThrow(() -> new TkMediaNotFoundException(String.valueOf(id)));
@@ -124,7 +115,6 @@ public class AdsService {
         Resource resource = new PathResource(filePath);
         MediaType mediaType = MediaType.parseMediaType(image.getMediatype());
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(resource);
@@ -140,8 +130,6 @@ public class AdsService {
     public AdResponseDto createAdd(final UserDetails userDetails,
             final CreateOrUpdateAdRequestDto createAddDto) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         final String userName = userDetails.getUsername();
         final UserEntity user = userRepository.findOneByNameRaw(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
@@ -149,7 +137,6 @@ public class AdsService {
         final AdEntity newAd = AdMapper.toEntity(createAddDto);
         newAd.setUser(user);
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return AdMapper.toDto(resourceService, adRepository.save(newAd));
     }
 
@@ -161,7 +148,6 @@ public class AdsService {
      */
     public String saveImageFile(final MultipartFile image) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.SHORT_RUN);
         return resourceService.saveAdImageFile(image);
     }
 
@@ -189,8 +175,6 @@ public class AdsService {
     @Transactional
     public void updateAdDb(final UserDetails userDetails,
             long adId, final String fileName, long fileSize, final String contentType) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
 
@@ -220,7 +204,6 @@ public class AdsService {
         image.setMediatype(contentType);
 
         ad.addImage(image);
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -231,14 +214,10 @@ public class AdsService {
      */
     public AdExtendedResponseDto getAdExtended(long adId) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         AdEntity entity = adRepository.findById(adId)
                 .orElseThrow(() -> new TkAdNotFoundException(adId));
 
-        AdExtendedResponseDto dto = AdMapper.toExtendedDto(resourceService, entity);
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return dto;
+        return AdMapper.toExtendedDto(resourceService, entity);
     }
 
     /**
@@ -253,15 +232,12 @@ public class AdsService {
     public AdResponseDto updateAd(UserDetails userDetails, long adId,
             CreateOrUpdateAdRequestDto requestDto) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
 
         ad.setTitle(requestDto.getTitle());
         ad.setPrice(BigDecimal.valueOf(requestDto.getPrice()));
         ad.setDescription(requestDto.getDescription());
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return AdMapper.toDto(resourceService, ad);
     }
 
@@ -273,8 +249,6 @@ public class AdsService {
      */
     @Transactional
     public void deleteAd(UserDetails userDetails, long adId) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
 
@@ -296,7 +270,6 @@ public class AdsService {
         }
 
         adRepository.delete(ad);
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -310,8 +283,6 @@ public class AdsService {
     public CommentResponseDto addComment(long adId,
             final CreateOrUpdateCommentRequestDto requestDto) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         AdEntity ad = adRepository.findById(adId)
                 .orElseThrow(() -> new TkAdNotFoundException(adId));
 
@@ -320,9 +291,7 @@ public class AdsService {
         comment.setUser(ad.getUser());
         CommentEntity savedComment = commentRepository.save(comment);
 
-        CommentResponseDto dto = CommentMapper.toDto(resourceService, savedComment);
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return dto;
+        return CommentMapper.toDto(resourceService, savedComment);
     }
 
     /**
@@ -333,13 +302,10 @@ public class AdsService {
      */
     public CommentsArrayResponseDto getComments(long adId) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         Set<CommentResponseDto> responseSet = commentRepository.findAllByAd_Id(adId).stream()
                 .map(commentEntity -> CommentMapper.toDto(resourceService, commentEntity))
                 .collect(Collectors.toSet());
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return new CommentsArrayResponseDto(responseSet.size(), responseSet);
     }
 
@@ -361,13 +327,8 @@ public class AdsService {
             long adId, long commentId,
             final CreateOrUpdateCommentRequestDto requestDto) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         CommentEntity entity = getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
-
         entity.setText(requestDto.getText());
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return CommentMapper.toDto(resourceService, entity);
     }
 
@@ -375,11 +336,7 @@ public class AdsService {
     public void deleteComment(final UserDetails userDetails,
             long adId, long commentId) {
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         CommentEntity entity = getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
-
         commentRepository.delete(entity);
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }

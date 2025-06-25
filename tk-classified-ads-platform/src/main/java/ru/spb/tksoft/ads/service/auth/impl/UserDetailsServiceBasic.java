@@ -28,11 +28,7 @@ public class UserDetailsServiceBasic implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(UserDetailsServiceBasic.class);
 
-    @NotNull
     private final UserRepository userRepository;
-
-    @NotNull
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * {@inheritDoc}
