@@ -74,7 +74,7 @@ public class AdsServiceCached {
      * @param me UserDetails implementation.
      * @return DTO.
      */
-    //@Cacheable(value = "getAdsMe", key = "#me.username")
+    @Cacheable(value = "getAdsMe", key = "#me.username")
     public AdsArrayResponseDto getAdsMe(final UserDetails me) {
 
         Set<AdResponseDto> responseSet = adRepository.findByUserName(me.getUsername()).stream()
@@ -90,7 +90,7 @@ public class AdsServiceCached {
      * @param id Ad ID.
      * @return Image resource.
      */
-    //@Cacheable(value = "getAdImage", key = "#id")
+    @Cacheable(value = "getAdImage", key = "#id")
     public ResponseEntity<Resource> getAdImage(final Long id) {
 
         ImageEntity image = imageRepository.findById(id)
@@ -121,7 +121,7 @@ public class AdsServiceCached {
      * @param adId Ad id.
      * @return Response DTO.
      */
-    //@Cacheable(value = "getOwnAdEntity", key = "#userName + '_' + #adId")
+    @Cacheable(value = "getOwnAdEntity", key = "#userName + '_' + #adId")
     public AdEntity getOwnAdEntity(final String userName, final Long adId) {
 
         AdEntity ad = adRepository.findById(adId)
@@ -140,7 +140,7 @@ public class AdsServiceCached {
      * @param adId Ad id.
      * @return Response DTO.
      */
-    //@Cacheable(value = "getAdExtended", key = "#adId")
+    @Cacheable(value = "getAdExtended", key = "#adId")
     public AdExtendedResponseDto getAdExtended(Long adId) {
 
         AdEntity entity = adRepository.findById(adId)
@@ -155,7 +155,7 @@ public class AdsServiceCached {
      * @param adId Ad id.
      * @return Response DTO.
      */
-    //@Cacheable(value = "getComments", key = "#adId")
+    @Cacheable(value = "getComments", key = "#adId")
     public CommentsArrayResponseDto getComments(Long adId) {
 
         Set<CommentResponseDto> responseSet = commentRepository.findAllByAd_Id(adId).stream()
@@ -173,7 +173,7 @@ public class AdsServiceCached {
      * @param commentId Comment id.
      * @return Response DTO.
      */
-    //@Cacheable(value = "getOwnCommentEntity", key = "#userName + '_' + #adId + '_' + #commentId")
+    @Cacheable(value = "getOwnCommentEntity", key = "#userName + '_' + #adId + '_' + #commentId")
     public CommentEntity getOwnCommentEntity(final String userName,
             final long adId, final long commentId) {
 

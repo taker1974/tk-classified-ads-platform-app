@@ -60,5 +60,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * @return Single UserEntity by ID.
      */
     @EntityGraph(attributePaths = {"avatar"})
-    Optional<UserEntity> findById(long id);
+    Optional<UserEntity> findById(Long id);
 }

@@ -51,7 +51,8 @@ public class AuthServiceBasic implements AuthService {
 
         final String userName = registerRequest.getUsername();
         try {
-            if (userServiceCached.existsByName(userName) != Boolean.TRUE) {
+            UserEntity user = userServiceCached.findUserByName(userName);
+            if (user != null) {
                 throw new TkUserExistsException(userName);
             }
 
@@ -77,23 +78,22 @@ public class AuthServiceBasic implements AuthService {
      * logged in via basic auth. See loadUserByUsername()
      * 
      * @param userName User name.
-     * @param password Password.
+     * @param passwordRaw Raw password.
      */
     @Override
-    public boolean login(final String userName, final String password) {
+    public boolean login(final String userName, final String passwordRaw) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         try {
-            if (userServiceCached.existsByNameAndPassword(
-                    userName, passwordEncoder.encode(password)) != Boolean.TRUE) {
+            UserEntity user = userServiceCached.findUserByName(userName);
+            if (!passwordEncoder.matches(passwordRaw, user.getPassword())) {
 
                 // We don't want to explain the reason to the user, but log it.
                 LogEx.warn(log, LogEx.getThisMethodName(),
                         "User with given credentials not exists: %s", userName);
                 return false;
             }
-
         } catch (Exception ex) { // Unexpected exception only.
             LogEx.error(log, LogEx.getThisMethodName(), ex);
             return false;

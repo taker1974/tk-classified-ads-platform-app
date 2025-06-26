@@ -43,64 +43,42 @@ public class UserServiceCached {
     /** Clear caches. */
     public void clearCaches() {
 
-        clearCache("existsByName");
-        clearCache("existsByNameAndPassword");
         clearCache("findUserByName");
         clearCache("getAvatar");
     }
 
-    /**
-     * Check if user exists.
-     * 
-     * @param userName Name.
-     * @return True if user exists.
-     */
-    //@Cacheable(value = "existsByName", key = "#userName")
-    public Boolean existsByName(String userName) {
+    private UserEntity getUserEntity(final String userName) {
 
         if (userName == null) {
             throw new TkNullArgumentException("userName");
         }
-        return userRepository.existsByName(userName);
-    }
 
-    /**
-     * Check if user exists.
-     * 
-     * Password must be encoded befor.
-     * 
-     * @param userName Name.
-     * @param passwordEncoded Password.
-     * @return True if user exists.
-     */
-    //@Cacheable(value = "existsByNameAndPassword", key = "#userName + '_' + #passwordEncoded")
-    public Boolean existsByNameAndPassword(String userName, String passwordEncoded) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-        if (passwordEncoded == null) {
-            throw new TkNullArgumentException("password");
-        }
-        return userRepository.existsByNameAndPassword(userName, passwordEncoded);
+        return userRepository.findByName(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
     }
 
     /**
      * Find user by name.
      * 
      * @param userName Name.
-     * @return DTO if found, empty DTO otherwise.
+     * @return UserEntity if found.
      */
-    //@Cacheable(value = "findUserByName", key = "#userName")
-    public UserResponseDto findUserByName(String userName) {
+    @Cacheable(value = "findUserByName", key = "#userName")
+    public UserEntity findUserByName(final String userName) {
 
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
+        return getUserEntity(userName);
+    }
 
-        UserEntity user = userRepository.findByName(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
+    /**
+     * Get user by name.
+     * 
+     * @param userName Name.
+     * @return Response DTO.
+     */
+    @Cacheable(value = "getUserByName", key = "#userName")
+    public UserResponseDto getUserByName(final String userName) {
 
+        UserEntity user = getUserEntity(userName);
         UserResponseDto dto = UserMapper.toDto(user);
 
         if (user.getAvatar() != null) {
@@ -116,7 +94,7 @@ public class UserServiceCached {
      * @param userId User ID.
      * @return Image resource.
      */
-    //@Cacheable(value = "getAvatar", key = "#userId")
+    @Cacheable(value = "getAvatar", key = "#userId")
     public ResponseEntity<Resource> getAvatar(final long userId) {
 
         UserEntity user = userRepository.findById(userId)

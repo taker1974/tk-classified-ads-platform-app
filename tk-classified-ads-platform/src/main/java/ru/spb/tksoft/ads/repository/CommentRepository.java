@@ -37,5 +37,5 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
             JOIN FETCH a.user u
             WHERE c.ad.id = :adId AND c.id = :commentId
                     """)
-    Optional<CommentEntity> findByAdAndCommentWithEagerFetch(long adId, long commentId);
+    Optional<CommentEntity> findByAdAndCommentWithEagerFetch(Long adId, Long commentId);
 }

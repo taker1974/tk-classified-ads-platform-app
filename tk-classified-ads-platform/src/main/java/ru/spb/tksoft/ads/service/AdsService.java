@@ -213,13 +213,32 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        AdEntity ad = adRepository.findById(adId)
-                .orElseThrow(() -> new TkAdNotFoundException(adId));
+        AdEntity ad;
+        try {
+            ad = adRepository.getReferenceById(adId);
+        } catch (Exception ex) {
+            throw new TkAdNotFoundException(adId);
+        }
 
-        CommentEntity comment = new CommentEntity(requestDto.getText());
+        long userId = ad.getUser().getId();
+        UserEntity user;
+        try {
+            user = userRepository.getReferenceById(userId);
+        } catch (Exception ex) {
+            throw new TkUserNotFoundException(String.format("user [%s]", userId), false);
+        }
+
+        var comment = new CommentEntity(requestDto.getText());
         comment.setAd(ad);
-        comment.setUser(ad.getUser());
-        CommentEntity savedComment = commentRepository.save(comment);
+        comment.setUser(user);
+
+        CommentEntity savedComment;
+        try {
+            savedComment = commentRepository.save(comment);
+        } catch (Exception ex) {
+            LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, ex);
+            throw ex;
+        }
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return CommentMapper.toDto(resourceService, savedComment);

@@ -38,15 +38,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "\"ad\"")
 @NamedEntityGraph(
-        name = "ad-with-user-and-images",
+        name = "Ad.withUserAvatar",
         attributeNodes = {
-                @NamedAttributeNode(value = "user"),
-                @NamedAttributeNode(value = "images")
+                @NamedAttributeNode("user"),
+                @NamedAttributeNode("images"),
+                @NamedAttributeNode(value = "user", subgraph = "user.avatar")
         },
         subgraphs = {
                 @NamedSubgraph(
-                        name = "user-with-avatar",
-                        attributeNodes = @NamedAttributeNode(value = "avatar"))
+                        name = "user.avatar",
+                        attributeNodes = @NamedAttributeNode("avatar"))
         })
 public class AdEntity {
 

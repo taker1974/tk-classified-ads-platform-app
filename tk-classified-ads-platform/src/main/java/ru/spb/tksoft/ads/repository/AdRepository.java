@@ -3,7 +3,6 @@ package ru.spb.tksoft.ads.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -38,6 +37,8 @@ public interface AdRepository extends JpaRepository<AdEntity, Long> {
     /**
      * @return Single AdEntity by ID.
      */
-    @EntityGraph(value = "ad-with-user-and-images", type = EntityGraphType.LOAD)
-    Optional<AdEntity> findById(long id);
+    @EntityGraph(
+            value = "Ad.withUserAvatar",
+            type = EntityGraph.EntityGraphType.FETCH)
+    Optional<AdEntity> findById(Long id);
 }

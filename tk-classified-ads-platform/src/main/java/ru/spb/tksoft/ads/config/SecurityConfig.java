@@ -39,9 +39,9 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/ads/**",
                                 "/register",
                                 "/login",
+                                "/ads/**",
                                 "/users/avatar/**",
                                 "/ads/image/**",
                                 "/v3/api-docs/**",
