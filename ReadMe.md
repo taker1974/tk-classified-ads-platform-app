@@ -6,6 +6,10 @@
 Поиск, CRUD.  
 Java, Spring Boot.
 
+## Применяемые технологии
+
+Java - openjdk 24
+
 ## Подготовка к развёртыванию на узле
 
 **Требуемое ПО**:
@@ -52,7 +56,7 @@ $java -jar target/tk-classified-ads-platform-<ваша.версия.ПО>.jar
 
 В браузере:
 
-http://localhost:<ваш-порт>/swagger-ui/index.html
+[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 ## Документация
 
