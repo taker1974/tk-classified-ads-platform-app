@@ -3,6 +3,7 @@ package ru.spb.tksoft.ads.repository;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -41,21 +42,23 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      */
     @Query(nativeQuery = true,
             value = "SELECT u.* FROM \"user\" u WHERE u.name = :name LIMIT 1")
-    Optional<UserEntity> findOneByName(String name);
+    Optional<UserEntity> findOneByNameRaw(String name);
 
     /**
-     * UserEntity by user's email and password.
-     * 
-     * @return UserEntity or empty.
+     * @return Page of UserEntity (for testing/management purposes).
      */
-    @Query(nativeQuery = true,
-            value = "SELECT u.* FROM \"user\" u WHERE u.name = :name AND u.password = :password LIMIT 1")
-    Optional<UserEntity> findOneByNameAndPassword(String name, String password);
-
-    /**
-     * @return Set of all UserEntity (for testing/management purposes).
-     */
-    @Query(nativeQuery = true,
-            value = "SELECT * FROM \"user\" u")
+    @EntityGraph(attributePaths = {"avatar"})
     Page<UserEntity> findAll(Pageable pageable);
+
+    /**
+     * @return Single UserEntity by name.
+     */
+    @EntityGraph(attributePaths = {"avatar"})
+    Optional<UserEntity> findByName(String name);
+
+    /**
+     * @return Single UserEntity by ID.
+     */
+    @EntityGraph(attributePaths = {"avatar"})
+    Optional<UserEntity> findById(long id);
 }

@@ -9,7 +9,9 @@ import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.service.AdsService;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,9 +48,9 @@ public class AdsController {
     @Operation(summary = "Получение всех объявлений")
     @GetMapping()
     @NotNull
-    public AdsArrayResponseDto getAllAds(@AuthenticationPrincipal UserDetails userDetails) {
+    public AdsArrayResponseDto getAllAds() {
 
-        return adsService.getAllAds(userDetails);
+        return adsService.getAllAds();
     }
 
     /**
@@ -66,6 +68,21 @@ public class AdsController {
     }
 
     /**
+     * Get ad image by link.
+     * 
+     * Returns 200/OK, 404/Not Found.
+     * 
+     * @param adId - User ID.
+     * @return Image resource.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/image/{adId}")
+    public ResponseEntity<Resource> getAdImage(@PathVariable(required = true) long adId) {
+
+        return adsService.getAdImage(adId);
+    }
+
+    /**
      * Create new ad.
      * 
      * @return 201/CREATED, 401/Unauthorized.
@@ -75,10 +92,20 @@ public class AdsController {
     @PostMapping(consumes = "multipart/form-data")
     @NotNull
     public AdResponseDto addAd(@AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestPart("properties") CreateOrUpdateAdRequestDto createAddDto,
-            @RequestPart("image") MultipartFile image) {
+            @NotNull @Valid @RequestPart("properties") CreateOrUpdateAdRequestDto createAddDto,
+            @NotNull @RequestPart("image") MultipartFile image) {
 
-        return adsService.addAd(userDetails, createAddDto, image);
+        // Plan:
+        // - create new ad in db; if ok:
+        // - update ad image (exactly the same as UserController.updateUserImage).
+
+        AdResponseDto dto = adsService.createAdd(userDetails, createAddDto);
+        final String fileName = adsService.saveImageFile(image);
+
+        adsService.updateAdImage(userDetails, dto.getId(),
+                fileName, image.getSize(), image.getContentType());
+
+        return dto;
     }
 
     /**
@@ -88,12 +115,11 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Получение комментариев объявления")
-    @GetMapping("/{id}/comments")
+    @GetMapping("/{adId}/comments")
     @NotNull
-    public CommentsArrayResponseDto getComments(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id) {
+    public CommentsArrayResponseDto getComments(@PathVariable(required = true) long adId) {
 
-        return adsService.getComments(userDetails, id);
+        return adsService.getComments(adId);
     }
 
     /**
@@ -103,13 +129,12 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Добавление комментария к объявлению")
-    @PostMapping("/{id}/comments")
+    @PostMapping("/{adId}/comments")
     @NotNull
-    public CommentResponseDto addComment(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id,
-            @Valid @RequestBody CreateOrUpdateCommentRequestDto createCommentDto) {
+    public CommentResponseDto addComment(@PathVariable(required = true) long adId,
+            @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto createCommentDto) {
 
-        return adsService.addComment(userDetails, id, createCommentDto);
+        return adsService.addComment(adId, createCommentDto);
     }
 
     /**
@@ -119,12 +144,11 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Получение информации об объявлении")
-    @GetMapping("/{id}")
+    @GetMapping("/{adId}")
     @NotNull
-    public AdExtendedResponseDto getAds(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id) {
+    public AdExtendedResponseDto getAds(@PathVariable(required = true) long adId) {
 
-        return adsService.getAds(userDetails, id);
+        return adsService.getAdExtended(adId);
     }
 
     /**
@@ -134,13 +158,13 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление информации об объявлении")
-    @PatchMapping("/{id}")
+    @PatchMapping("/{adId}")
     @NotNull
     public AdResponseDto updateAds(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id,
-            @Valid @RequestBody CreateOrUpdateAdRequestDto updateAdsDto) {
+            @PathVariable(required = true) long adId,
+            @NotNull @Valid @RequestBody CreateOrUpdateAdRequestDto updateAdsDto) {
 
-        return adsService.updateAds(userDetails, id, updateAdsDto);
+        return adsService.updateAdInfo(userDetails, adId, updateAdsDto);
     }
 
     /**
@@ -150,11 +174,11 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Обновление информации об объявлении")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{adId}")
     public void removeAd(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id) {
+            @PathVariable(required = true) long adId) {
 
-        adsService.removeAd(userDetails, id);
+        adsService.deleteAd(userDetails, adId);
     }
 
     /**
@@ -169,7 +193,7 @@ public class AdsController {
     public CommentResponseDto updateComment(@AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(required = true) long adId,
             @PathVariable(required = true) long commentId,
-            @Valid @RequestBody CreateOrUpdateCommentRequestDto updateCommentDto) {
+            @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto updateCommentDto) {
 
         return adsService.updateComment(userDetails, adId, commentId, updateCommentDto);
     }
@@ -196,11 +220,13 @@ public class AdsController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление картинки объявления")
-    @PatchMapping(value = "/{id}/image", consumes = "multipart/form-data")
+    @PatchMapping(value = "/{adId}/image", consumes = "multipart/form-data")
     public void updateImage(@AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(required = true) long id,
-            @RequestPart("image") MultipartFile image) {
+            @PathVariable(required = true) long adId,
+            @NotNull @RequestPart("image") MultipartFile image) {
 
-        adsService.updateImage(userDetails, id, image);
+        final String fileName = adsService.saveImageFile(image);
+        adsService.updateAdImage(userDetails, adId,
+                fileName, image.getSize(), image.getContentType());
     }
 }

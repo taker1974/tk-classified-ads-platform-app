@@ -1,19 +1,22 @@
 package ru.spb.tksoft.ads.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.spb.tksoft.ads.enumeration.UserRole;
@@ -25,7 +28,6 @@ import ru.spb.tksoft.ads.enumeration.UserRole;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "\"user\"")
@@ -37,13 +39,13 @@ public class UserEntity {
     private Long id;
 
     /** Name as login as email. */
-    @Column(name = "name", nullable = false, length = 32, unique = true)
+    @Column(nullable = false, length = 32, unique = true)
     @Size(min = 4, max = 32)
     @NotBlank
     private String name;
 
     /** Password. Password can/will be encoded in bcrypt so it's length can be larger than 16. */
-    @Column(name = "password", nullable = false, length = 64)
+    @Column(nullable = false, length = 64)
     @Size(min = 8, max = 64)
     @NotBlank
     private String password;
@@ -61,16 +63,23 @@ public class UserEntity {
     private String lastName;
 
     /** Phone number. */
-    @Column(name = "phone", nullable = false, length = 32)
+    @Column(nullable = false, length = 32)
     @Pattern(regexp = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}")
     @Size(min = 11, max = 32)
     @NotBlank
     private String phone;
 
+    /** User's role. */
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     @NotNull
     private UserRole role;
+
+    /** Avatar. */
+    @JsonManagedReference("user-avatar")
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    private AvatarEntity avatar;
 
     /** Full constructor. */
     public UserEntity(long id, String name, String password,

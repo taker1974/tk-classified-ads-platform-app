@@ -1,8 +1,8 @@
 package ru.spb.tksoft.ads.exception;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.validation.constraints.NotBlank;
 import ru.spb.tksoft.utils.log.LogEx;
 
 /**
@@ -25,9 +25,9 @@ public class TkUserExistsException extends RuntimeException {
      * 
      * @param userName User name.
      */
-    public TkUserExistsException(@NotBlank final String userName) {
+    public TkUserExistsException(String userName) {
 
-        super(MESSAGE + ": " + userName);
-        LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, CODE, this);
+        super(MESSAGE + ": " + (Objects.isNull(userName) ? "null" : userName));
+        LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, CODE);
     }
 }

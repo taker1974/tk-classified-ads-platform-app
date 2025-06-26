@@ -3,6 +3,10 @@
         {
             "name": "spring.datasource.ads",
             "description": "Ads DB properties"
+        },
+        {
+            "name": "image",
+            "description": "Image properties"
         }
     ]
 }

@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonPropertyOrder({"count", "items"})
+@JsonPropertyOrder({"count", "results"})
 public class CommentsArrayResponseDto {
 
     /** Items count. */
     private int count;
 
     /** Items array. */
-    private Set<CommentResponseDto> items;
+    private Set<CommentResponseDto> results;
 }

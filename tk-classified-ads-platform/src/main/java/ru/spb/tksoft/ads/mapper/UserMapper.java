@@ -1,8 +1,9 @@
 package ru.spb.tksoft.ads.mapper;
 
-import javax.annotation.concurrent.ThreadSafe;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
+import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
 
@@ -13,7 +14,6 @@ import ru.spb.tksoft.ads.entity.UserEntity;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-@ThreadSafe
 public final class UserMapper {
 
     private UserMapper() {}
@@ -25,7 +25,7 @@ public final class UserMapper {
      * @return user DTO.
      */
     @NotNull
-    public static UserResponseDto toDto(@NotNull final UserEntity entity) {
+    public static UserResponseDto toDto(final UserEntity entity) {
 
         return new UserResponseDto(
                 entity.getId(),
@@ -34,7 +34,22 @@ public final class UserMapper {
                 entity.getLastName(),
                 entity.getPhone(),
                 entity.getRole(),
-                "link-to-avatar");
+                entity.getAvatar() == null ? "no avatar" : entity.getAvatar().getName());
+    }
+
+    /**
+     * Entity to DTO.
+     * 
+     * @param updateRequest Update request DTO.
+     * @return Response DTO.
+     */
+    @NotNull
+    public static UpdateUserResponseDto toDto(final UpdateUserRequestDto updateRequest) {
+
+        return new UpdateUserResponseDto(
+                updateRequest.getFirstName(),
+                updateRequest.getLastName(),
+                updateRequest.getPhone());
     }
 
     /**
@@ -43,7 +58,7 @@ public final class UserMapper {
      * @param dto New user DTO.
      * @return User entity.
      */
-    public static UserEntity toEntity(@NotNull final RegisterRequestDto dto) {
+    public static UserEntity toEntity(final RegisterRequestDto dto) {
 
         return new UserEntity(dto.getUsername(), dto.getPassword(),
                 dto.getFirstName(), dto.getLastName(),

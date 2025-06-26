@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +27,7 @@ public class UserDetailsServiceBasic implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(UserDetailsServiceBasic.class);
 
-    @NotNull
     private final UserRepository userRepository;
-
-    @NotNull
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * {@inheritDoc}
@@ -45,7 +40,7 @@ public class UserDetailsServiceBasic implements UserDetailsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        UserEntity user = userRepository.findOneByName(userName)
+        UserEntity user = userRepository.findOneByNameRaw(userName)
             .orElseThrow(()->new TkUserNotFoundException(userName, false));
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);

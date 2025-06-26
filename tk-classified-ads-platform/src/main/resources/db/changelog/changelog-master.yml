@@ -3,3 +3,11 @@ databaseChangeLog:
           file: "db/changelog/v0.0.1/create-tables-user.sql"
     - include:
            file: "db/changelog/v0.0.1/insert-test-data-user.sql"
+    - include:
+           file: "db/changelog/v0.0.1/create-tables-ad.sql"
+    - include:
+           file: "db/changelog/v0.0.1/create-tables-image.sql"
+    - include:
+           file: "db/changelog/v0.0.1/create-tables-avatar.sql"
+    - include:
+           file: "db/changelog/v0.0.1/create-tables-comment.sql"
