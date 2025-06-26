@@ -2,10 +2,14 @@ package ru.spb.tksoft.ads.mapper;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
 import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
+import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
+import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
+import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
@@ -80,6 +84,34 @@ public final class AdMapper {
                 e.getId(), e.getTitle(), e.getPrice().intValue(), e.getDescription(),
                 image,
                 u.getFirstName(), u.getLastName(), u.getName(), u.getPhone());
+    }
+
+    /**
+     * Comments entity to DTO.
+     * 
+     * @param size Amount of comments.
+     * @param responseSet Comments set.
+     * @return Response array DTO.
+     */
+    @NotNull
+    public static CommentsArrayResponseDto toCommentsDto(int size,
+            final Set<CommentResponseDto> responseSet) {
+
+        return new CommentsArrayResponseDto(responseSet.size(), responseSet);
+    }
+
+    /**
+     * Owned ads entity to DTO.
+     * 
+     * @param size Amount of comments.
+     * @param responseSet Comments set.
+     * @return Response array DTO.
+     */
+    @NotNull
+    public static AdsArrayResponseDto toAdsDto(int size,
+            final Set<AdResponseDto> responseSet) {
+
+        return new AdsArrayResponseDto(responseSet.size(), responseSet);
     }
 
     /**

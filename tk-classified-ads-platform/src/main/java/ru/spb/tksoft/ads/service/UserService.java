@@ -1,15 +1,10 @@
 package ru.spb.tksoft.ads.service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -80,69 +75,12 @@ public class UserService {
     }
 
     /**
-     * Check if user exists.
-     * 
-     * @param userName Name.
-     * @return True if user exists.
-     */
-    public boolean existsByName(String userName) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-        return userRepository.existsByName(userName);
-    }
-
-    /**
-     * Check if user exists.
-     * 
-     * Password must be encoded befor.
-     * 
-     * @param userName Name.
-     * @param passwordEncoded Password.
-     * @return True if user exists.
-     */
-    public boolean existsByNameAndPassword(String userName, String passwordEncoded) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-        if (passwordEncoded == null) {
-            throw new TkNullArgumentException("password");
-        }
-        return userRepository.existsByNameAndPassword(userName, passwordEncoded);
-    }
-
-    /**
-     * Find user by name.
-     * 
-     * @param userName Name.
-     * @return DTO if found, empty DTO otherwise.
-     */
-    public UserResponseDto findUserByName(String userName) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-
-        UserEntity user = userRepository.findByName(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
-
-        UserResponseDto dto = UserMapper.toDto(user);
-
-        if (user.getAvatar() != null) {
-            dto.setImage(resourceService.getAvatarImageUrl(user.getId()));
-        }
-
-        return dto;
-    }
-
-    /**
      * Set new password for user.
      *
      * @param userDetails User details implementation.
      * @param newPasswordRequest DTO.
      */
+    @CacheEvict(value = "existsByNameAndPassword", allEntries = true)
     @Transactional
     public void setPassword(final UserDetails userDetails,
             final NewPasswordRequestDto newPasswordRequest) {
@@ -173,6 +111,7 @@ public class UserService {
      * @param updateRequest Request DTO.
      * @return Response DTO.
      */
+    @CacheEvict(value = "findUserByName", key = "#userName")
     @Transactional
     public UpdateUserResponseDto updateUser(String userName,
             final UpdateUserRequestDto updateRequest) {
@@ -217,6 +156,7 @@ public class UserService {
      * @param contentType File type.
      * @throws TkNullArgumentException If any of arguments is null.
      */
+    @CacheEvict(value = "findUserByName", key = "#userName")
     @Transactional
     public void updateAvatarDb(String userName,
             String fileName, long fileSize, String contentType) {
@@ -257,38 +197,5 @@ public class UserService {
     public void deleteAvatarFile(final String fileName) {
 
         resourceService.deleteAvatarImageFile(fileName);
-    }
-
-    /**
-     * Get avatar by user id.
-     * 
-     * @param userId User ID.
-     * @return Image resource.
-     */
-    public ResponseEntity<Resource> getAvatar(final long userId) {
-
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new TkUserNotFoundException(String.valueOf(userId), false));
-
-        if (user.getAvatar() == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        String filename = user.getAvatar().getName();
-        if (filename.isBlank()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Path filePath = resourceService.getAvatarImagePath(filename);
-        if (!Files.exists(filePath)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Resource resource = new PathResource(filePath);
-        MediaType mediaType = MediaType.parseMediaType(user.getAvatar().getMediatype());
-
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .body(resource);
     }
 }

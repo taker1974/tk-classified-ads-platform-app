@@ -9,6 +9,7 @@ import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.service.AdsService;
+import ru.spb.tksoft.ads.service.AdsServiceCached;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,9 @@ public class AdsController {
     @NotNull
     private final AdsService adsService;
 
+    @NotNull
+    private final AdsServiceCached adsServiceCached;
+
     /**
      * Get all ads.
      * 
@@ -64,7 +68,7 @@ public class AdsController {
     @NotNull
     public AdsArrayResponseDto getAdsMe(@AuthenticationPrincipal UserDetails userDetails) {
 
-        return adsService.getAdsMe(userDetails);
+        return adsServiceCached.getAdsMe(userDetails);
     }
 
     /**
@@ -79,7 +83,7 @@ public class AdsController {
     @GetMapping("/image/{adId}")
     public ResponseEntity<Resource> getAdImage(@PathVariable(required = true) long adId) {
 
-        return adsService.getAdImage(adId);
+        return adsServiceCached.getAdImage(adId);
     }
 
     /**
@@ -119,7 +123,7 @@ public class AdsController {
     @NotNull
     public CommentsArrayResponseDto getComments(@PathVariable(required = true) long adId) {
 
-        return adsService.getComments(adId);
+        return adsServiceCached.getComments(Long.valueOf(adId));
     }
 
     /**
@@ -148,7 +152,7 @@ public class AdsController {
     @NotNull
     public AdExtendedResponseDto getAds(@PathVariable(required = true) long adId) {
 
-        return adsService.getAdExtended(adId);
+        return adsServiceCached.getAdExtended(adId);
     }
 
     /**

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOG_ROOT" value="${user.home}/log"/>
-    <property name="LOG_APP_NAME" value="tk-classified-ads-platform"/>
+    <property name="LOG_ROOT" value="${user.home}/log" />
+    <property name="LOG_APP_NAME" value="tk-classified-ads-platform" />
 
     <appender name="ASYNC_FILE_ERROR" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="FILE_ERROR"/>
+        <appender-ref ref="FILE_ERROR" />
     </appender>
 
     <appender name="FILE_ERROR" class="ch.qos.logback.core.FileAppender">
@@ -21,8 +21,21 @@
         </encoder>
     </appender>
 
-    <root level="ERROR">
-        <appender-ref ref="ASYNC_FILE_ERROR"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT_SHORT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="WARN">
+        <appender-ref ref="STDOUT_SHORT" />
+        <appender-ref ref="ASYNC_FILE_INFO" />
     </root>
 
 </configuration>

@@ -1,17 +1,11 @@
 package ru.spb.tksoft.ads.service;
 
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -21,26 +15,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateCommentRequestDto;
-import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
-import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.CommentEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkAdNotFoundException;
-import ru.spb.tksoft.ads.exception.TkAdNotOwnedException;
-import ru.spb.tksoft.ads.exception.TkCommentNotFoundException;
-import ru.spb.tksoft.ads.exception.TkCommentNotOwnedException;
-import ru.spb.tksoft.ads.exception.TkMediaNotFoundException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
 import ru.spb.tksoft.ads.mapper.CommentMapper;
 import ru.spb.tksoft.ads.repository.AdRepository;
 import ru.spb.tksoft.ads.repository.CommentRepository;
-import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
 
@@ -55,10 +42,11 @@ public class AdsService {
 
     private final Logger log = LoggerFactory.getLogger(AdsService.class);
 
+    private final AdsServiceCached adsServiceCached;
+
     private final AdRepository adRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-    private final ImageRepository imageRepository;
 
     private final ResourceService resourceService;
 
@@ -73,51 +61,7 @@ public class AdsService {
                 .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
                 .collect(Collectors.toSet());
 
-        return new AdsArrayResponseDto(responseSet.size(), responseSet);
-    }
-
-    /**
-     * Get a list of all my ads.
-     * 
-     * @param me UserDetails implementation.
-     * @return DTO.
-     */
-    public AdsArrayResponseDto getAdsMe(final UserDetails me) {
-
-        Set<AdResponseDto> responseSet = adRepository.findByUserName(me.getUsername()).stream()
-                .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
-                .collect(Collectors.toSet());
-
-        return new AdsArrayResponseDto(responseSet.size(), responseSet);
-    }
-
-    /**
-     * Get ad image by id.
-     * 
-     * @param id Ad ID.
-     * @return Image resource.
-     */
-    public ResponseEntity<Resource> getAdImage(final long id) {
-
-        ImageEntity image = imageRepository.findById(id)
-                .orElseThrow(() -> new TkMediaNotFoundException(String.valueOf(id)));
-
-        String filename = image.getName();
-        if (filename.isBlank()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Path filePath = resourceService.getAdImagePath(filename);
-        if (!Files.exists(filePath)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Resource resource = new PathResource(filePath);
-        MediaType mediaType = MediaType.parseMediaType(image.getMediatype());
-
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .body(resource);
+        return AdMapper.toAdsDto(responseSet.size(), responseSet);
     }
 
     /**
@@ -154,18 +98,6 @@ public class AdsService {
         return resourceService.saveAdImageFile(image);
     }
 
-    private AdEntity getOwnAdEntity(final String userName, final long adId) {
-
-        AdEntity ad = adRepository.findById(adId)
-                .orElseThrow(() -> new TkAdNotFoundException(adId));
-
-        if (!ad.getUser().getName().equals(userName)) {
-            throw new TkAdNotOwnedException(adId);
-        }
-
-        return ad;
-    }
-
     /**
      * Update ad image.
      * 
@@ -179,7 +111,7 @@ public class AdsService {
     public void updateAdImage(final UserDetails userDetails,
             long adId, final String fileName, long fileSize, final String contentType) {
 
-        AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
+        AdEntity ad = adsServiceCached.getOwnAdEntity(userDetails.getUsername(), adId);
 
         List<ImageEntity> images = ad.getImages();
         assert (images != null);
@@ -207,20 +139,7 @@ public class AdsService {
         image.setMediatype(contentType);
 
         ad.addImage(image);
-    }
-
-    /**
-     * Get info about ad with given id.
-     * 
-     * @param adId Ad id.
-     * @return Response DTO.
-     */
-    public AdExtendedResponseDto getAdExtended(long adId) {
-
-        AdEntity entity = adRepository.findById(adId)
-                .orElseThrow(() -> new TkAdNotFoundException(adId));
-
-        return AdMapper.toExtendedDto(resourceService, entity);
+        adsServiceCached.clearCaches();
     }
 
     /**
@@ -235,12 +154,13 @@ public class AdsService {
     public AdResponseDto updateAdInfo(UserDetails userDetails, long adId,
             CreateOrUpdateAdRequestDto requestDto) {
 
-        AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
+        AdEntity ad = adsServiceCached.getOwnAdEntity(userDetails.getUsername(), adId);
 
         ad.setTitle(requestDto.getTitle());
         ad.setPrice(BigDecimal.valueOf(requestDto.getPrice()));
         ad.setDescription(requestDto.getDescription());
 
+        adsServiceCached.clearCaches();
         return AdMapper.toDto(resourceService, ad);
     }
 
@@ -255,7 +175,7 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        AdEntity ad = getOwnAdEntity(userDetails.getUsername(), adId);
+        AdEntity ad = adsServiceCached.getOwnAdEntity(userDetails.getUsername(), adId);
 
         List<ImageEntity> images = ad.getImages();
         assert (images != null);
@@ -275,6 +195,8 @@ public class AdsService {
         }
 
         adRepository.delete(ad);
+        adsServiceCached.clearCaches();
+
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
@@ -304,34 +226,6 @@ public class AdsService {
     }
 
     /**
-     * Get all comments for ad with given id.
-     * 
-     * @param adId Ad id.
-     * @return Response DTO.
-     */
-    public CommentsArrayResponseDto getComments(long adId) {
-
-        Set<CommentResponseDto> responseSet = commentRepository.findAllByAd_Id(adId).stream()
-                .map(commentEntity -> CommentMapper.toDto(resourceService, commentEntity))
-                .collect(Collectors.toSet());
-
-        return new CommentsArrayResponseDto(responseSet.size(), responseSet);
-    }
-
-    private CommentEntity getOwnCommentEntity(final String userName,
-            final long adId, final long commentId) {
-
-        CommentEntity comment = commentRepository.findByAdAndCommentWithEagerFetch(adId, commentId)
-                .orElseThrow(() -> new TkCommentNotFoundException(adId));
-
-        if (!comment.getUser().getName().equals(userName)) {
-            throw new TkCommentNotOwnedException(commentId);
-        }
-
-        return comment;
-    }
-
-    /**
      * Update comment with given ad ID and comment ID.
      * 
      * @param userDetails UserDetails implementation.
@@ -345,8 +239,11 @@ public class AdsService {
             long adId, long commentId,
             final CreateOrUpdateCommentRequestDto requestDto) {
 
-        CommentEntity entity = getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
+        CommentEntity entity =
+                adsServiceCached.getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
         entity.setText(requestDto.getText());
+
+        adsServiceCached.clearCaches();
         return CommentMapper.toDto(resourceService, entity);
     }
 
@@ -363,9 +260,11 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        CommentEntity entity = getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
+        CommentEntity entity =
+                adsServiceCached.getOwnCommentEntity(userDetails.getUsername(), adId, commentId);
         commentRepository.delete(entity);
 
+        adsServiceCached.clearCaches();
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }

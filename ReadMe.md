@@ -12,7 +12,7 @@ Java - openjdk 21,
 Spring Boot 3.5.3, Lombok,  
 Mockito,  
 JavaDoc, Swagger,  
-Liquibase, PostgreSQL, Caffein,  
+Liquibase, PostgreSQL, Caffeine,  
 Spring Security.
 
 ## Подготовка к развёртыванию на узле
@@ -22,7 +22,7 @@ Spring Security.
 - PostgreSQL >= 15;
 - Java >= 21.
 
-Версии ПО могут быть другими. При разработке используется Postgres 15 и 17 и Java 21 и 24.  
+Версии ПО могут быть другими. При разработке используется Postgres 15 и 17 и Java 21.  
 Нет явных ограничений на использование других версий ПО.
 
 **Postgres**:

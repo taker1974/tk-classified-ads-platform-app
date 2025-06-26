@@ -11,6 +11,7 @@ import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkUserExistsException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.service.UserService;
+import ru.spb.tksoft.ads.service.UserServiceCached;
 import ru.spb.tksoft.ads.service.auth.AuthService;
 import ru.spb.tksoft.utils.log.LogEx;
 
@@ -25,7 +26,9 @@ public class AuthServiceBasic implements AuthService {
 
     private final Logger log = LoggerFactory.getLogger(AuthServiceBasic.class);
 
+    private final UserServiceCached userServiceCached;
     private final UserService userService;
+
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -48,7 +51,7 @@ public class AuthServiceBasic implements AuthService {
 
         final String userName = registerRequest.getUsername();
         try {
-            if (userService.existsByName(userName)) {
+            if (userServiceCached.existsByName(userName) != Boolean.TRUE) {
                 throw new TkUserExistsException(userName);
             }
 
@@ -82,8 +85,8 @@ public class AuthServiceBasic implements AuthService {
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         try {
-            if (userService.existsByNameAndPassword(
-                    userName, passwordEncoder.encode(password))) {
+            if (userServiceCached.existsByNameAndPassword(
+                    userName, passwordEncoder.encode(password)) != Boolean.TRUE) {
 
                 // We don't want to explain the reason to the user, but log it.
                 LogEx.warn(log, LogEx.getThisMethodName(),
