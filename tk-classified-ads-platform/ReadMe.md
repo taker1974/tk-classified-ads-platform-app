@@ -4,7 +4,15 @@
 
 Основной запускаемый проект доски объявлений с возможностью использования медиа, с комментированием.  
 Поиск, CRUD.  
-Java, Spring Boot.
+
+## Применяемые технологии
+
+Java - openjdk 21,  
+Spring Boot 3.5.3, Lombok,  
+Mockito,  
+JavaDoc, Swagger,  
+Liquibase, PostgreSQL, Caffein,  
+Spring Security.
 
 ## Подготовка к развёртыванию, запуск, документирование
 

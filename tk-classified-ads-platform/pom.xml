@@ -44,10 +44,10 @@
     </scm>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>24</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
         <start-class>ru.spb.tksoft.ads.TKAdsApplication</start-class>
         <maven.test.skip>true</maven.test.skip>
     </properties>
@@ -312,7 +312,7 @@
                 <configuration>
                     <outputDirectory>javadoc</outputDirectory>
                     <doclint>none</doclint>
-                    <source>21</source>
+                    <source>24</source>
                 </configuration>
 
                 <executions>

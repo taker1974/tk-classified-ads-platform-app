@@ -24,7 +24,7 @@ public class AuthController {
     /**
      * POST /register - Registration endpoint.
      * 
-     * @RequestBody - RegisterRequestDto - object with user registration data.
+     * @param registerRequest Object with user registration data.
      * @return ResponseEntity<Void> - 201 Created if registration is successful, 400 Bad Request if
      *         registration fails.
      */
@@ -44,7 +44,7 @@ public class AuthController {
     /**
      * POST /login - Authentication endpoint.
      * 
-     * @RequestBody - LoginRequestDto - object with user credentials.
+     * @param login Object with user credentials.
      * @return ResponseEntity<Void> - 200 OK if authentication is successful, 401 Unauthorized if
      *         authentication fails.
      */
