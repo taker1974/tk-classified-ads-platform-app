@@ -1,9 +1,6 @@
 package ru.spb.tksoft.ads.repository;
 
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,47 +15,37 @@ import ru.spb.tksoft.ads.entity.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     /**
-     * Check if user with such name exists.
+     * Check if user with such name exists. Using at registration.
      * 
      * @return true if exists, otherwise false.
      */
-    @Query(nativeQuery = true,
-            value = "SELECT EXISTS(SELECT 1 FROM \"user\" WHERE name = :name LIMIT 1)")
+    @Query("SELECT EXISTS(SELECT 1 FROM UserEntity u WHERE u.name = :name)")
     boolean existsByName(String name);
 
     /**
-     * Check if user with such name and password exists.
+     * UserEntity by name.
      * 
-     * @return true if exists, otherwise false.
+     * @param name User name.
+     * @return Optional UserEntity.
      */
-    @Query(nativeQuery = true,
-            value = "SELECT EXISTS(SELECT 1 FROM \"user\" WHERE name = :name AND password = :password LIMIT 1)")
-    boolean existsByNameAndPassword(String name, String password);
+    @Query("SELECT u FROM UserEntity u WHERE u.name = :name")
+    Optional<UserEntity> findOneByNameLazy(String name);
 
     /**
-     * UserEntity by user's email as login as name.
+     * UserEntity by name with avatar.
      * 
-     * @return UserEntity or empty.
+     * @param name User name.
+     * @return Optional UserEntity with avatar.
      */
-    @Query(nativeQuery = true,
-            value = "SELECT u.* FROM \"user\" u WHERE u.name = :name LIMIT 1")
-    Optional<UserEntity> findOneByNameRaw(String name);
+    @Query("SELECT u FROM UserEntity u JOIN FETCH u.avatar WHERE u.name = :name")
+    Optional<UserEntity> findOneByNameEager(String name);
 
     /**
-     * @return Page of UserEntity (for testing/management purposes).
+     * UserEntity by ID with avatar.
+     * 
+     * @param id User ID.
+     * @return Optional UserEntity with avatar.
      */
-    @EntityGraph(attributePaths = {"avatar"})
-    Page<UserEntity> findAll(Pageable pageable);
-
-    /**
-     * @return Single UserEntity by name.
-     */
-    @EntityGraph(attributePaths = {"avatar"})
-    Optional<UserEntity> findByName(String name);
-
-    /**
-     * @return Single UserEntity by ID.
-     */
-    @EntityGraph(attributePaths = {"avatar"})
-    Optional<UserEntity> findById(Long id);
+    @Query("SELECT u FROM UserEntity u JOIN FETCH u.avatar WHERE u.id = :id")
+    Optional<UserEntity> findOneByIdEager(Long id);
 }

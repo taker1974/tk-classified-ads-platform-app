@@ -13,6 +13,7 @@ import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
+import ru.spb.tksoft.ads.projection.AdProjection;
 import ru.spb.tksoft.ads.service.ResourceService;
 
 /**
@@ -48,12 +49,12 @@ public final class AdMapper {
      */
     @NotNull
     public static AdResponseDto toDto(final ResourceService resourceService,
-            final AdEntity entity) {
+            final AdProjection projection) {
 
         String image = "";
-        List<ImageEntity> images = entity.getImages();
-        if (images != null && !images.isEmpty()) {
-            image = resourceService.getAdImageUrl(entity.getImages().getFirst().getId());
+        List<String> imageNames = projection.getImageNames();
+        if (imageNames != null && !imageNames.isEmpty()) {
+            image = resourceService.getAdImageUrl(imageNames.getFirst().getId());
         }
 
         return new AdResponseDto(entity.getId(),
@@ -109,7 +110,7 @@ public final class AdMapper {
      */
     @NotNull
     public static AdsArrayResponseDto toAdsDto(int size,
-            final Set<AdResponseDto> responseSet) {
+            final Set<AdProjection> responseSet) {
 
         return new AdsArrayResponseDto(responseSet.size(), responseSet);
     }

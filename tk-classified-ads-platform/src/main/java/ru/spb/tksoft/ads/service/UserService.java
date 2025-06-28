@@ -2,9 +2,6 @@ package ru.spb.tksoft.ads.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,11 +13,9 @@ import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
 import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
-import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.AvatarEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkNullArgumentException;
-import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
@@ -39,18 +34,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final UserServiceCached userServiceCached;
+
     private final ResourceService resourceService;
-
-    /**
-     * Get paginated list of users.
-     * 
-     * @param pageable Paging info.
-     * @return DTO.
-     */
-    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
-
-        return userRepository.findAll(pageable).map(UserMapper::toDto);
-    }
 
     /**
      * Create user.
@@ -59,19 +45,14 @@ public class UserService {
      * @return DTO if created, empty DTO otherwise.
      */
     @Transactional
-    public UserResponseDto createUser(UserEntity newUser) {
+    public void createUser(final UserEntity newUser) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
         if (newUser == null) {
             throw new TkNullArgumentException("newUser");
         }
-
-        UserEntity entity = userRepository.save(newUser);
-        UserResponseDto dto = UserMapper.toDto(entity);
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return dto;
+        userRepository.save(newUser);
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -80,7 +61,6 @@ public class UserService {
      * @param userDetails User details implementation.
      * @param newPasswordRequest DTO.
      */
-    @CacheEvict(value = "existsByNameAndPassword", allEntries = true)
     @Transactional
     public void setPassword(final UserDetails userDetails,
             final NewPasswordRequestDto newPasswordRequest) {
@@ -94,13 +74,10 @@ public class UserService {
             throw new TkNullArgumentException("newPasswordRequest");
         }
 
-        String userName = userDetails.getUsername(); // UserDetails.getUsername() cannot return
-                                                     // null.
-        UserEntity user = userRepository.findOneByNameRaw(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, true));
+        userServiceCached.getUserEntityLazy(userDetails.getUsername())
+                .setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
 
-        user.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
-
+        userServiceCached.clearCaches();
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
@@ -111,9 +88,8 @@ public class UserService {
      * @param updateRequest Request DTO.
      * @return Response DTO.
      */
-    @CacheEvict(value = "findUserByName", key = "#userName")
     @Transactional
-    public UpdateUserResponseDto updateUser(String userName,
+    public UpdateUserResponseDto updateUser(final String userName,
             final UpdateUserRequestDto updateRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
@@ -125,12 +101,12 @@ public class UserService {
             throw new TkNullArgumentException("updateRequest");
         }
 
-        UserEntity user = userRepository.findOneByNameRaw(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, true));
-
+        UserEntity user = userServiceCached.getUserEntityLazy(userName);
         user.setFirstName(updateRequest.getFirstName());
         user.setLastName(updateRequest.getLastName());
         user.setPhone(updateRequest.getPhone());
+
+        userServiceCached.clearCaches();
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return UserMapper.toDto(updateRequest);
@@ -143,7 +119,6 @@ public class UserService {
      * @return Filename.
      */
     public String saveAvatarFile(final MultipartFile image) {
-
         return resourceService.saveAvatarFile(image);
     }
 
@@ -156,18 +131,15 @@ public class UserService {
      * @param contentType File type.
      * @throws TkNullArgumentException If any of arguments is null.
      */
-    @CacheEvict(value = "findUserByName", key = "#userName")
     @Transactional
-    public void updateAvatarDb(String userName,
-            String fileName, long fileSize, String contentType) {
+    public void updateAvatarDb(final String userName,
+            final String fileName, final long fileSize, final String contentType) {
 
-        UserEntity user = userRepository.findByName(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
-
+        UserEntity user = userServiceCached.getUserEntityEager(userName);
         AvatarEntity avatar = user.getAvatar();
 
         // Planning to delete old avatar image.
-        String oldFileName = avatar != null ? avatar.getName() : "";
+        final String oldFileName = avatar != null ? avatar.getName() : "";
         if (oldFileName != null && !oldFileName.isBlank()) {
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronization() {
@@ -185,8 +157,8 @@ public class UserService {
         avatar.setSize((int) fileSize);
         avatar.setMediatype(contentType);
 
-        avatar.setUser(user);
         user.setAvatar(avatar);
+        userServiceCached.clearCaches();
     }
 
     /**
@@ -195,7 +167,6 @@ public class UserService {
      * @param fileName Filename.
      */
     public void deleteAvatarFile(final String fileName) {
-
         resourceService.deleteAvatarImageFile(fileName);
     }
 }

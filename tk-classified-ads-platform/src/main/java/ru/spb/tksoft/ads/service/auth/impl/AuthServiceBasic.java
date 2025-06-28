@@ -36,10 +36,6 @@ public class AuthServiceBasic implements AuthService {
      * 
      * Creates a new user if it does not exist.
      * 
-     * Note for dbg/dev: password '12345678' is encoded to
-     * '$2a$10$dNwSTUHdpy8BEEgtQvWKLuhfh2rNSSJIZRG3PieITjsDPcphmGGoi'; password '0123456789ABCDEF'
-     * is encoded to '$2a$10$Vi90CYzDu3rPEjBSI5nrOeVBB.xc0t2G38atUD8tBMZ./lse.unt.';
-     * 
      * @param registerRequest RegisterRequestDto object with user credentials.
      * @return true if the user is successfully created, false otherwise.
      */
@@ -51,8 +47,7 @@ public class AuthServiceBasic implements AuthService {
 
         final String userName = registerRequest.getUsername();
         try {
-            UserEntity user = userServiceCached.findUserByName(userName);
-            if (user != null) {
+            if (Boolean.TRUE != userServiceCached.existsByName(userName)) {
                 throw new TkUserExistsException(userName);
             }
 
@@ -86,7 +81,7 @@ public class AuthServiceBasic implements AuthService {
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
         try {
-            UserEntity user = userServiceCached.findUserByName(userName);
+            UserEntity user = userServiceCached.getUserEntityLazy(userName);
             if (!passwordEncoder.matches(passwordRaw, user.getPassword())) {
 
                 // We don't want to explain the reason to the user, but log it.

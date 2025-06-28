@@ -100,3 +100,11 @@ management:
     web:
       exposure:
         include: health,info,metrics,env,beans,loggers,threaddump,prometheus
+
+logging:
+  level:
+    org:
+      hibernate: WARN
+      springframework:
+        data:
+          jpa: WARN

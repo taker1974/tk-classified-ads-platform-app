@@ -1,8 +1,6 @@
 package ru.spb.tksoft.ads.entity;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,10 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.NamedSubgraph;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -37,18 +32,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "\"ad\"")
-@NamedEntityGraph(
-        name = "Ad.withUserAvatar",
-        attributeNodes = {
-                @NamedAttributeNode("user"),
-                @NamedAttributeNode("images"),
-                @NamedAttributeNode(value = "user", subgraph = "user.avatar")
-        },
-        subgraphs = {
-                @NamedSubgraph(
-                        name = "user.avatar",
-                        attributeNodes = @NamedAttributeNode("avatar"))
-        })
 public class AdEntity {
 
     /** Ad ID. */
@@ -61,6 +44,13 @@ public class AdEntity {
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull
     private UserEntity user;
+
+    /** Avatar. */
+    @JsonManagedReference("ad-image")
+    @OneToOne(mappedBy = "ad", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    @NotNull
+    private ImageEntity image;
 
     /** Title. */
     @Column(nullable = false, length = 32)
@@ -80,14 +70,6 @@ public class AdEntity {
     @NotBlank
     private String description;
 
-    /** Images. */
-    @JsonManagedReference("ad-images")
-    @OneToMany(mappedBy = "ad",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
-    private List<ImageEntity> images = new ArrayList<>();
-
     /** Full constructor. */
     public AdEntity(long id, String title, BigDecimal price, String description) {
 
@@ -101,20 +83,5 @@ public class AdEntity {
         this.title = title;
         this.price = price;
         this.description = description;
-    }
-
-    /** Add image. */
-    public void addImage(ImageEntity image) {
-
-        // Remove old image and it's back link.
-        if (!images.isEmpty()) {
-            ImageEntity imageOld = images.getFirst();
-            images.remove(imageOld);
-            imageOld.setAd(null);
-        }
-
-        // Add new image and set new back link.
-        images.add(image);
-        image.setAd(this);
     }
 }

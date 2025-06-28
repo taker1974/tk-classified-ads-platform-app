@@ -68,7 +68,7 @@ public class UserController {
     @NotNull
     public UserResponseDto getUser(@AuthenticationPrincipal UserDetails userDetails) {
 
-        return userServiceCached.getUserByName(userDetails.getUsername());
+        return userServiceCached.getUser(userDetails.getUsername());
     }
 
     /**

@@ -26,8 +26,11 @@ import ru.spb.tksoft.ads.exception.TkAdNotFoundException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
 import ru.spb.tksoft.ads.mapper.CommentMapper;
+import ru.spb.tksoft.ads.projection.AdProjection;
+import ru.spb.tksoft.ads.projection.ImageProjection;
 import ru.spb.tksoft.ads.repository.AdRepository;
 import ru.spb.tksoft.ads.repository.CommentRepository;
+import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
 
@@ -43,12 +46,13 @@ public class AdsService {
     private final Logger log = LoggerFactory.getLogger(AdsService.class);
 
     private final AdsServiceCached adsServiceCached;
+    private final UserServiceCached userServiceCached;
+    private final ResourceService resourceService;
 
     private final AdRepository adRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-
-    private final ResourceService resourceService;
+    private final ImageRepository imageRepository;
 
     /**
      * Get a list of all ads.
@@ -57,8 +61,19 @@ public class AdsService {
      */
     public AdsArrayResponseDto getAllAds() {
 
-        Set<AdResponseDto> responseSet = adRepository.findAll().stream()
-                .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
+        final List<AdProjection> responseList = adRepository.findMany();
+        if (responseList.isEmpty()) {
+            return new AdsArrayResponseDto(0, Set.of());
+        }
+
+        final List<ImageProjection> imageList = imageRepository.findMany();
+
+        Set<AdResponseDto> responseSet = responseList.stream()
+                .map(projection -> )
+
+        
+        stream()
+                .map(projection -> AdMapper.toDto(resourceService, projection))
                 .collect(Collectors.toSet());
 
         return AdMapper.toAdsDto(responseSet.size(), responseSet);

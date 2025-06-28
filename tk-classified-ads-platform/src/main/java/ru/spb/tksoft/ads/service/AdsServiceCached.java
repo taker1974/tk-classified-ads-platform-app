@@ -77,7 +77,7 @@ public class AdsServiceCached {
     @Cacheable(value = "getAdsMe", key = "#me.username")
     public AdsArrayResponseDto getAdsMe(final UserDetails me) {
 
-        Set<AdResponseDto> responseSet = adRepository.findByUserName(me.getUsername()).stream()
+        Set<AdResponseDto> responseSet = adRepository.findManyByUserNameEager(me.getUsername()).stream()
                 .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
                 .collect(Collectors.toSet());
 

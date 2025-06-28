@@ -60,7 +60,7 @@ public class AvatarEntity {
     @Size(min = 1, max = 128)
     @NotBlank
     private String mediatype;
-    
+
     /** Full constructor. */
     public AvatarEntity(long id, String name, int size, String mediatype) {
 

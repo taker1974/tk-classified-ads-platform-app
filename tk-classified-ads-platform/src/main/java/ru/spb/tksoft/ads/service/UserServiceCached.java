@@ -43,62 +43,92 @@ public class UserServiceCached {
     /** Clear caches. */
     public void clearCaches() {
 
-        clearCache("findUserByName");
+        clearCache("existsByName");
+        clearCache("getUserEntityLazy");
+        clearCache("getUserEntityEager");
+        clearCache("getUser");
         clearCache("getAvatar");
     }
 
-    private UserEntity getUserEntity(final String userName) {
-
+    /**
+     * Check if user exists. Used in registration procedure.
+     * 
+     * @param userName Name.
+     * @return True if user exists.
+     */
+    @Cacheable(value = "existsByName", key = "#userName")
+    public Boolean existsByName(String userName) {
+        
         if (userName == null) {
             throw new TkNullArgumentException("userName");
         }
+        return userRepository.existsByName(userName);
+    }
 
-        return userRepository.findByName(userName)
+    /**
+     * Get UserEntity by name lazily.
+     * 
+     * @param userName Name.
+     * @return UserEntity.
+     * @throws TkNullArgumentException If userName is null.
+     * @throws TkUserNotFoundException If user not found.
+     */
+    @Cacheable(value = "getUserEntityLazy", key = "#userName")
+    public UserEntity getUserEntityLazy(final String userName) {
+        if (userName == null) {
+            throw new TkNullArgumentException("userName");
+        }
+        return userRepository.findOneByNameLazy(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
+    }
+
+    private UserEntity findUserEntityEager(final String userName) {
+        
+        if (userName == null) {
+            throw new TkNullArgumentException("userName");
+        }
+        return userRepository.findOneByNameEager(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
     }
 
     /**
-     * Find user by name.
+     * Get UserEntity by name eagerly (proxy for {@link #findUserEntityEager}).
      * 
      * @param userName Name.
-     * @return UserEntity if found.
+     * @return UserEntity.
+     * @throws TkNullArgumentException If userName is null.
+     * @throws TkUserNotFoundException If user not found.
      */
-    @Cacheable(value = "findUserByName", key = "#userName")
-    public UserEntity findUserByName(final String userName) {
-
-        return getUserEntity(userName);
+    @Cacheable(value = "getUserEntityEager", key = "#userName")
+    public UserEntity getUserEntityEager(final String userName) {
+        
+        return findUserEntityEager(userName);
     }
 
     /**
-     * Get user by name.
+     * Get UserResponseDto by name.
      * 
      * @param userName Name.
      * @return Response DTO.
      */
-    @Cacheable(value = "getUserByName", key = "#userName")
-    public UserResponseDto getUserByName(final String userName) {
-
-        UserEntity user = getUserEntity(userName);
-        UserResponseDto dto = UserMapper.toDto(user);
-
-        if (user.getAvatar() != null) {
-            dto.setImage(resourceService.getAvatarImageUrl(user.getId()));
-        }
-
-        return dto;
+    @Cacheable(value = "getUser", key = "#userName")
+    public UserResponseDto getUser(final String userName) {
+        
+        return UserMapper.toDto(resourceService, findUserEntityEager(userName));
     }
 
     /**
-     * Get avatar by user id.
+     * Get avatar by user ID.
      * 
      * @param userId User ID.
      * @return Image resource.
      */
     @Cacheable(value = "getAvatar", key = "#userId")
-    public ResponseEntity<Resource> getAvatar(final long userId) {
+    public ResponseEntity<Resource> getAvatar(final Long userId) {
 
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new TkUserNotFoundException(String.valueOf(userId), false));
+        UserEntity user = userRepository.findOneByIdEager(userId)
+                .orElseThrow(() -> new TkUserNotFoundException(
+                        userId.toString(), false));
 
         if (user.getAvatar() == null) {
             return ResponseEntity.notFound().build();
