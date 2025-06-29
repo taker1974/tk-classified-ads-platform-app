@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * @return true if exists, otherwise false.
      */
     @Query("SELECT EXISTS(SELECT 1 FROM UserEntity u WHERE u.name = :name)")
-    boolean existsByName(String name);
+    Boolean existsByName(String name);
 
     /**
      * UserEntity by name.
@@ -37,7 +37,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * @param name User name.
      * @return Optional UserEntity with avatar.
      */
-    @Query("SELECT u FROM UserEntity u JOIN FETCH u.avatar WHERE u.name = :name")
+    @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.avatar WHERE u.name = :name")
     Optional<UserEntity> findOneByNameEager(String name);
 
     /**
@@ -46,6 +46,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
      * @param id User ID.
      * @return Optional UserEntity with avatar.
      */
-    @Query("SELECT u FROM UserEntity u JOIN FETCH u.avatar WHERE u.id = :id")
+    @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.avatar WHERE u.id = :id")
     Optional<UserEntity> findOneByIdEager(Long id);
 }

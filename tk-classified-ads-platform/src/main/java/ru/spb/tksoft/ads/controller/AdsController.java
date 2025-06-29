@@ -10,6 +10,7 @@ import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.service.AdsService;
 import ru.spb.tksoft.ads.service.AdsServiceCached;
+import java.util.Set;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,10 +38,7 @@ import jakarta.validation.constraints.NotNull;
 @RequestMapping("/ads")
 public class AdsController {
 
-    @NotNull
     private final AdsService adsService;
-
-    @NotNull
     private final AdsServiceCached adsServiceCached;
 
     /**
@@ -68,7 +66,7 @@ public class AdsController {
     @NotNull
     public AdsArrayResponseDto getAdsMe(@AuthenticationPrincipal UserDetails userDetails) {
 
-        return adsServiceCached.getAdsMe(userDetails);
+        return adsServiceCached.getMyAds(userDetails);
     }
 
     /**
@@ -123,7 +121,8 @@ public class AdsController {
     @NotNull
     public CommentsArrayResponseDto getComments(@PathVariable(required = true) long adId) {
 
-        return adsServiceCached.getComments(Long.valueOf(adId));
+        return new CommentsArrayResponseDto(0, Set.of());
+        // return adsServiceCached.getComments(Long.valueOf(adId));
     }
 
     /**
@@ -138,7 +137,8 @@ public class AdsController {
     public CommentResponseDto addComment(@PathVariable(required = true) long adId,
             @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto createCommentDto) {
 
-        return adsService.addComment(adId, createCommentDto);
+        return new CommentResponseDto(0, 0, "0", "", 0L, "");
+        // return adsService.addComment(adId, createCommentDto);
     }
 
     /**
@@ -152,7 +152,8 @@ public class AdsController {
     @NotNull
     public AdExtendedResponseDto getAds(@PathVariable(required = true) long adId) {
 
-        return adsServiceCached.getAdExtended(adId);
+        throw new UnsupportedOperationException();
+        //return adsServiceCached.getAdExtended(adId);
     }
 
     /**
@@ -199,7 +200,8 @@ public class AdsController {
             @PathVariable(required = true) long commentId,
             @NotNull @Valid @RequestBody CreateOrUpdateCommentRequestDto updateCommentDto) {
 
-        return adsService.updateComment(userDetails, adId, commentId, updateCommentDto);
+        return new CommentResponseDto(0, 0, "0", "", 0L, "");
+        // return adsService.updateComment(userDetails, adId, commentId, updateCommentDto);
     }
 
     /**
@@ -214,7 +216,7 @@ public class AdsController {
             @PathVariable(required = true) long adId,
             @PathVariable(required = true) long commentId) {
 
-        adsService.deleteComment(userDetails, adId, commentId);
+        // adsService.deleteComment(userDetails, adId, commentId);
     }
 
     /**
@@ -229,8 +231,8 @@ public class AdsController {
             @PathVariable(required = true) long adId,
             @NotNull @RequestPart("image") MultipartFile image) {
 
-        final String fileName = adsService.saveImageFile(image);
-        adsService.updateAdImage(userDetails, adId,
-                fileName, image.getSize(), image.getContentType());
+        // final String fileName = adsService.saveImageFile(image);
+        // adsService.updateAdImage(userDetails, adId,
+        // fileName, image.getSize(), image.getContentType());
     }
 }

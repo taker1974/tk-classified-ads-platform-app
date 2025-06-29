@@ -47,7 +47,7 @@ public class AuthServiceBasic implements AuthService {
 
         final String userName = registerRequest.getUsername();
         try {
-            if (Boolean.TRUE != userServiceCached.existsByName(userName)) {
+            if (userServiceCached.existsByName(userName).equals(Boolean.TRUE)) {
                 throw new TkUserExistsException(userName);
             }
 

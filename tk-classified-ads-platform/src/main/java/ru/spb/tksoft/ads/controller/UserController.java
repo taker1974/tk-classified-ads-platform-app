@@ -7,6 +7,7 @@ import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.service.UserService;
 import ru.spb.tksoft.ads.service.UserServiceCached;
+import ru.spb.tksoft.utils.log.LogEx;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +87,7 @@ public class UserController {
     public UpdateUserResponseDto updateUser(@AuthenticationPrincipal UserDetails userDetails,
             @NotNull @Valid @RequestBody UpdateUserRequestDto updateRequest) {
 
-        return userService.updateUser(userDetails.getUsername(), updateRequest);
+            return userService.updateUser(userDetails.getUsername(), updateRequest);
     }
 
     /**
@@ -116,7 +117,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/avatar/{userId}")
     public ResponseEntity<Resource> getAvatar(@PathVariable(required = true) long userId) {
-        
+
         return userServiceCached.getAvatar(userId);
     }
 }

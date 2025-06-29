@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.spb.tksoft.ads.entity.CommentEntity;
+import ru.spb.tksoft.ads.projection.CommentProjection;
 
 /**
  * Repository of CommentEntity.
@@ -15,30 +16,47 @@ import ru.spb.tksoft.ads.entity.CommentEntity;
 @Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
 
-    /**
-     * List of CommentEntity by ad ID.
-     * 
-     * @param adId Ad ID.
-     * @return List of CommentEntity.
-     */
-    @Query("""
-            SELECT c FROM CommentEntity c
-            JOIN FETCH c.ad a
-            JOIN FETCH c.user u
-            WHERE a.id = :adId""")
-    List<CommentEntity> findManyByAdIdEager(Long adId);
+    // TODO: What if u.avatar is null?
 
-    /**
-     * CommentEntity by comment ID and ad ID.
-     * 
-     * @param adId Ad ID.
-     * @param commentId Comment ID.
-     * @return Optional CommentEntity.
-     */
-    @Query("""
-            SELECT c FROM CommentEntity c
-            JOIN FETCH c.ad a
-            JOIN FETCH c.user u
-            WHERE a.id = :adId AND c.id = :commentId""")
-    Optional<CommentEntity> findOneByAdIdAndCommentIdEager(Long adId, Long commentId);
+//     /**
+//      * List of CommentProjection by ad ID.
+//      * 
+//      * @param adId Ad ID.
+//      * @return List of CommentProjection.
+//      */
+//     @Query("""
+//             SELECT c.id AS id, c.createdAt, c.text,
+//             u.id AS authorId, u.firstName AS authorFirstName,
+//             av.id AS authorAvatarId
+//             FROM CommentEntity c
+//             INNER JOIN c.user u ON u.id = c.user.id
+//             LEFT JOIN u.avatar av ON av.id = u.avatar.id
+//             WHERE c.ad.id = :adId""")
+//     List<CommentProjection> findManyByAdId(Long adId);
+
+//     /**
+//      * CommentProjection by user name, ad ID and comment ID.
+//      * 
+//      * @param adId Ad ID.
+//      * @param userId User ID.
+//      * @return List of CommentProjection.
+//      */
+//     @Query("""
+//             SELECT c.id AS id, c.createdAt, c.text,
+//             u.id AS authorId, u.firstName AS authorFirstName,
+//             av.id AS authorAvatarId
+//             FROM CommentEntity c
+//             INNER JOIN c.user u ON u.id = c.user.id
+//             LEFT JOIN u.avatar av ON av.id = u.avatar.id
+//             WHERE c.user.name = :userName AND c.ad.id = :adId AND c.id = :commentId""")
+//     Optional<CommentProjection> findOneExact(String username, Long adId, Long commentId);
+
+//     /**
+//      * CommentEntity by comment ID.
+//      * 
+//      * @param id Comment ID.
+//      * @return List of CommentProjection.
+//      */
+//     @Query("SELECT c FROM CommentEntity c WHERE c.id = :id")
+//     Optional<CommentEntity> findOneById(Long id);
 }

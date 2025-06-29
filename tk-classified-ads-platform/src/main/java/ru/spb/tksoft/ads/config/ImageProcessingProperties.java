@@ -22,8 +22,13 @@ public record ImageProcessingProperties(
         List<String> allowedMimeTypes,
 
         int ioBufferSize,
+
         String urlBasePath,
-        String storagePath) {
+        String storagePath,
+
+        String fileNameDefault,
+        long fileSizeDefault,
+        String mimeTypeDefault) {
 
     @ConstructorBinding
     public ImageProcessingProperties {

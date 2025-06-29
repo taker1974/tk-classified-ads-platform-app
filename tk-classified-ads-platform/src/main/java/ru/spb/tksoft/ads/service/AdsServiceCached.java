@@ -2,8 +2,11 @@ package ru.spb.tksoft.ads.service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,9 +32,12 @@ import ru.spb.tksoft.ads.exception.TkCommentNotOwnedException;
 import ru.spb.tksoft.ads.exception.TkMediaNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
 import ru.spb.tksoft.ads.mapper.CommentMapper;
+import ru.spb.tksoft.ads.projection.AdResponseProjection;
+import ru.spb.tksoft.ads.projection.CommentProjection;
 import ru.spb.tksoft.ads.repository.AdRepository;
 import ru.spb.tksoft.ads.repository.CommentRepository;
 import ru.spb.tksoft.ads.repository.ImageRepository;
+import ru.spb.tksoft.utils.log.LogEx;
 
 /**
  * Ads service, cached methods.
@@ -41,6 +47,8 @@ import ru.spb.tksoft.ads.repository.ImageRepository;
 @Service
 @RequiredArgsConstructor
 public class AdsServiceCached {
+
+    private final Logger log = LoggerFactory.getLogger(AdsServiceCached.class);
 
     private final AdRepository adRepository;
     private final CommentRepository commentRepository;
@@ -61,11 +69,11 @@ public class AdsServiceCached {
     /** Clear caches. */
     public void clearCaches() {
 
-        clearCache("getAdsMe");
+        clearCache("getMyAds");
         clearCache("getAdImage");
-        clearCache("getOwnAdEntity");
+        clearCache("getAdEntityWithImage");
         clearCache("getAdExtended");
-        clearCache("getOwnCommentEntity");
+        clearCache("getCommentEntity");
     }
 
     /**
@@ -74,11 +82,18 @@ public class AdsServiceCached {
      * @param me UserDetails implementation.
      * @return DTO.
      */
-    @Cacheable(value = "getAdsMe", key = "#me.username")
-    public AdsArrayResponseDto getAdsMe(final UserDetails me) {
+    @Cacheable(value = "getMyAds", key = "#me.username")
+    public AdsArrayResponseDto getMyAds(final UserDetails me) {
 
-        Set<AdResponseDto> responseSet = adRepository.findManyByUserNameEager(me.getUsername()).stream()
-                .map(adEntity -> AdMapper.toDto(resourceService, adEntity))
+        // Extra: user id, image url
+        final List<AdResponseProjection> projections =
+                adRepository.findManyMinimal(me.getUsername());
+        if (projections.isEmpty()) {
+            return new AdsArrayResponseDto(0, Set.of());
+        }
+
+        Set<AdResponseDto> responseSet = projections.stream()
+                .map(projection -> AdMapper.toDto(resourceService, projection))
                 .collect(Collectors.toSet());
 
         return AdMapper.toAdsDto(responseSet.size(), responseSet);
@@ -97,18 +112,22 @@ public class AdsServiceCached {
                 .orElseThrow(() -> new TkMediaNotFoundException(String.valueOf(id)));
 
         String filename = image.getName();
-        if (filename.isBlank()) {
-            return ResponseEntity.notFound().build();
+
+        if (filename == null || filename.isBlank()) {
+            LogEx.error(log, LogEx.getThisMethodName(),
+                    "Ad " + id + ": " + "image file not set");
+            return resourceService.getDefaultAdImage();
         }
 
         Path filePath = resourceService.getAdImagePath(filename);
         if (!Files.exists(filePath)) {
-            return ResponseEntity.notFound().build();
+            LogEx.error(log, LogEx.getThisMethodName(),
+                    "Ad " + id + ": " + "image file \"" + filename + "\" not found");
+            return resourceService.getDefaultAdImage();
         }
 
         Resource resource = new PathResource(filePath);
         MediaType mediaType = MediaType.parseMediaType(image.getMediatype());
-
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(resource);
@@ -121,69 +140,54 @@ public class AdsServiceCached {
      * @param adId Ad id.
      * @return Response DTO.
      */
-    @Cacheable(value = "getOwnAdEntity", key = "#userName + '_' + #adId")
-    public AdEntity getOwnAdEntity(final String userName, final Long adId) {
+    @Cacheable(value = "getAdEntityWithImage", key = "#userName + '_' + #adId")
+    public AdEntity getAdEntityWithImage(final String userName, final Long adId) {
 
-        AdEntity ad = adRepository.findById(adId)
-                .orElseThrow(() -> new TkAdNotFoundException(adId));
-
-        if (!ad.getUser().getName().equals(userName)) {
-            throw new TkAdNotOwnedException(adId);
-        }
-
-        return ad;
+        return adRepository.findOneByUserNameAndAdIdWithImage(userName, adId)
+                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
     }
 
-    /**
-     * Get info about ad with given id.
-     * 
-     * @param adId Ad id.
-     * @return Response DTO.
-     */
-    @Cacheable(value = "getAdExtended", key = "#adId")
-    public AdExtendedResponseDto getAdExtended(Long adId) {
+    // /**
+    // * Get info about ad with given id.
+    // *
+    // * @param adId Ad id.
+    // * @return Response DTO.
+    // */
+    // @Cacheable(value = "getAdExtended", key = "#adId")
+    // public AdExtendedResponseDto getAdExtended(Long adId) {
 
-        AdEntity entity = adRepository.findById(adId)
-                .orElseThrow(() -> new TkAdNotFoundException(adId));
+    // AdEntity entity = adRepository.findById(adId)
+    // .orElseThrow(() -> new TkAdNotFoundException(adId));
 
-        return AdMapper.toExtendedDto(resourceService, entity);
-    }
+    // return AdMapper.toExtendedDto(resourceService, entity);
+    // }
 
-    /**
-     * Get all comments for ad with given id.
-     * 
-     * @param adId Ad id.
-     * @return Response DTO.
-     */
-    @Cacheable(value = "getComments", key = "#adId")
-    public CommentsArrayResponseDto getComments(Long adId) {
+    // /**
+    // * Get all comments for ad with given id.
+    // *
+    // * @param adId Ad id.
+    // * @return Response DTO.
+    // */
+    // @Cacheable(value = "getComments", key = "#adId")
+    // public CommentsArrayResponseDto getComments(Long adId) {
 
-        Set<CommentResponseDto> responseSet = commentRepository.findAllByAd_Id(adId).stream()
-                .map(commentEntity -> CommentMapper.toDto(resourceService, commentEntity))
-                .collect(Collectors.toSet());
+    // Set<CommentResponseDto> responseSet = commentRepository.findManyByAdId(adId).stream()
+    // .map(projection -> CommentMapper.toDto(resourceService, projection))
+    // .collect(Collectors.toSet());
 
-        return AdMapper.toCommentsDto(responseSet.size(), responseSet);
-    }
+    // return AdMapper.toCommentsDto(responseSet.size(), responseSet);
+    // }
 
-    /**
-     * Get info about comment with given id.
-     * 
-     * @param userName User name.
-     * @param adId Ad id.
-     * @param commentId Comment id.
-     * @return Response DTO.
-     */
-    @Cacheable(value = "getOwnCommentEntity", key = "#userName + '_' + #adId + '_' + #commentId")
-    public CommentEntity getOwnCommentEntity(final String userName,
-            final long adId, final long commentId) {
+    // /**
+    // * Get comment by id.
+    // *
+    // * @param commentId Comment id.
+    // * @return CommentEntity.
+    // */
+    // @Cacheable(value = "getCommentEntity", key = "#commentId")
+    // public CommentEntity getCommentEntity(final long commentId) {
 
-        CommentEntity comment = commentRepository.findByAdAndCommentWithEagerFetch(adId, commentId)
-                .orElseThrow(() -> new TkCommentNotFoundException(adId));
-
-        if (!comment.getUser().getName().equals(userName)) {
-            throw new TkCommentNotOwnedException(commentId);
-        }
-
-        return comment;
-    }
+    // return commentRepository.findOneById(commentId)
+    // .orElseThrow(() -> new TkCommentNotFoundException(String.valueOf(commentId)));
+    // }
 }

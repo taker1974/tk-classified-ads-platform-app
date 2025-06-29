@@ -45,7 +45,7 @@ public class AdEntity {
     @NotNull
     private UserEntity user;
 
-    /** Avatar. */
+    /** Image. */
     @JsonManagedReference("ad-image")
     @OneToOne(mappedBy = "ad", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)

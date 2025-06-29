@@ -24,9 +24,9 @@ public class TkCommentNotFoundException extends RuntimeException {
      * 
      * @param adId Ad ID.
      */
-    public TkCommentNotFoundException(long adId) {
+    public TkCommentNotFoundException(String subMessage) {
 
-        super(MESSAGE + ": " + adId);
+        super(MESSAGE + ": " + subMessage);
         LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, CODE, this);
     }
 }

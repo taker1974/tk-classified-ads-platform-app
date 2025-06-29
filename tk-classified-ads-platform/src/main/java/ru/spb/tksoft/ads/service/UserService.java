@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
 import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
@@ -16,6 +18,7 @@ import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.entity.AvatarEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkNullArgumentException;
+import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.UserMapper;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
@@ -74,8 +77,11 @@ public class UserService {
             throw new TkNullArgumentException("newPasswordRequest");
         }
 
-        userServiceCached.getUserEntityLazy(userDetails.getUsername())
-                .setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
+        String userName = userDetails.getUsername();
+        UserEntity user = userRepository.findOneByNameLazy(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
+
+        user.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
 
         userServiceCached.clearCaches();
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
@@ -101,7 +107,10 @@ public class UserService {
             throw new TkNullArgumentException("updateRequest");
         }
 
-        UserEntity user = userServiceCached.getUserEntityLazy(userName);
+        // Entity must be managed, so use repository durectly, without *Cached requests.
+        UserEntity user = userRepository.findOneByNameLazy(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
+
         user.setFirstName(updateRequest.getFirstName());
         user.setLastName(updateRequest.getLastName());
         user.setPhone(updateRequest.getPhone());
@@ -119,6 +128,7 @@ public class UserService {
      * @return Filename.
      */
     public String saveAvatarFile(final MultipartFile image) {
+
         return resourceService.saveAvatarFile(image);
     }
 
@@ -135,7 +145,9 @@ public class UserService {
     public void updateAvatarDb(final String userName,
             final String fileName, final long fileSize, final String contentType) {
 
-        UserEntity user = userServiceCached.getUserEntityEager(userName);
+        UserEntity user = userRepository.findOneByNameEager(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
+
         AvatarEntity avatar = user.getAvatar();
 
         // Planning to delete old avatar image.
@@ -158,6 +170,8 @@ public class UserService {
         avatar.setMediatype(contentType);
 
         user.setAvatar(avatar);
+        avatar.setUser(user);
+        
         userServiceCached.clearCaches();
     }
 
@@ -167,6 +181,7 @@ public class UserService {
      * @param fileName Filename.
      */
     public void deleteAvatarFile(final String fileName) {
+
         resourceService.deleteAvatarImageFile(fileName);
     }
 }

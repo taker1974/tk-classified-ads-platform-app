@@ -11,5 +11,3 @@ databaseChangeLog:
            file: "db/changelog/v0.0.1/create-tables-avatar.sql"
     - include:
            file: "db/changelog/v0.0.1/create-tables-comment.sql"
-    - include:
-           file: "db/changelog/v0.0.1/alter-tables-image.sql"

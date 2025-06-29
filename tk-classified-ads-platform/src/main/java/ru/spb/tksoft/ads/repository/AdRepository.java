@@ -6,8 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.spb.tksoft.ads.entity.AdEntity;
-import ru.spb.tksoft.ads.projection.AdExtendedProjection;
-import ru.spb.tksoft.ads.projection.AdProjection;
+import ru.spb.tksoft.ads.projection.AdResponseProjection;
 
 /**
  * Repository of AdEntity.
@@ -18,47 +17,84 @@ import ru.spb.tksoft.ads.projection.AdProjection;
 public interface AdRepository extends JpaRepository<AdEntity, Long> {
 
     /**
-     * List of AdProjection.
-     * 
-     * [INNER] JOIN because if user not found, we don't want to get such result.
-     * 
-     * @param userName User name.
-     * @return List of AdEntity.
+     * @return List of AdResponseProjection.
      */
     @Query("""
-            SELECT a.id AS id, u.id AS userId, 
-            a.price AS price, a.title AS title
+            SELECT
+                    a.id AS id,
+                    a.title AS title,
+                    a.price AS price,
+                    u.id AS userId,
+                    i.id AS imageId
             FROM AdEntity a
-            INNER JOIN UserEntity u ON a.user.id = u.id""")
-    List<AdProjection> findMany();
+            JOIN a.user u
+            LEFT JOIN a.image i""")
+    List<AdResponseProjection> findManyMinimal();
 
     /**
-     * List of AdProjection by user name.
-     * 
-     * @param userName User name.
-     * @return List of AdEntity.
+     * @return List of AdResponseProjection by user name.
      */
     @Query("""
-            SELECT a.id AS id, u.id AS userId,
-            a.price AS price, a.title AS title
+                SELECT
+                a.id AS id,
+                a.title AS title,
+                a.price AS price,
+                u.id AS userId,
+                i.id AS imageId
             FROM AdEntity a
-            INNER JOIN UserEntity u ON a.user.id = u.id
+            JOIN a.user u
+            LEFT JOIN a.image i
             WHERE u.name = :userName""")
-    List<AdProjection> findManyByUserName(String userName);
+    List<AdResponseProjection> findManyMinimal(String userName);
 
     /**
-     * AdExtendedProjection by ID.
+     * AdEntity by user name and ad ID.
      * 
-     * @param id Ad ID.
-     * @return Optional AdExtendedProjection.
+     * @param userName User name.
+     * @param adId Ad ID.
+     * @return Optional AdEntity.
      */
     @Query("""
-            SELECT a.id AS id, u.id AS userId,
-            a.price AS price, a.title AS title, a.description AS description,
-            u.firstName AS authorFirstName, u.lastName AS authorLastName,
-            u.name AS email, u.phone AS phone
-            FROM AdEntity a
-            INNER JOIN UserEntity u ON a.user.id = u.id
-            WHERE a.id = :id""")
-    Optional<AdExtendedProjection> findOneExtendedById(Long id);
+            SELECT a FROM AdEntity a
+            JOIN a.user u 
+            LEFT JOIN FETCH a.image i 
+            WHERE u.name = :userName AND a.id = :adId""")
+    Optional<AdEntity> findOneByUserNameAndAdIdWithImage(String userName, Long adId);
+
+    // /**
+    // * List of AdEntity.
+    // *
+    // * @return List of AdEntity.
+    // */
+    // @Query("""
+    // SELECT a FROM AdEntity a
+    // INNER JOIN FETCH a.user u
+    // INNER JOIN FETCH a.image i""")
+    // List<AdEntity> findManyEager();
+
+    // /**
+    // * List of AdEntity by user name.
+    // *
+    // * @param userName User name.
+    // * @return List of AdEntity.
+    // */
+    // @Query("""
+    // SELECT a FROM AdEntity a
+    // INNER JOIN FETCH a.user u
+    // INNER JOIN FETCH a.image i
+    // WHERE u.name = :userName""")
+    // List<AdEntity> findManyByUserNameEager(String userName);
+
+    // /**
+    // * AdEntity by ad ID.
+    // *
+    // * @param adId Ad ID.
+    // * @return Optional AdEntity.
+    // */
+    // @Query("""
+    // SELECT a FROM AdEntity a
+    // INNER JOIN FETCH a.user u
+    // INNER JOIN FETCH a.image i
+    // WHERE a.id = :adId""")
+    // Optional<AdEntity> findOneByUserNameEager(Long adId);
 }

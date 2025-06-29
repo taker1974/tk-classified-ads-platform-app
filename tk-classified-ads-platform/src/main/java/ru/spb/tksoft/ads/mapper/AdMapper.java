@@ -13,7 +13,7 @@ import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
-import ru.spb.tksoft.ads.projection.AdProjection;
+import ru.spb.tksoft.ads.projection.AdResponseProjection;
 import ru.spb.tksoft.ads.service.ResourceService;
 
 /**
@@ -28,98 +28,60 @@ public final class AdMapper {
     private AdMapper() {}
 
     /**
-     * Gets first image file name.
+     * AdResponseProjection to DTO.
      * 
-     * @param entity Ad entity.
-     * @return File name.
-     */
-    public static String getFirstImageFileName(final AdEntity entity) {
-
-        if (entity.getImages() != null && !entity.getImages().isEmpty()) {
-            return entity.getImages().getFirst().getName();
-        }
-        return "";
-    }
-
-    /**
-     * Entity to DTO.
-     * 
-     * @param entity Ad entity.
-     * @return user DTO.
+     * @param resourceService Resource service.
+     * @param projection AdResponseProjection.
+     * @return Response DTO.
      */
     @NotNull
     public static AdResponseDto toDto(final ResourceService resourceService,
-            final AdProjection projection) {
+            final AdResponseProjection projection) {
 
-        String image = "";
-        List<String> imageNames = projection.getImageNames();
-        if (imageNames != null && !imageNames.isEmpty()) {
-            image = resourceService.getAdImageUrl(imageNames.getFirst().getId());
-        }
-
-        return new AdResponseDto(entity.getId(),
-                entity.getUser().getId(),
-                image,
-                entity.getPrice().intValue(),
-                entity.getTitle());
+        return new AdResponseDto(projection.getId(),
+                projection.getUserId(),
+                resourceService.getAdImageUrl(projection.getImageId()),
+                projection.getPrice().intValue(),
+                projection.getTitle());
     }
 
     /**
-     * Entity to extended DTO.
+     * Set of AdResponseDto to data DTO.
      * 
-     * @param e Ad entity.
-     * @return user DTO.
-     */
-    @NotNull
-    public static AdExtendedResponseDto toExtendedDto(final ResourceService resourceService,
-            final AdEntity e) {
-
-        String image = "";
-        List<ImageEntity> images = e.getImages();
-        if (images != null && !images.isEmpty()) {
-            image = resourceService.getAdImageUrl(e.getImages().getFirst().getId());
-        }
-
-        UserEntity u = e.getUser();
-        return new AdExtendedResponseDto(
-                e.getId(), e.getTitle(), e.getPrice().intValue(), e.getDescription(),
-                image,
-                u.getFirstName(), u.getLastName(), u.getName(), u.getPhone());
-    }
-
-    /**
-     * Comments entity to DTO.
-     * 
-     * @param size Amount of comments.
-     * @param responseSet Comments set.
-     * @return Response array DTO.
-     */
-    @NotNull
-    public static CommentsArrayResponseDto toCommentsDto(int size,
-            final Set<CommentResponseDto> responseSet) {
-
-        return new CommentsArrayResponseDto(responseSet.size(), responseSet);
-    }
-
-    /**
-     * Owned ads entity to DTO.
-     * 
-     * @param size Amount of comments.
-     * @param responseSet Comments set.
-     * @return Response array DTO.
+     * @param size Amount of items.
+     * @param responseSet Items.
+     * @return Response set.
      */
     @NotNull
     public static AdsArrayResponseDto toAdsDto(int size,
-            final Set<AdProjection> responseSet) {
+            final Set<AdResponseDto> responseSet) {
 
         return new AdsArrayResponseDto(responseSet.size(), responseSet);
     }
 
     /**
-     * DTO to entity.
+     * AdEntity to DTO.
      * 
-     * @param dto DTO.
-     * @return New entity.
+     * @param resourceService Resource service.
+     * @param projection AdResponseProjection.
+     * @return Response DTO.
+     */
+    @NotNull
+    public static AdResponseDto toDto(final ResourceService resourceService,
+            final AdEntity entity) {
+
+        return new AdResponseDto(entity.getId(),
+                entity.getUser().getId(),
+                resourceService.getAdImageUrl(entity.getId()),
+                entity.getPrice().intValue(),
+                entity.getTitle());
+    }
+
+    /**
+     * CreateOrUpdateAdRequestDto to entity.
+     *
+     * @param dto Request DTO.
+     * @return New ad entity.
      */
     @NotNull
     public static AdEntity toEntity(final CreateOrUpdateAdRequestDto dto) {
@@ -129,4 +91,41 @@ public final class AdMapper {
                 BigDecimal.valueOf(dto.getPrice()),
                 dto.getDescription());
     }
+
+    // /**
+    // * Entity to extended DTO.
+    // *
+    // * @param e Ad entity.
+    // * @return user DTO.
+    // */
+    // @NotNull
+    // public static AdExtendedResponseDto toExtendedDto(final ResourceService resourceService,
+    // final AdEntity e) {
+
+    // String image = "";
+    // List<ImageEntity> images = e.getImages();
+    // if (images != null && !images.isEmpty()) {
+    // image = resourceService.getAdImageUrl(e.getImages().getFirst().getId());
+    // }
+
+    // UserEntity u = e.getUser();
+    // return new AdExtendedResponseDto(
+    // e.getId(), e.getTitle(), e.getPrice().intValue(), e.getDescription(),
+    // image,
+    // u.getFirstName(), u.getLastName(), u.getName(), u.getPhone());
+    // }
+
+    // /**
+    // * Comments entity to DTO.
+    // *
+    // * @param size Amount of comments.
+    // * @param responseSet Comments set.
+    // * @return Response array DTO.
+    // */
+    // @NotNull
+    // public static CommentsArrayResponseDto toCommentsDto(int size,
+    // final Set<CommentResponseDto> responseSet) {
+
+    // return new CommentsArrayResponseDto(responseSet.size(), responseSet);
+    // }
 }

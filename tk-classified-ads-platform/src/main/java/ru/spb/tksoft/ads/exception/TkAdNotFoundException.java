@@ -24,9 +24,9 @@ public class TkAdNotFoundException extends RuntimeException {
      * 
      * @param adId Ad ID.
      */
-    public TkAdNotFoundException(long adId) {
+    public TkAdNotFoundException(String subMessage) {
 
-        super(MESSAGE + ": " + adId);
+        super(MESSAGE + ": " + subMessage);
         LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, CODE, this);
     }
 }

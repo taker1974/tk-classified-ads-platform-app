@@ -2,8 +2,7 @@ package ru.spb.tksoft.ads.mapper;
 
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
-import ru.spb.tksoft.ads.entity.CommentEntity;
-import ru.spb.tksoft.ads.entity.UserEntity;
+import ru.spb.tksoft.ads.projection.CommentProjection;
 import ru.spb.tksoft.ads.service.ResourceService;
 
 /**
@@ -25,19 +24,13 @@ public final class CommentMapper {
      */
     @NotNull
     public static CommentResponseDto toDto(final ResourceService resourceService,
-            final CommentEntity entity) {
+            final CommentProjection projection) {
 
-        UserEntity user = entity.getUser();
-        String avatar = "";
-        if (user.getAvatar() != null) {
-            avatar = resourceService.getAvatarImageUrl(user.getId());
-        }
-
-        return new CommentResponseDto(entity.getId(),
-                user.getId(),
-                avatar,
-                user.getFirstName(),
-                entity.getCreatedAt().toEpochMilli(),
-                entity.getText());
+        return new CommentResponseDto(projection.getId(),
+                projection.getAuthorId(),
+                resourceService.getAvatarImageUrl(projection.getAuthorId()),
+                projection.getAuthorFirstName(),
+                projection.getCreatedAt().toEpochMilli(),
+                projection.getText());
     }
 }
