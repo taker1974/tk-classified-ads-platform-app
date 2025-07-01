@@ -9,9 +9,6 @@ CREATE TABLE IF NOT EXISTS "user" (
     "name" VARCHAR(32) UNIQUE NOT NULL CHECK (
         LENGTH("name") BETWEEN 4 AND 32
     ),
-    -- password can/will be encoded in bcrypt so it's length can be larger than 16;
-    -- password '12345678' is encoded to '$2a$10$dNwSTUHdpy8BEEgtQvWKLuhfh2rNSSJIZRG3PieITjsDPcphmGGoi';
-    -- password '0123456789ABCDEF' is encoded to '$2a$10$Vi90CYzDu3rPEjBSI5nrOeVBB.xc0t2G38atUD8tBMZ./lse.unt.';
     "password" VARCHAR(256) NOT NULL CHECK (
         LENGTH("password") BETWEEN 8 AND 256
     ),

@@ -1,0 +1,49 @@
+erDiagram
+    user ||--o{ avatar : has
+    user ||--o{ ad : creates
+    user ||--o{ comment : writes
+    ad ||--o{ image : contains
+    ad ||--o{ comment : has
+
+    user {
+        BIGINT id PK "GENERATED ALWAYS AS IDENTITY"
+        VARCHAR(32) name "UNIQUE"
+        VARCHAR(256) password
+        VARCHAR(16) first_name
+        VARCHAR(16) last_name
+        VARCHAR(16) phone "UNIQUE"
+        VARCHAR(20) role
+    }
+    
+    avatar {
+        BIGINT id PK "GENERATED ALWAYS AS IDENTITY"
+        BIGINT user_id FK "UNIQUE"
+        VARCHAR(256) name "UNIQUE, LENGTH:1-256"
+        BIGINT size "CHECK: >0 AND <=10000000"
+        VARCHAR(128) mediatype "LENGTH:3-128"
+    }
+    
+    ad {
+        BIGINT id PK "GENERATED ALWAYS AS IDENTITY"
+        BIGINT user_id FK
+        VARCHAR(32) title
+        DECIMAL price "DEFAULT 0"
+        VARCHAR(64) description
+    }
+    
+    image {
+        BIGINT id PK "GENERATED ALWAYS AS IDENTITY"
+        BIGINT ad_id FK "UNIQUE"
+        VARCHAR(256) name
+        BIGINT size
+        VARCHAR(128) mediatype
+    }
+    
+    comment {
+        BIGINT id PK "GENERATED ALWAYS AS IDENTITY"
+        BIGINT ad_id FK
+        BIGINT user_id FK
+        TIMESTAMP created_at "WITH TIME ZONE"
+        VARCHAR(64) text
+    }
+    
