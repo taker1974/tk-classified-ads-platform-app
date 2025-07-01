@@ -7,7 +7,6 @@ import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.service.UserService;
 import ru.spb.tksoft.ads.service.UserServiceCached;
-import ru.spb.tksoft.utils.log.LogEx;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

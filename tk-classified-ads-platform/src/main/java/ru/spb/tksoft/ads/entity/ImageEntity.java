@@ -3,7 +3,6 @@ package ru.spb.tksoft.ads.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,7 +37,7 @@ public class ImageEntity {
 
     /** Owner user. */
     @JsonBackReference("ad-image")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "ad_id", nullable = false)
     @NotNull
     private AdEntity ad;

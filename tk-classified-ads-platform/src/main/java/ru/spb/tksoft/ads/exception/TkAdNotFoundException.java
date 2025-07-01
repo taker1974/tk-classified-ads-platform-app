@@ -22,7 +22,7 @@ public class TkAdNotFoundException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param adId Ad ID.
+     * @param subMessage Additional message.
      */
     public TkAdNotFoundException(String subMessage) {
 

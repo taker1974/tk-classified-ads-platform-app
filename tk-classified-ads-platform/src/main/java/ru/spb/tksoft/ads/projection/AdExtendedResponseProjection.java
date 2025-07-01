@@ -1,29 +1,30 @@
 package ru.spb.tksoft.ads.projection;
 
+import java.math.BigDecimal;
+
 /**
- * Ad projection extended for {@link ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto}.
+ * Extended ad projection for {@link ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto}.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public interface AdExtendedProjection {
+public interface AdExtendedResponseProjection {
 
     /** Ad ID. */
     Long getId();
-
-    /** User/creator/author ID. */
-    Long getUserId();
 
     /** Title. */
     String getTitle();
 
     /** Price. */
-    int getPrice();
-
-    /** Image. */
-    String getImage();
+    BigDecimal getPrice();
 
     /** Description. */
     String getDescription();
+
+    /**
+     * Image. Image URL will be produced later from url part and image ID.
+     */
+    Long getImageId();
 
     /** Author's first name. */
     String getAuthorFirstName();

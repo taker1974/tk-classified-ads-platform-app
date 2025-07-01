@@ -32,6 +32,7 @@ import ru.spb.tksoft.ads.exception.TkCommentNotOwnedException;
 import ru.spb.tksoft.ads.exception.TkMediaNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
 import ru.spb.tksoft.ads.mapper.CommentMapper;
+import ru.spb.tksoft.ads.projection.AdExtendedResponseProjection;
 import ru.spb.tksoft.ads.projection.AdResponseProjection;
 import ru.spb.tksoft.ads.projection.CommentProjection;
 import ru.spb.tksoft.ads.repository.AdRepository;
@@ -40,15 +41,15 @@ import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.utils.log.LogEx;
 
 /**
- * Ads service, cached methods.
+ * Ad service, cached methods.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
 @Service
 @RequiredArgsConstructor
-public class AdsServiceCached {
+public class AdServiceCached {
 
-    private final Logger log = LoggerFactory.getLogger(AdsServiceCached.class);
+    private final Logger log = LoggerFactory.getLogger(AdServiceCached.class);
 
     private final AdRepository adRepository;
     private final CommentRepository commentRepository;
@@ -82,12 +83,11 @@ public class AdsServiceCached {
      * @param me UserDetails implementation.
      * @return DTO.
      */
-    @Cacheable(value = "getMyAds", key = "#me.username")
-    public AdsArrayResponseDto getMyAds(final UserDetails me) {
+    // @Cacheable(value = "getMyAds", key = "#me.username")
+    public AdsArrayResponseDto getAds(final UserDetails me) {
 
         // Extra: user id, image url
-        final List<AdResponseProjection> projections =
-                adRepository.findManyMinimal(me.getUsername());
+        List<AdResponseProjection> projections = adRepository.findManyMinimal(me.getUsername());
         if (projections.isEmpty()) {
             return new AdsArrayResponseDto(0, Set.of());
         }
@@ -105,7 +105,7 @@ public class AdsServiceCached {
      * @param id Ad ID.
      * @return Image resource.
      */
-    @Cacheable(value = "getAdImage", key = "#id")
+    // @Cacheable(value = "getAdImage", key = "#id")
     public ResponseEntity<Resource> getAdImage(final Long id) {
 
         ImageEntity image = imageRepository.findById(id)
@@ -134,33 +134,19 @@ public class AdsServiceCached {
     }
 
     /**
-     * Get info about ad with given id.
-     * 
-     * @param userName User name.
+     * Get ad info.
+     *
      * @param adId Ad id.
      * @return Response DTO.
      */
-    @Cacheable(value = "getAdEntityWithImage", key = "#userName + '_' + #adId")
-    public AdEntity getAdEntityWithImage(final String userName, final Long adId) {
-
-        return adRepository.findOneByUserNameAndAdIdWithImage(userName, adId)
-                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
-    }
-
-    // /**
-    // * Get info about ad with given id.
-    // *
-    // * @param adId Ad id.
-    // * @return Response DTO.
-    // */
     // @Cacheable(value = "getAdExtended", key = "#adId")
-    // public AdExtendedResponseDto getAdExtended(Long adId) {
+    public AdExtendedResponseDto getAdInfo(final long adId) {
 
-    // AdEntity entity = adRepository.findById(adId)
-    // .orElseThrow(() -> new TkAdNotFoundException(adId));
+        AdExtendedResponseProjection projection = adRepository.findOneExtended(adId)
+                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
 
-    // return AdMapper.toExtendedDto(resourceService, entity);
-    // }
+        return AdMapper.toDto(resourceService, projection);
+    }
 
     // /**
     // * Get all comments for ad with given id.

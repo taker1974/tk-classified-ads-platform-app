@@ -22,7 +22,7 @@ public class TkCommentNotFoundException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param adId Ad ID.
+     * @param subMessage Additional message.
      */
     public TkCommentNotFoundException(String subMessage) {
 

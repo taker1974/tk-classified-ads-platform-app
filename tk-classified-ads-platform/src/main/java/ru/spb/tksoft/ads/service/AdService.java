@@ -19,11 +19,11 @@ import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
+import ru.spb.tksoft.ads.exception.TkAdNotFoundException;
+import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
 import ru.spb.tksoft.ads.projection.AdResponseProjection;
 import ru.spb.tksoft.ads.repository.AdRepository;
-import ru.spb.tksoft.ads.repository.CommentRepository;
-import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
 
@@ -34,15 +34,127 @@ import ru.spb.tksoft.utils.log.LogEx;
  */
 @Service
 @RequiredArgsConstructor
-public class AdsService {
+public class AdService {
 
-    private final Logger log = LoggerFactory.getLogger(AdsService.class);
+    private final Logger log = LoggerFactory.getLogger(AdService.class);
 
-    private final AdsServiceCached adsServiceCached;
+    private final AdServiceCached adsServiceCached;
     private final UserServiceCached userServiceCached;
     private final ResourceService resourceService;
 
     private final AdRepository adRepository;
+    private final UserRepository userRepository;
+
+    /**
+     * Save ad image file.
+     * 
+     * @param image Uploaded image.
+     * @return Filename.
+     */
+    public String saveImageFile(final MultipartFile image) {
+
+        return resourceService.saveAdImageFile(image);
+    }
+
+    /**
+     * Create new ad entity.
+     * 
+     * @param userDetails UserDetails implementation.
+     * @param createAddDto Request DTO.
+     * @param fileName Saved file name.
+     * @param fileSize Saved file size.
+     * @param contentType Saved file type.
+     * @return Newly created ad entity.
+     */
+    public AdEntity createAdEntity(final UserDetails userDetails,
+            final CreateOrUpdateAdRequestDto createAddDto,
+            final String fileName, final int fileSize, final String contentType) {
+
+        final String userName = userDetails.getUsername();
+        final UserEntity user = userRepository.findOneByNameLazy(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
+
+        final AdEntity newAd = AdMapper.toEntity(createAddDto);
+        newAd.setUser(user);
+
+        var imageEntity = new ImageEntity(fileName, fileSize, contentType);
+        newAd.setImage(imageEntity);
+
+        return newAd;
+    }
+
+    /**
+     * Save new ad entity inside transaction.
+     * 
+     * @param adEntity Ad entity.
+     * @param savedFileName Saved file name.
+     * @return Saved ad entity.
+     */
+    @Transactional
+    public AdEntity saveAdEntity(final AdEntity adEntity, final String savedFileName) {
+
+        if (savedFileName != null && !savedFileName.isBlank()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCompletion(int status) {
+                            if (status == STATUS_ROLLED_BACK) {
+                                resourceService.deleteAdImageFile(savedFileName);
+                            }
+                        }
+                    });
+        }
+
+        return adRepository.save(adEntity);
+    }
+
+    /** AdEntity to DTO. */
+    public AdResponseDto getCreatedAd(final AdEntity entity) {
+
+        return AdMapper.toDto(resourceService, entity);
+    }
+
+    /**
+     * Update ad image.
+     * 
+     * @param userName User name.
+     * @param adId Ad ID.
+     * @param fileName Filename.
+     * @param fileSize File size.
+     * @param contentType File type.
+     */
+    @Transactional
+    public void updateImageEntity(final String userName, Long adId,
+            final String fileName, Long fileSize, final String contentType) {
+
+        AdEntity ad = adRepository.findOneByUserNameAndAdId(userName, adId)
+                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf( adId)));
+
+        // Planning to delete old ad image file.
+        String oldFileName = ad.getImage() == null ? "" : ad.getImage().getName();
+        if (!oldFileName.isBlank()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCompletion(int status) {
+                            if (status == STATUS_COMMITTED) {
+                                resourceService.deleteAdImageFile(oldFileName);
+                            }
+                            if (status == STATUS_ROLLED_BACK) {
+                                resourceService.deleteAdImageFile(fileName);
+                            }
+                        }
+                    });
+        }
+
+        ImageEntity image = ad.getImage();
+
+        image.setName(fileName);
+        image.setSize(fileSize.intValue());
+        image.setMediatype(contentType);
+
+        adsServiceCached.clearCaches();
+    }
 
     /**
      * Get a list of all ads.
@@ -65,78 +177,6 @@ public class AdsService {
     }
 
     /**
-     * Create new ad.
-     * 
-     * @param userDetails UserDetails implementation.
-     * @param createAddDto Request DTO.
-     * @return Response DTO.
-     */
-    @Transactional
-    public AdResponseDto createAdd(final UserDetails userDetails,
-            final CreateOrUpdateAdRequestDto createAddDto) {
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
-
-        final UserEntity user = userServiceCached.getUserEntityLazy(userDetails.getUsername());
-
-        final AdEntity newAd = AdMapper.toEntity(createAddDto);
-        newAd.setUser(user);
-
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return AdMapper.toDto(resourceService, adRepository.save(newAd));
-    }
-
-    /**
-     * Save ad image file.
-     * 
-     * @param image Uploaded image.
-     * @return Filename.
-     */
-    public String saveImageFile(final MultipartFile image) {
-
-        return resourceService.saveAdImageFile(image);
-    }
-
-    /**
-     * Update ad image.
-     * 
-     * @param userDetails UserDetails implementation.
-     * @param adId Ad ID.
-     * @param fileName Filename.
-     * @param fileSize File size.
-     * @param contentType File type.
-     */
-    @Transactional
-    public void updateAdImage(final UserDetails userDetails, long adId,
-            final String fileName, long fileSize, final String contentType) {
-
-        AdEntity ad = adsServiceCached.getAdEntityWithImage(userDetails.getUsername(), adId);
-
-        // Planning to delete old ad image.
-        String oldFileName = ad.getImage() == null ? "" : ad.getImage().getName();
-        if (!oldFileName.isBlank()) {
-            TransactionSynchronizationManager.registerSynchronization(
-                    new TransactionSynchronization() {
-                        @Override
-                        public void afterCompletion(int status) {
-                            if (status == STATUS_COMMITTED) {
-                                resourceService.deleteAdImageFile(oldFileName);
-                            }
-                            if (status == STATUS_ROLLED_BACK) {
-                                resourceService.deleteAdImageFile(fileName);
-                            }
-                        }
-                    });
-        }
-
-        var image = new ImageEntity(fileName, (int) fileSize, contentType);
-        image.setAd(ad);
-        ad.setImage(image);
-
-        adsServiceCached.clearCaches();
-    }
-
-    /**
      * Update ad user with given ID and owned by given user.
      * 
      * @param userDetails UserDetails implementation.
@@ -148,7 +188,9 @@ public class AdsService {
     public AdResponseDto updateAdInfo(UserDetails userDetails, long adId,
             CreateOrUpdateAdRequestDto requestDto) {
 
-        AdEntity ad = adsServiceCached.getAdEntityWithImage(userDetails.getUsername(), adId);
+        AdEntity ad = adRepository
+                .findOneByUserNameAndAdId(userDetails.getUsername(), adId)
+                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
 
         ad.setTitle(requestDto.getTitle());
         ad.setPrice(BigDecimal.valueOf(requestDto.getPrice()));
@@ -169,7 +211,9 @@ public class AdsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        AdEntity ad = adsServiceCached.getAdEntityWithImage(userDetails.getUsername(), adId);
+        AdEntity ad = adRepository
+                .findOneByUserNameAndAdId(userDetails.getUsername(), adId)
+                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
 
         // Planning to delete ad image.
         String imageFileName = ad.getImage() == null ? "" : ad.getImage().getName();
@@ -186,8 +230,8 @@ public class AdsService {
         }
 
         adRepository.delete(ad);
-        adsServiceCached.clearCaches();
 
+        adsServiceCached.clearCaches();
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }

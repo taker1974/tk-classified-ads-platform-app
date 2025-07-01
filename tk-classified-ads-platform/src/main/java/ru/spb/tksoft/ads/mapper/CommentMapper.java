@@ -1,8 +1,11 @@
 package ru.spb.tksoft.ads.mapper;
 
+import java.util.Set;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
-import ru.spb.tksoft.ads.projection.CommentProjection;
+import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
+import ru.spb.tksoft.ads.entity.CommentEntity;
+import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.service.ResourceService;
 
 /**
@@ -19,18 +22,33 @@ public final class CommentMapper {
     /**
      * Entity to DTO.
      * 
-     * @param entity Comment entity.
+     * @param comment Comment entity.
      * @return Comment DTO.
      */
     @NotNull
     public static CommentResponseDto toDto(final ResourceService resourceService,
-            final CommentProjection projection) {
+            final CommentEntity comment) {
 
-        return new CommentResponseDto(projection.getId(),
-                projection.getAuthorId(),
-                resourceService.getAvatarImageUrl(projection.getAuthorId()),
-                projection.getAuthorFirstName(),
-                projection.getCreatedAt().toEpochMilli(),
-                projection.getText());
+        UserEntity user = comment.getUser();
+        Long userId = user.getId();
+
+        return new CommentResponseDto(comment.getId(),
+                userId,
+                resourceService.getAvatarImageUrl(userId),
+                user.getFirstName(),
+                comment.getCreatedAt().toEpochMilli(),
+                comment.getText());
+    }
+
+    /**
+     * Entity to DTO.
+     * 
+     * @param resultSet Result set.
+     * @return Comment DTO.
+     */
+    @NotNull
+    public static CommentsArrayResponseDto toDto(Set<CommentResponseDto> resultSet) {
+
+        return new CommentsArrayResponseDto(resultSet.size(), resultSet);
     }
 }

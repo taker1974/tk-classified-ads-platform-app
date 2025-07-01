@@ -1,18 +1,14 @@
 package ru.spb.tksoft.ads.mapper;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
 import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
-import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
-import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
-import ru.spb.tksoft.ads.entity.ImageEntity;
-import ru.spb.tksoft.ads.entity.UserEntity;
+import ru.spb.tksoft.ads.projection.AdExtendedResponseProjection;
 import ru.spb.tksoft.ads.projection.AdResponseProjection;
 import ru.spb.tksoft.ads.service.ResourceService;
 
@@ -63,7 +59,7 @@ public final class AdMapper {
      * AdEntity to DTO.
      * 
      * @param resourceService Resource service.
-     * @param projection AdResponseProjection.
+     * @param entity Ad entity.
      * @return Response DTO.
      */
     @NotNull
@@ -92,40 +88,22 @@ public final class AdMapper {
                 dto.getDescription());
     }
 
-    // /**
-    // * Entity to extended DTO.
-    // *
-    // * @param e Ad entity.
-    // * @return user DTO.
-    // */
-    // @NotNull
-    // public static AdExtendedResponseDto toExtendedDto(final ResourceService resourceService,
-    // final AdEntity e) {
+    /**
+     * Ad projection to extended DTO.
+     *
+     * @param projection Ad projection.
+     * @return Extended ad DTO.
+     */
+    @NotNull
+    public static AdExtendedResponseDto toDto(final ResourceService resourceService,
+            final AdExtendedResponseProjection projection) {
 
-    // String image = "";
-    // List<ImageEntity> images = e.getImages();
-    // if (images != null && !images.isEmpty()) {
-    // image = resourceService.getAdImageUrl(e.getImages().getFirst().getId());
-    // }
-
-    // UserEntity u = e.getUser();
-    // return new AdExtendedResponseDto(
-    // e.getId(), e.getTitle(), e.getPrice().intValue(), e.getDescription(),
-    // image,
-    // u.getFirstName(), u.getLastName(), u.getName(), u.getPhone());
-    // }
-
-    // /**
-    // * Comments entity to DTO.
-    // *
-    // * @param size Amount of comments.
-    // * @param responseSet Comments set.
-    // * @return Response array DTO.
-    // */
-    // @NotNull
-    // public static CommentsArrayResponseDto toCommentsDto(int size,
-    // final Set<CommentResponseDto> responseSet) {
-
-    // return new CommentsArrayResponseDto(responseSet.size(), responseSet);
-    // }
+        return new AdExtendedResponseDto(
+                projection.getId(),
+                projection.getTitle(), projection.getPrice().intValue(),
+                projection.getDescription(),
+                resourceService.getAdImageUrl(projection.getImageId()),
+                projection.getAuthorFirstName(), projection.getAuthorLastName(),
+                projection.getEmail(), projection.getPhone());
+    }
 }

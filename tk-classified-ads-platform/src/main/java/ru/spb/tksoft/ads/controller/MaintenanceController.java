@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import ru.spb.tksoft.ads.service.AdsServiceCached;
+import ru.spb.tksoft.ads.service.AdServiceCached;
 import ru.spb.tksoft.ads.service.UserServiceCached;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class MaintenanceController {
 
     private final UserServiceCached userServiceCached;
-    private final AdsServiceCached adsServiceCached;
+    private final AdServiceCached adsServiceCached;
 
     /**
      * Clear caches.

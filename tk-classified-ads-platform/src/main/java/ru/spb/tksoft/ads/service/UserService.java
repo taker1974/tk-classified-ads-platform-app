@@ -9,8 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
 import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
@@ -38,14 +36,12 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserServiceCached userServiceCached;
-
     private final ResourceService resourceService;
 
     /**
      * Create user.
      * 
      * @param newUser New user.
-     * @return DTO if created, empty DTO otherwise.
      */
     @Transactional
     public void createUser(final UserEntity newUser) {

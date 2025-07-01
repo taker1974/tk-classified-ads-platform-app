@@ -5,7 +5,6 @@ import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
-import ru.spb.tksoft.ads.entity.AvatarEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.service.ResourceService;
 
