@@ -39,7 +39,6 @@ public class AdService {
     private final Logger log = LoggerFactory.getLogger(AdService.class);
 
     private final AdServiceCached adsServiceCached;
-    private final UserServiceCached userServiceCached;
     private final ResourceService resourceService;
 
     private final AdRepository adRepository;
@@ -59,22 +58,21 @@ public class AdService {
     /**
      * Create new ad entity.
      * 
-     * @param userDetails UserDetails implementation.
-     * @param createAddDto Request DTO.
+     * @param userName User name.
+     * @param requestDto Request DTO.
      * @param fileName Saved file name.
      * @param fileSize Saved file size.
      * @param contentType Saved file type.
      * @return Newly created ad entity.
      */
-    public AdEntity createAdEntity(final UserDetails userDetails,
-            final CreateOrUpdateAdRequestDto createAddDto,
+    public AdEntity createAdEntity(final String userName,
+            final CreateOrUpdateAdRequestDto requestDto,
             final String fileName, final int fileSize, final String contentType) {
 
-        final String userName = userDetails.getUsername();
         final UserEntity user = userRepository.findOneByNameLazy(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
-        final AdEntity newAd = AdMapper.toEntity(createAddDto);
+        final AdEntity newAd = AdMapper.toEntity(requestDto);
         newAd.setUser(user);
 
         var imageEntity = new ImageEntity(fileName, fileSize, contentType);
@@ -93,17 +91,19 @@ public class AdService {
     @Transactional
     public AdEntity saveAdEntity(final AdEntity adEntity, final String savedFileName) {
 
-        if (savedFileName != null && !savedFileName.isBlank()) {
-            TransactionSynchronizationManager.registerSynchronization(
-                    new TransactionSynchronization() {
-                        @Override
-                        public void afterCompletion(int status) {
-                            if (status == STATUS_ROLLED_BACK) {
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status == STATUS_ROLLED_BACK) {
+                            if (savedFileName != null && !savedFileName.isBlank()) {
                                 resourceService.deleteAdImageFile(savedFileName);
                             }
+                        } else if (status == STATUS_COMMITTED) {
+                            adsServiceCached.clearCaches();
                         }
-                    });
-        }
+                    }
+                });
 
         return adRepository.save(adEntity);
     }
@@ -112,6 +112,26 @@ public class AdService {
     public AdResponseDto getCreatedAd(final AdEntity entity) {
 
         return AdMapper.toDto(resourceService, entity);
+    }
+
+    /**
+     * Get a list of all ads.
+     * 
+     * @return Resoinse DTO.
+     */
+    public AdsArrayResponseDto getAllAds() {
+
+        // Extra: user id, image url
+        final List<AdResponseProjection> projections = adRepository.findManyMinimal();
+        if (projections.isEmpty()) {
+            return new AdsArrayResponseDto(0, Set.of());
+        }
+
+        Set<AdResponseDto> responseSet = projections.stream()
+                .map(projection -> AdMapper.toDto(resourceService, projection))
+                .collect(Collectors.toSet());
+
+        return AdMapper.toAdsDto(responseSet.size(), responseSet);
     }
 
     /**
@@ -128,52 +148,30 @@ public class AdService {
             final String fileName, Long fileSize, final String contentType) {
 
         AdEntity ad = adRepository.findOneByUserNameAndAdId(userName, adId)
-                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf( adId)));
+                .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
 
-        // Planning to delete old ad image file.
-        String oldFileName = ad.getImage() == null ? "" : ad.getImage().getName();
-        if (!oldFileName.isBlank()) {
-            TransactionSynchronizationManager.registerSynchronization(
-                    new TransactionSynchronization() {
-                        @Override
-                        public void afterCompletion(int status) {
-                            if (status == STATUS_COMMITTED) {
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status == STATUS_ROLLED_BACK) {
+                            resourceService.deleteAdImageFile(fileName);
+                        } else if (status == STATUS_COMMITTED) {
+                            String oldFileName =
+                                    ad.getImage() == null ? "" : ad.getImage().getName();
+                            if (!oldFileName.isBlank()) {
                                 resourceService.deleteAdImageFile(oldFileName);
                             }
-                            if (status == STATUS_ROLLED_BACK) {
-                                resourceService.deleteAdImageFile(fileName);
-                            }
+                            adsServiceCached.clearCaches();
                         }
-                    });
-        }
+                    }
+                });
 
         ImageEntity image = ad.getImage();
 
         image.setName(fileName);
         image.setSize(fileSize.intValue());
         image.setMediatype(contentType);
-
-        adsServiceCached.clearCaches();
-    }
-
-    /**
-     * Get a list of all ads.
-     * 
-     * @return DTO.
-     */
-    public AdsArrayResponseDto getAllAds() {
-
-        // Extra: user id, image url
-        final List<AdResponseProjection> projections = adRepository.findManyMinimal();
-        if (projections.isEmpty()) {
-            return new AdsArrayResponseDto(0, Set.of());
-        }
-
-        Set<AdResponseDto> responseSet = projections.stream()
-                .map(projection -> AdMapper.toDto(resourceService, projection))
-                .collect(Collectors.toSet());
-
-        return AdMapper.toAdsDto(responseSet.size(), responseSet);
     }
 
     /**
@@ -196,7 +194,16 @@ public class AdService {
         ad.setPrice(BigDecimal.valueOf(requestDto.getPrice()));
         ad.setDescription(requestDto.getDescription());
 
-        adsServiceCached.clearCaches();
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status == STATUS_COMMITTED) {
+                            adsServiceCached.clearCaches();
+                        }
+                    }
+                });
+
         return AdMapper.toDto(resourceService, ad);
     }
 
@@ -215,23 +222,22 @@ public class AdService {
                 .findOneByUserNameAndAdId(userDetails.getUsername(), adId)
                 .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
 
-        // Planning to delete ad image.
-        String imageFileName = ad.getImage() == null ? "" : ad.getImage().getName();
-        if (!imageFileName.isBlank()) {
-            TransactionSynchronizationManager.registerSynchronization(
-                    new TransactionSynchronization() {
-                        @Override
-                        public void afterCompletion(int status) {
-                            if (status == STATUS_COMMITTED) {
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status == STATUS_COMMITTED) {
+                            String imageFileName =
+                                    ad.getImage() == null ? "" : ad.getImage().getName();
+                            if (!imageFileName.isBlank()) {
                                 resourceService.deleteAdImageFile(imageFileName);
                             }
+                            adsServiceCached.clearCaches();
                         }
-                    });
-        }
+                    }
+                });
 
         adRepository.delete(ad);
-
-        adsServiceCached.clearCaches();
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 }

@@ -72,8 +72,9 @@ public class SecurityConfig {
         // Enable CORS for this origins only because of security reasons:
         // basic authentication is used.
         config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"));
+                "http://localhost:*", // For E2E tests from random ports! Should be source port of
+                                      // web-ui contauned app (3000, for example).
+                "http://127.0.0.1:*"));
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("*"));

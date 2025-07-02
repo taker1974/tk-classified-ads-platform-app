@@ -23,7 +23,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Boolean existsByName(String name);
 
     /**
-     * UserEntity by name.
+     * UserEntity by name. More 'readable' analogue of generative 'findByName'.
      * 
      * @param name User name.
      * @return Optional UserEntity.

@@ -51,13 +51,12 @@ public class UserServiceCached {
 
         clearCache("existsByName");
         clearCache("getUserEntityLazy");
-        clearCache("getUserEntityEager");
         clearCache("getUser");
         clearCache("getAvatar");
     }
 
     /**
-     * Check if user exists. Used in registration procedure.
+     * Check if user exists. Used in registration procedure. Used.
      * 
      * @param userName Name.
      * @return True if user exists.
@@ -81,35 +80,12 @@ public class UserServiceCached {
      */
     @Cacheable(value = "getUserEntityLazy", key = "#userName")
     public UserEntity getUserEntityLazy(final String userName) {
-        
+
         if (userName == null) {
             throw new TkNullArgumentException("userName");
         }
         return userRepository.findOneByNameLazy(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
-    }
-
-    private UserEntity findUserEntityEager(final String userName) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-        return userRepository.findOneByNameEager(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
-    }
-
-    /**
-     * Get UserEntity by name eagerly (proxy for {@link #findUserEntityEager}).
-     * 
-     * @param userName Name.
-     * @return UserEntity.
-     * @throws TkNullArgumentException If userName is null.
-     * @throws TkUserNotFoundException If user not found.
-     */
-    @Cacheable(value = "getUserEntityEager", key = "#userName")
-    public UserEntity getUserEntityEager(final String userName) {
-
-        return findUserEntityEager(userName);
     }
 
     /**
@@ -121,7 +97,13 @@ public class UserServiceCached {
     @Cacheable(value = "getUser", key = "#userName")
     public UserResponseDto getUser(final String userName) {
 
-        return UserMapper.toDto(resourceService, findUserEntityEager(userName));
+        if (userName == null || userName.isBlank()) {
+            throw new TkNullArgumentException("userName");
+        }
+        UserEntity user = userRepository.findOneByNameEager(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
+
+        return UserMapper.toDto(resourceService, user);
     }
 
     /**

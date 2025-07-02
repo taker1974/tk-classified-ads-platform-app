@@ -99,7 +99,7 @@ public class AdController {
             @NotNull @RequestPart("image") MultipartFile image) {
 
         final String savedFileName = adsService.saveImageFile(image);
-        final AdEntity adEntity = adsService.createAdEntity(userDetails, createAdRequest,
+        final AdEntity adEntity = adsService.createAdEntity(userDetails.getUsername(), createAdRequest,
                 savedFileName, (int) image.getSize(), image.getContentType());
         final AdEntity savedAdEntity = adsService.saveAdEntity(adEntity, savedFileName);
         return adsService.getCreatedAd(savedAdEntity);
