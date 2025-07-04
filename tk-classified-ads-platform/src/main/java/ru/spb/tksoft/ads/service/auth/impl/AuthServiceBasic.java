@@ -47,7 +47,8 @@ public class AuthServiceBasic implements AuthService {
 
         final String userName = registerRequest.getUsername();
         try {
-            if (userServiceCached.existsByName(userName).equals(Boolean.TRUE)) {
+            boolean exists = userServiceCached.existsByName(userName);
+            if (exists) {
                 throw new TkUserExistsException(userName);
             }
 
@@ -57,7 +58,7 @@ public class AuthServiceBasic implements AuthService {
 
             userService.createUser(newUser);
 
-        } catch (Exception ex) { // Unexpected exception only.
+        } catch (Exception ex) {
             LogEx.error(log, LogEx.getThisMethodName(), ex);
             return false;
         }

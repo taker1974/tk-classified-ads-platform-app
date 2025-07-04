@@ -15,6 +15,8 @@ import org.testcontainers.utility.DockerImageName;
 import ru.spb.tksoft.ads.dto.request.LoginRequestDto;
 import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 import ru.spb.tksoft.ads.enumeration.UserRole;
+import ru.spb.tksoft.ads.repository.UserRepository;
+import ru.spb.tksoft.ads.service.UserServiceCached;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -30,6 +32,13 @@ class E2ETestBase {
         return "http://localhost:" + port;
     }
 
+    @Autowired
+    protected UserRepository userRepository;
+
+    @Autowired
+    protected UserServiceCached userServiceCached;
+
+    @SuppressWarnings("resource")
     @Container
     @ServiceConnection
     protected static PostgreSQLContainer<?> postgres =
@@ -49,6 +58,7 @@ class E2ETestBase {
     }
 
     protected RegisterRequestDto createValidRegisterRequest() {
+        
         return new RegisterRequestDto(
                 "valid@example.com",
                 "validPassword123",

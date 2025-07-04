@@ -2,16 +2,12 @@ package ru.spb.tksoft.ads.controller;
 
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
-import ru.spb.tksoft.ads.dto.request.CreateOrUpdateCommentRequestDto;
 import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
-import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
-import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.service.AdService;
 import ru.spb.tksoft.ads.service.AdServiceCached;
-import java.util.Set;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

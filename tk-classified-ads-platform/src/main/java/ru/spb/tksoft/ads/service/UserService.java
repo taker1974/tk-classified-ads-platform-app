@@ -47,9 +47,21 @@ public class UserService {
     public void createUser(final UserEntity newUser) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
+
         if (newUser == null) {
             throw new TkNullArgumentException("newUser");
         }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status == STATUS_COMMITTED) {
+                            userServiceCached.clearCaches();
+                        }
+                    }
+                });
+
         userRepository.save(newUser);
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
@@ -167,7 +179,7 @@ public class UserService {
 
         user.setAvatar(avatar);
         avatar.setUser(user);
-        
+
         userServiceCached.clearCaches();
     }
 

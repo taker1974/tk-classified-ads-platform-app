@@ -2,6 +2,7 @@ package ru.spb.tksoft.ads;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,28 +18,31 @@ import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthControllerE2ETest extends E2ETestBase {
 
-    private final RegisterRequestDto goodRegisterRequestDto = createValidRegisterRequest();
-
-    private ResponseEntity<Void> registerOk() {
-        RegisterRequestDto request = createValidRegisterRequest();
-        return sendRegisterRequest(request);
+    @BeforeEach
+    void resetDatabase() {
+        userRepository.deleteAll();
+        userServiceCached.clearCaches();
     }
 
     @DisplayName("Registered - 201, otherwise - 400 or whatever")
     @Test
     void register_201_whenValidRequest() {
-        Assertions.assertEquals(HttpStatus.CREATED, registerOk().getStatusCode());
+
+        RegisterRequestDto request = createValidRegisterRequest();
+        ResponseEntity<Void> response = sendRegisterRequest(request);
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
     @DisplayName("Logged in - 200, otherwise - 400 or whatever")
     @Test
     void login_200_whenValidCredentials() {
 
-        registerOk();
+        RegisterRequestDto request = createValidRegisterRequest();
+        sendRegisterRequest(request);
 
         var loginRequest = new LoginRequestDto(
-                goodRegisterRequestDto.getUsername(),
-                goodRegisterRequestDto.getPassword());
+                "valid@example.com",
+                "validPassword123");
 
         ResponseEntity<Void> response = sendLoginRequest(loginRequest);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -65,64 +69,54 @@ class AuthControllerE2ETest extends E2ETestBase {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
-    // // Параметризованные тесты для невалидных данных аутентификации
-    // static Stream<LoginRequestDto> invalidLoginRequests() {
-    // return Stream.of(
-    // new LoginRequestDto("invalid", "password"),
-    // new LoginRequestDto("a@b", "password"),
-    // new LoginRequestDto("valid@example.com", ""),
-    // new LoginRequestDto("valid@example.com", "short"),
-    // new LoginRequestDto(null, null)
-    // );
-    // }
+    static Stream<LoginRequestDto> invalidLoginRequests() {
+        return Stream.of(
+                new LoginRequestDto("invalid", "password"),
+                new LoginRequestDto("a@b", "password"),
+                new LoginRequestDto("valid@example.com", ""),
+                new LoginRequestDto("valid@example.com", "short"),
+                new LoginRequestDto(null, null));
+    }
 
-    // @ParameterizedTest
-    // @MethodSource("invalidLoginRequests")
-    // void login_shouldReturn400_whenInvalidRequest(LoginRequestDto invalidRequest) {
-    // // Act
-    // ResponseEntity<Void> response = sendLoginRequest(invalidRequest);
+    @DisplayName("Login failed - 400")
+    @ParameterizedTest
+    @MethodSource("invalidLoginRequests")
+    void login_400_whenInvalidRequest(LoginRequestDto invalidRequest) {
 
-    // // Assert
-    // Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    // }
+        ResponseEntity<Void> response = sendLoginRequest(invalidRequest);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
 
-    // @Test
-    // void register_shouldReturn400_whenUsernameExists() {
-    // // Arrange
-    // RegisterRequestDto firstUser = createValidRegisterRequest();
-    // sendRegisterRequest(firstUser);
+    @DisplayName("Register failed - 400 when username exists")
+    @Test
+    void register_400_whenUsernameExists() {
 
-    // RegisterRequestDto secondUser = new RegisterRequestDto(
-    // "valid@example.com",
-    // "anotherPassword",
-    // "Second",
-    // "User",
-    // "+7(999)222-22-22",
-    // UserRole.USER
-    // );
+        RegisterRequestDto firstUser = createValidRegisterRequest();
+        sendRegisterRequest(firstUser);
 
-    // // Act
-    // ResponseEntity<Void> response = sendRegisterRequest(secondUser);
+        RegisterRequestDto secondUser = new RegisterRequestDto(
+                "valid@example.com",
+                "anotherPassword",
+                "Second",
+                "User",
+                "+7(999)222-22-22");
 
-    // // Assert
-    // Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    // }
+        ResponseEntity<Void> response = sendRegisterRequest(secondUser);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
 
-    // @Test
-    // void login_shouldReturn401_whenInvalidCredentials() {
-    // // Arrange
-    // RegisterRequestDto registerRequest = createValidRegisterRequest();
-    // sendRegisterRequest(registerRequest);
+    @DisplayName("Register failed - 400 when username exists")
+    @Test
+    void login_401_whenInvalidCredentials() {
 
-    // LoginRequestDto loginRequest = new LoginRequestDto(
-    // "valid@example.com",
-    // "wrongPassword"
-    // );
+        RegisterRequestDto request = createValidRegisterRequest();
+        sendRegisterRequest(request);
 
-    // // Act
-    // ResponseEntity<Void> response = sendLoginRequest(loginRequest);
+        LoginRequestDto loginRequest = new LoginRequestDto(
+                "valid@example.com",
+                "wrongPassword");
 
-    // // Assert
-    // Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-    // }
+        ResponseEntity<Void> response = sendLoginRequest(loginRequest);
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
 }

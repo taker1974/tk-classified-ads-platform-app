@@ -38,7 +38,7 @@ public class UserServiceCached {
 
     private final CacheManager cacheManager;
 
-    private void clearCache(String name) {
+    private void clearCache(final String name) {
 
         Cache cache = cacheManager.getCache(name);
         assert (cache != null);
@@ -56,13 +56,13 @@ public class UserServiceCached {
     }
 
     /**
-     * Check if user exists. Used in registration procedure. Used.
+     * Check if user exists. Used in registration procedure.
      * 
      * @param userName Name.
      * @return True if user exists.
      */
     @Cacheable(value = "existsByName", key = "#userName")
-    public Boolean existsByName(String userName) {
+    public Boolean existsByName(final String userName) {
 
         if (userName == null) {
             throw new TkNullArgumentException("userName");
