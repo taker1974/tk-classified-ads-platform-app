@@ -12,6 +12,7 @@ server:
     mime-types: text/html,text/xml,text/plain,application/json
 
 spring:
+
   application:
     name: tk-classified-ads-platform
   sql:
@@ -108,10 +109,15 @@ management:
       exposure:
         include: health,info,metrics,env,beans,loggers,threaddump,prometheus
 
-# logging:
-#   level:
-#     org:
-#       hibernate: WARN
-#       springframework:
-#         data:
-#           jpa: WARN
+logging:
+  level:
+    org:
+      hibernate: WARN
+      springframework:
+        data:
+          jpa: WARN
+
+cors:
+  allowed-origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"

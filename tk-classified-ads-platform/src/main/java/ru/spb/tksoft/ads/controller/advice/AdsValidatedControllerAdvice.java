@@ -16,6 +16,7 @@ import ru.spb.tksoft.common.controller.advice.ValidatedControllerAdvice;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AdsValidatedControllerAdvice extends ValidatedControllerAdvice {
 
+
     /**
      * Default constructor.
      */

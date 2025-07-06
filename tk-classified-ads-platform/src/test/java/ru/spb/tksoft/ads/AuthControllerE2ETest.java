@@ -10,12 +10,23 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.spb.tksoft.ads.dto.request.LoginRequestDto;
 import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 
-@Testcontainers
+/**
+ * E2E for AuthController.
+ * 
+ * https://www.baeldung.com/spring-boot-built-in-testcontainers
+ * https://blog.jetbrains.com/idea/2024/12/testing-spring-boot-applications-using-testcontainers/
+ * https://testcontainers.com/guides/testing-spring-boot-rest-api-using-testcontainers/
+ * 
+ * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@Testcontainers
 class AuthControllerE2ETest extends E2ETestBase {
 
     @BeforeEach
@@ -24,7 +35,7 @@ class AuthControllerE2ETest extends E2ETestBase {
         userServiceCached.clearCaches();
     }
 
-    @DisplayName("Registered - 201, otherwise - 400 or whatever")
+    @DisplayName("Register OK")
     @Test
     void register_201_whenValidRequest() {
 
@@ -33,7 +44,7 @@ class AuthControllerE2ETest extends E2ETestBase {
         Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
-    @DisplayName("Logged in - 200, otherwise - 400 or whatever")
+    @DisplayName("Logged in OK")
     @Test
     void login_200_whenValidCredentials() {
 
@@ -41,8 +52,8 @@ class AuthControllerE2ETest extends E2ETestBase {
         sendRegisterRequest(request);
 
         var loginRequest = new LoginRequestDto(
-                "valid@example.com",
-                "validPassword123");
+                request.getUsername(),
+                request.getPassword());
 
         ResponseEntity<Void> response = sendLoginRequest(loginRequest);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -60,9 +71,9 @@ class AuthControllerE2ETest extends E2ETestBase {
                 new RegisterRequestDto(null, null, null, null, null, null));
     }
 
-    @DisplayName("Register failed - 400")
-    @ParameterizedTest
     @MethodSource("invalidRegisterRequests")
+    @DisplayName("Register invalid")
+    @ParameterizedTest
     void register_400_whenInvalidRequest(RegisterRequestDto invalidRequest) {
 
         ResponseEntity<Void> response = sendRegisterRequest(invalidRequest);
@@ -78,9 +89,9 @@ class AuthControllerE2ETest extends E2ETestBase {
                 new LoginRequestDto(null, null));
     }
 
+    @MethodSource("invalidLoginRequests")
     @DisplayName("Login failed - 400")
     @ParameterizedTest
-    @MethodSource("invalidLoginRequests")
     void login_400_whenInvalidRequest(LoginRequestDto invalidRequest) {
 
         ResponseEntity<Void> response = sendLoginRequest(invalidRequest);

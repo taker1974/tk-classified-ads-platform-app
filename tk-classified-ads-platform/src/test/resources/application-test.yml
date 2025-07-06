@@ -1,0 +1,17 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info
+
+logging:
+  level:
+    org:
+      hibernate: INFO
+      springframework:
+        data:
+          jpa: INFO
+
+# Empty list means allow from any origin.
+cors:
+  allowed-origins:
