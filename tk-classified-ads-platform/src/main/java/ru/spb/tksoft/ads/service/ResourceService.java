@@ -10,7 +10,10 @@ import java.nio.file.Paths;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +44,40 @@ public class ResourceService {
     private final ImageProcessingProperties avatarImageProcessing;
     private final ImageProcessingProperties adImageProcessing;
 
+    private final ResourceLoader resourceLoader;
+
+    private ResponseEntity<Resource> getDefault(final ImageProcessingProperties properties) {
+
+        try {
+            Resource resource = resourceLoader.getResource(properties.fileNameDefault());
+            MediaType mediaType = MediaType.parseMediaType(properties.mimeTypeDefault());
+            return ResponseEntity.ok().contentType(mediaType).body(resource);
+        } catch (Exception ex) {
+            LogEx.error(log, LogEx.getThisMethodName(), ex);
+            throw ex;
+        }
+    }
+
+    /**
+     * Get default avatar response.
+     * 
+     * @return Response entity.
+     */
+    public ResponseEntity<Resource> getDefaultAvatar() {
+
+        return getDefault(avatarImageProcessing);
+    }
+
+    /**
+     * Get default image response.
+     * 
+     * @return Response entity.
+     */
+    public ResponseEntity<Resource> getDefaultAdImage() {
+
+        return getDefault(adImageProcessing);
+    }
+
     /**
      * Get avatar URL.
      * 
@@ -60,7 +97,7 @@ public class ResourceService {
      * @return Image URL in a form of "/image-base-path/image-id".
      */
     public String getAdImageUrl(long imageId) {
-        
+
         return Paths.get(adImageProcessing.urlBasePath())
                 .resolve(String.valueOf(imageId)).toString();
     }

@@ -50,4 +50,16 @@ public class RegisterRequestDto {
     /** User's role. */
     @NotNull
     private UserRole role;
+
+    /** Reduced constructor for tests. */
+    public RegisterRequestDto(String username, String password,
+            String firstName, String lastName, String phone) {
+
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.role = UserRole.USER;
+    }
 }

@@ -1,15 +1,7 @@
 package ru.spb.tksoft.ads.service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
 import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
-import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.AvatarEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkNullArgumentException;
@@ -44,27 +35,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final UserServiceCached userServiceCached;
     private final ResourceService resourceService;
-
-    /**
-     * Get paginated list of users.
-     * 
-     * @param pageable Paging info.
-     * @return DTO.
-     */
-    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
-
-        return userRepository.findAll(pageable).map(UserMapper::toDto);
-    }
 
     /**
      * Create user.
      * 
      * @param newUser New user.
-     * @return DTO if created, empty DTO otherwise.
      */
     @Transactional
-    public UserResponseDto createUser(UserEntity newUser) {
+    public void createUser(final UserEntity newUser) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
@@ -72,69 +52,18 @@ public class UserService {
             throw new TkNullArgumentException("newUser");
         }
 
-        UserEntity entity = userRepository.save(newUser);
-        UserResponseDto dto = UserMapper.toDto(entity);
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status == STATUS_COMMITTED) {
+                            userServiceCached.clearCaches();
+                        }
+                    }
+                });
 
-        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
-        return dto;
-    }
-
-    /**
-     * Check if user exists.
-     * 
-     * @param userName Name.
-     * @return True if user exists.
-     */
-    public boolean existsByName(String userName) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-        return userRepository.existsByName(userName);
-    }
-
-    /**
-     * Check if user exists.
-     * 
-     * Password must be encoded befor.
-     * 
-     * @param userName Name.
-     * @param passwordEncoded Password.
-     * @return True if user exists.
-     */
-    public boolean existsByNameAndPassword(String userName, String passwordEncoded) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-        if (passwordEncoded == null) {
-            throw new TkNullArgumentException("password");
-        }
-        return userRepository.existsByNameAndPassword(userName, passwordEncoded);
-    }
-
-    /**
-     * Find user by name.
-     * 
-     * @param userName Name.
-     * @return DTO if found, empty DTO otherwise.
-     */
-    public UserResponseDto findUserByName(String userName) {
-
-        if (userName == null) {
-            throw new TkNullArgumentException("userName");
-        }
-
-        UserEntity user = userRepository.findByName(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
-
-        UserResponseDto dto = UserMapper.toDto(user);
-
-        if (user.getAvatar() != null) {
-            dto.setImage(resourceService.getAvatarImageUrl(user.getId()));
-        }
-
-        return dto;
+        userRepository.save(newUser);
+        LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
     /**
@@ -156,13 +85,13 @@ public class UserService {
             throw new TkNullArgumentException("newPasswordRequest");
         }
 
-        String userName = userDetails.getUsername(); // UserDetails.getUsername() cannot return
-                                                     // null.
-        UserEntity user = userRepository.findOneByNameRaw(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, true));
+        String userName = userDetails.getUsername();
+        UserEntity user = userRepository.findOneByNameLazy(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
         user.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
 
+        userServiceCached.clearCaches();
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
 
@@ -174,7 +103,7 @@ public class UserService {
      * @return Response DTO.
      */
     @Transactional
-    public UpdateUserResponseDto updateUser(String userName,
+    public UpdateUserResponseDto updateUser(final String userName,
             final UpdateUserRequestDto updateRequest) {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
@@ -186,12 +115,15 @@ public class UserService {
             throw new TkNullArgumentException("updateRequest");
         }
 
-        UserEntity user = userRepository.findOneByNameRaw(userName)
-                .orElseThrow(() -> new TkUserNotFoundException(userName, true));
+        // Entity must be managed, so use repository durectly, without *Cached requests.
+        UserEntity user = userRepository.findOneByNameLazy(userName)
+                .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
         user.setFirstName(updateRequest.getFirstName());
         user.setLastName(updateRequest.getLastName());
         user.setPhone(updateRequest.getPhone());
+
+        userServiceCached.clearCaches();
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return UserMapper.toDto(updateRequest);
@@ -218,16 +150,16 @@ public class UserService {
      * @throws TkNullArgumentException If any of arguments is null.
      */
     @Transactional
-    public void updateAvatarDb(String userName,
-            String fileName, long fileSize, String contentType) {
+    public void updateAvatarDb(final String userName,
+            final String fileName, final long fileSize, final String contentType) {
 
-        UserEntity user = userRepository.findByName(userName)
+        UserEntity user = userRepository.findOneByNameEager(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
         AvatarEntity avatar = user.getAvatar();
 
         // Planning to delete old avatar image.
-        String oldFileName = avatar != null ? avatar.getName() : "";
+        final String oldFileName = avatar != null ? avatar.getName() : "";
         if (oldFileName != null && !oldFileName.isBlank()) {
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronization() {
@@ -245,8 +177,10 @@ public class UserService {
         avatar.setSize((int) fileSize);
         avatar.setMediatype(contentType);
 
-        avatar.setUser(user);
         user.setAvatar(avatar);
+        avatar.setUser(user);
+
+        userServiceCached.clearCaches();
     }
 
     /**
@@ -257,38 +191,5 @@ public class UserService {
     public void deleteAvatarFile(final String fileName) {
 
         resourceService.deleteAvatarImageFile(fileName);
-    }
-
-    /**
-     * Get avatar by user id.
-     * 
-     * @param userId User ID.
-     * @return Image resource.
-     */
-    public ResponseEntity<Resource> getAvatar(final long userId) {
-
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new TkUserNotFoundException(String.valueOf(userId), false));
-
-        if (user.getAvatar() == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        String filename = user.getAvatar().getName();
-        if (filename.isBlank()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Path filePath = resourceService.getAvatarImagePath(filename);
-        if (!Files.exists(filePath)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Resource resource = new PathResource(filePath);
-        MediaType mediaType = MediaType.parseMediaType(user.getAvatar().getMediatype());
-
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .body(resource);
     }
 }

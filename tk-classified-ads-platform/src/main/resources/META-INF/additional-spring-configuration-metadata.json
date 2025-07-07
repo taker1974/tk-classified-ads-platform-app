@@ -1,6 +1,10 @@
 {
     "properties": [
         {
+            "name": "cors",
+            "description": "CORS-related properties"
+        },
+        {
             "name": "spring.datasource.ads",
             "description": "Ads DB properties"
         },

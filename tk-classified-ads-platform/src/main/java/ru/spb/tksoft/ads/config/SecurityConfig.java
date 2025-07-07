@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,10 @@ import java.util.List;
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final CorsValuesConfig values;
 
     /**
      * Configure Spring Security filters and authorization rules.
@@ -36,10 +40,12 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/register",
                                 "/login",
+                                "/ads/**",
                                 "/users/avatar/**",
                                 "/ads/image/**",
                                 "/v3/api-docs/**",
@@ -69,9 +75,7 @@ public class SecurityConfig {
 
         // Enable CORS for this origins only because of security reasons:
         // basic authentication is used.
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"));
+        config.setAllowedOrigins(values.getAllowedOrigins());
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("*"));

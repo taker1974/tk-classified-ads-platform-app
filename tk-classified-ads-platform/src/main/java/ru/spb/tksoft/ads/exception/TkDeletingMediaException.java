@@ -1,18 +1,13 @@
 package ru.spb.tksoft.ads.exception;
 
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.spb.tksoft.utils.log.LogEx;
 
 /**
  * Delete media file failed.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkDeletingMediaException extends RuntimeException {
-
-    private static final Logger log = LoggerFactory.getLogger(TkDeletingMediaException.class);
+public class TkDeletingMediaException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 657;
@@ -27,7 +22,6 @@ public class TkDeletingMediaException extends RuntimeException {
      */
     public TkDeletingMediaException(String path) {
 
-        super(MESSAGE + ": " + (Objects.isNull(path) ? "" : path));
-        LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, CODE);
+        super(CODE, MESSAGE + ": " + (Objects.isNull(path) ? "" : path));
     }
 }

@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.entity.UserEntity;
-import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
-import ru.spb.tksoft.ads.repository.UserRepository;
+import ru.spb.tksoft.ads.service.UserServiceCached;
 import ru.spb.tksoft.utils.log.LogEx;
 
 /**
@@ -27,7 +26,7 @@ public class UserDetailsServiceBasic implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(UserDetailsServiceBasic.class);
 
-    private final UserRepository userRepository;
+    private final UserServiceCached userServiceCached;
 
     /**
      * {@inheritDoc}
@@ -40,8 +39,7 @@ public class UserDetailsServiceBasic implements UserDetailsService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        UserEntity user = userRepository.findOneByNameRaw(userName)
-            .orElseThrow(()->new TkUserNotFoundException(userName, false));
+        UserEntity user = userServiceCached.getUserEntityLazy(userName);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return User.builder()

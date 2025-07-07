@@ -12,6 +12,7 @@ server:
     mime-types: text/html,text/xml,text/plain,application/json
 
 spring:
+
   application:
     name: tk-classified-ads-platform
   sql:
@@ -22,7 +23,7 @@ spring:
       enabled: always
   thymeleaf:
     check-template-location: false
-
+  
   main:
     lazy-initialization: true
   autoconfigure:
@@ -80,6 +81,10 @@ image:
     io-buffer-size: 10485760
     url-base-path: /users/avatar
     storage-path: /home/kostus/ad-avatar
+    file-name-default: "classpath:static/watto.jpg"
+    file-size-default: 39564
+    mime-type-default: image/jpeg
+
   ad:
     min-file-size-bytes: 512
     max-file-size-bytes: 10485760
@@ -94,9 +99,25 @@ image:
     io-buffer-size: 10485760
     url-base-path: /ads/image
     storage-path: /home/kostus/ad-image
+    file-name-default: "classpath:static/no-image.png"
+    file-size-default: 45061
+    mime-type-default: image/png
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics,env,beans,loggers,threaddump,prometheus
+
+logging:
+  level:
+    org:
+      hibernate: WARN
+      springframework:
+        data:
+          jpa: WARN
+
+cors:
+  allowed-origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"

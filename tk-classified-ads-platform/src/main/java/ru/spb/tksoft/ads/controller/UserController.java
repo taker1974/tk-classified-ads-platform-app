@@ -6,6 +6,7 @@ import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.service.UserService;
+import ru.spb.tksoft.ads.service.UserServiceCached;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,9 @@ public class UserController {
 
     @NotNull
     private final UserService userService;
+
+    @NotNull
+    private final UserServiceCached userServiceCached;
 
     /**
      * Set new password endpoint.
@@ -64,7 +68,7 @@ public class UserController {
     @NotNull
     public UserResponseDto getUser(@AuthenticationPrincipal UserDetails userDetails) {
 
-        return userService.findUserByName(userDetails.getUsername());
+        return userServiceCached.getUser(userDetails.getUsername());
     }
 
     /**
@@ -82,7 +86,7 @@ public class UserController {
     public UpdateUserResponseDto updateUser(@AuthenticationPrincipal UserDetails userDetails,
             @NotNull @Valid @RequestBody UpdateUserRequestDto updateRequest) {
 
-        return userService.updateUser(userDetails.getUsername(), updateRequest);
+            return userService.updateUser(userDetails.getUsername(), updateRequest);
     }
 
     /**
@@ -112,7 +116,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/avatar/{userId}")
     public ResponseEntity<Resource> getAvatar(@PathVariable(required = true) long userId) {
-        
-        return userService.getAvatar(userId);
+
+        return userServiceCached.getAvatar(userId);
     }
 }

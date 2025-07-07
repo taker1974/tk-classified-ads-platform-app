@@ -9,26 +9,22 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Caffein cache config.
+ * Caffeine cache config.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
 @Configuration
 @EnableCaching
-public class CaffeinCacheConfig {
+public class CaffeineCacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
 
         var cacheManager = new CaffeineCacheManager();
-
         cacheManager.setCaffeine(Caffeine.newBuilder()
-                .initialCapacity(100)
-                .maximumSize(1000)
-                .expireAfterAccess(30, TimeUnit.MINUTES));
-
-        cacheManager.setAllowNullValues(false);
-
+                .maximumSize(500)
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .recordStats());
         return cacheManager;
     }
 }

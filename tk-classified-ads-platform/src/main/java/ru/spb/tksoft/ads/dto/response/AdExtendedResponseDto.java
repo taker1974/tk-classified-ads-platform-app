@@ -32,8 +32,7 @@ public class AdExtendedResponseDto {
     private String description;
 
     /** Image URL. */
-    @JsonProperty("image")
-    private String imageUrl;
+    private String image;
 
     /** Author's first name. */
     private String authorFirstName;

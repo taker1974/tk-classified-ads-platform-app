@@ -1,17 +1,11 @@
 package ru.spb.tksoft.ads.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.spb.tksoft.utils.log.LogEx;
-
 /**
  * Comment not found.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkCommentNotFoundException extends RuntimeException {
-
-    private static final Logger log = LoggerFactory.getLogger(TkCommentNotFoundException.class);
+public class TkCommentNotFoundException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 922;
@@ -22,11 +16,10 @@ public class TkCommentNotFoundException extends RuntimeException {
     /**
      * Constructor.
      * 
-     * @param adId Ad ID.
+     * @param subMessage Additional message.
      */
-    public TkCommentNotFoundException(long adId) {
+    public TkCommentNotFoundException(String subMessage) {
 
-        super(MESSAGE + ": " + adId);
-        LogEx.error(log, LogEx.getThisMethodName(), LogEx.EXCEPTION_THROWN, CODE, this);
+        super(CODE, MESSAGE + ": " + subMessage);
     }
 }

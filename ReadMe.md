@@ -6,6 +6,15 @@
 Поиск, CRUD.  
 Java, Spring Boot.
 
+## Применяемые технологии
+
+Java - openjdk 21,  
+Spring Boot 3.5.3, Lombok,  
+Mockito,  
+JavaDoc, Swagger,  
+Liquibase, PostgreSQL, Caffeine,  
+Spring Security.
+
 ## Подготовка к развёртыванию на узле
 
 **Требуемое ПО**:
@@ -13,7 +22,7 @@ Java, Spring Boot.
 - PostgreSQL >= 15;
 - Java >= 21.
 
-Версии ПО могут быть другими. При разработке используется Postgres 15 и 17 и Java 21 и 24.  
+Версии ПО могут быть другими. При разработке используется Postgres 15 и 17 и Java 21.  
 Нет явных ограничений на использование других версий ПО.
 
 **Postgres**:
@@ -35,8 +44,15 @@ ALTER DATABASE
 
 **Java**:
 
-- установить JDK или JRE версии не ниже 21 (на этой версии ведётся разработка: нет явных ограничений на использование других версий Java);
+- установить JDK или JRE версии не ниже 21 (разработка ведётся на версии 24: нет явных ограничений на использование других версий Java);
 - убедиться в правильности установки, в доступности java, javac, maven (mvn);
+- **важно** установить переменную JAVA_HOME (в ~/.bashrc, например):
+
+```Bash
+$export JAVA_HOME=/usr/lib/jvm/java-24-openjdk
+```
+
+При возникновении сложностей при работе с openjdk-24 можно откатиться на openjdk-21: просто замените во всех pom.xml версии 24 на 21.
 
 ## Запуск приложения
 
@@ -52,7 +68,7 @@ $java -jar target/tk-classified-ads-platform-<ваша.версия.ПО>.jar
 
 В браузере:
 
-http://localhost:<ваш-порт>/swagger-ui/index.html
+[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 ## Документация
 

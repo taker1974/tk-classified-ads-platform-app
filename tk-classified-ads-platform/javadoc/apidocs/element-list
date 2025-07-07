@@ -8,6 +8,7 @@ ru.spb.tksoft.ads.entity
 ru.spb.tksoft.ads.enumeration
 ru.spb.tksoft.ads.exception
 ru.spb.tksoft.ads.mapper
+ru.spb.tksoft.ads.projection
 ru.spb.tksoft.ads.repository
 ru.spb.tksoft.ads.service
 ru.spb.tksoft.ads.service.auth

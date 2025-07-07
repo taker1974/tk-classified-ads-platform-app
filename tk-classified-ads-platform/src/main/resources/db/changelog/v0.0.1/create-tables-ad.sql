@@ -4,7 +4,6 @@
 -- Naming convention - see SQL Style Guide: snake_case, lowercase.
 
 -- Notes for "ad" table:
--- image URL/path/etc. stored separately;
 -- price is a decimal value for convenience.
 
 -- changeSet kostusonline:3081a2d1-6ba9-5534-a9e3-8c088577cf93 runOnChange:true

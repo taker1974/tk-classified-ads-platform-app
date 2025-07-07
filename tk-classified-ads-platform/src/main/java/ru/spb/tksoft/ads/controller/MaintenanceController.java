@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import ru.spb.tksoft.ads.service.AdServiceCached;
+import ru.spb.tksoft.ads.service.UserServiceCached;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,6 +23,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequiredArgsConstructor
 public class MaintenanceController {
 
+    private final UserServiceCached userServiceCached;
+    private final AdServiceCached adsServiceCached;
+
     /**
      * Clear caches.
      */
@@ -28,6 +33,8 @@ public class MaintenanceController {
     @Operation(summary = "Сброс всех кэшей")
     @PostMapping("/clear-caches")
     public void clearCaches() {
-        // ...
+        
+        userServiceCached.clearCaches();
+        adsServiceCached.clearCaches();
     }
 }

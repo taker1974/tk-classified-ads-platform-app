@@ -6,6 +6,7 @@ import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 import ru.spb.tksoft.ads.entity.UserEntity;
+import ru.spb.tksoft.ads.service.ResourceService;
 
 /**
  * Mapper for User*.
@@ -25,7 +26,8 @@ public final class UserMapper {
      * @return user DTO.
      */
     @NotNull
-    public static UserResponseDto toDto(final UserEntity entity) {
+    public static UserResponseDto toDto(final ResourceService resourceService,
+            final UserEntity entity) {
 
         return new UserResponseDto(
                 entity.getId(),
@@ -34,7 +36,7 @@ public final class UserMapper {
                 entity.getLastName(),
                 entity.getPhone(),
                 entity.getRole(),
-                entity.getAvatar() == null ? "no avatar" : entity.getAvatar().getName());
+                resourceService.getAvatarImageUrl(entity.getId()));
     }
 
     /**

@@ -1,14 +1,15 @@
 package ru.spb.tksoft.ads.mapper;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Set;
 import jakarta.validation.constraints.NotNull;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
 import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
+import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
-import ru.spb.tksoft.ads.entity.ImageEntity;
-import ru.spb.tksoft.ads.entity.UserEntity;
+import ru.spb.tksoft.ads.projection.AdExtendedResponseProjection;
+import ru.spb.tksoft.ads.projection.AdResponseProjection;
 import ru.spb.tksoft.ads.service.ResourceService;
 
 /**
@@ -23,70 +24,60 @@ public final class AdMapper {
     private AdMapper() {}
 
     /**
-     * Gets first image file name.
+     * AdResponseProjection to DTO.
      * 
-     * @param entity Ad entity.
-     * @return File name.
+     * @param resourceService Resource service.
+     * @param projection AdResponseProjection.
+     * @return Response DTO.
      */
-    public static String getFirstImageFileName(final AdEntity entity) {
+    @NotNull
+    public static AdResponseDto toDto(final ResourceService resourceService,
+            final AdResponseProjection projection) {
 
-        if (entity.getImages() != null && !entity.getImages().isEmpty()) {
-            return entity.getImages().getFirst().getName();
-        }
-        return "";
+        return new AdResponseDto(projection.getId(),
+                projection.getUserId(),
+                resourceService.getAdImageUrl(projection.getImageId()),
+                projection.getPrice().intValue(),
+                projection.getTitle());
     }
 
     /**
-     * Entity to DTO.
+     * Set of AdResponseDto to data DTO.
      * 
+     * @param size Amount of items.
+     * @param responseSet Items.
+     * @return Response set.
+     */
+    @NotNull
+    public static AdsArrayResponseDto toAdsDto(int size,
+            final Set<AdResponseDto> responseSet) {
+
+        return new AdsArrayResponseDto(responseSet.size(), responseSet);
+    }
+
+    /**
+     * AdEntity to DTO.
+     * 
+     * @param resourceService Resource service.
      * @param entity Ad entity.
-     * @return user DTO.
+     * @return Response DTO.
      */
     @NotNull
     public static AdResponseDto toDto(final ResourceService resourceService,
             final AdEntity entity) {
 
-        String image = "";
-        List<ImageEntity> images = entity.getImages();
-        if (images != null && !images.isEmpty()) {
-            image = resourceService.getAdImageUrl(entity.getImages().getFirst().getId());
-        }
-
         return new AdResponseDto(entity.getId(),
                 entity.getUser().getId(),
-                image,
+                resourceService.getAdImageUrl(entity.getId()),
                 entity.getPrice().intValue(),
                 entity.getTitle());
     }
 
     /**
-     * Entity to extended DTO.
-     * 
-     * @param e Ad entity.
-     * @return user DTO.
-     */
-    @NotNull
-    public static AdExtendedResponseDto toExtendedDto(final ResourceService resourceService,
-            final AdEntity e) {
-
-        String image = "";
-        List<ImageEntity> images = e.getImages();
-        if (images != null && !images.isEmpty()) {
-            image = resourceService.getAdImageUrl(e.getImages().getFirst().getId());
-        }
-
-        UserEntity u = e.getUser();
-        return new AdExtendedResponseDto(
-                e.getId(), e.getTitle(), e.getPrice().intValue(), e.getDescription(),
-                image,
-                u.getFirstName(), u.getLastName(), u.getName(), u.getPhone());
-    }
-
-    /**
-     * DTO to entity.
-     * 
-     * @param dto DTO.
-     * @return New entity.
+     * CreateOrUpdateAdRequestDto to entity.
+     *
+     * @param dto Request DTO.
+     * @return New ad entity.
      */
     @NotNull
     public static AdEntity toEntity(final CreateOrUpdateAdRequestDto dto) {
@@ -95,5 +86,24 @@ public final class AdMapper {
                 dto.getTitle(),
                 BigDecimal.valueOf(dto.getPrice()),
                 dto.getDescription());
+    }
+
+    /**
+     * Ad projection to extended DTO.
+     *
+     * @param projection Ad projection.
+     * @return Extended ad DTO.
+     */
+    @NotNull
+    public static AdExtendedResponseDto toDto(final ResourceService resourceService,
+            final AdExtendedResponseProjection projection) {
+
+        return new AdExtendedResponseDto(
+                projection.getId(),
+                projection.getTitle(), projection.getPrice().intValue(),
+                projection.getDescription(),
+                resourceService.getAdImageUrl(projection.getImageId()),
+                projection.getAuthorFirstName(), projection.getAuthorLastName(),
+                projection.getEmail(), projection.getPhone());
     }
 }

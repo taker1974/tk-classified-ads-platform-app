@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 
 /**
- * Repository of ImageRepository.
+ * Repository of ImageEntity.
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
