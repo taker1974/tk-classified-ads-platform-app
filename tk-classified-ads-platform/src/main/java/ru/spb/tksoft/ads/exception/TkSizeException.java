@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkSizeException extends RuntimeException {
+public class TkSizeException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 694;
@@ -22,6 +22,6 @@ public class TkSizeException extends RuntimeException {
      */
     public TkSizeException(String objectName) {
 
-        super(MESSAGE + ": " + (Objects.isNull(objectName) ? "" : objectName));
+        super(CODE, MESSAGE + ": " + (Objects.isNull(objectName) ? "" : objectName));
     }
 }

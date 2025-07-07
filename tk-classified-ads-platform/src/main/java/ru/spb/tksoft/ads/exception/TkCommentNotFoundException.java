@@ -5,7 +5,7 @@ package ru.spb.tksoft.ads.exception;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkCommentNotFoundException extends RuntimeException {
+public class TkCommentNotFoundException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 922;
@@ -20,6 +20,6 @@ public class TkCommentNotFoundException extends RuntimeException {
      */
     public TkCommentNotFoundException(String subMessage) {
 
-        super(MESSAGE + ": " + subMessage);
+        super(CODE, MESSAGE + ": " + subMessage);
     }
 }

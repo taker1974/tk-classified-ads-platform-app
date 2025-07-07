@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -16,10 +15,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.spb.tksoft.ads.dto.request.NewPasswordRequestDto;
 import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
@@ -28,19 +25,13 @@ import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 /**
  * E2E for UserController.
  * 
- * https://www.baeldung.com/spring-boot-built-in-testcontainers
- * https://blog.jetbrains.com/idea/2024/12/testing-spring-boot-applications-using-testcontainers/
- * https://testcontainers.com/guides/testing-spring-boot-rest-api-using-testcontainers/
- * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@Testcontainers
 class UserControllerE2ETest extends E2ETestBase {
 
     @BeforeEach
     void resetDatabase() {
+
         userRepository.deleteAll();
         userServiceCached.clearCaches();
     }
@@ -192,19 +183,17 @@ class UserControllerE2ETest extends E2ETestBase {
         // Get user ID.
         HttpHeaders authHeaders = createBasicAuthHeaders(credentials);
         ResponseEntity<UserResponseDto> userResponse = restTemplate.exchange(
-            getBaseUrl() + "/users/me",
-            HttpMethod.GET,
-            new HttpEntity<>(authHeaders),
-            UserResponseDto.class
-        );
+                getBaseUrl() + "/users/me",
+                HttpMethod.GET,
+                new HttpEntity<>(authHeaders),
+                UserResponseDto.class);
         long userId = userResponse.getBody().getId();
-        
+
         // Try to get user avatar without authorization.
         ResponseEntity<Resource> response = restTemplate.getForEntity(
-            getBaseUrl() + "/users/avatar/" + userId,
-            Resource.class
-        );
-        
+                getBaseUrl() + "/users/avatar/" + userId,
+                Resource.class);
+
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }

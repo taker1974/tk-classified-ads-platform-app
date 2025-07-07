@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkNullArgumentException extends RuntimeException {
+public class TkNullArgumentException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 225;
@@ -22,6 +22,6 @@ public class TkNullArgumentException extends RuntimeException {
      */
     public TkNullArgumentException(String argumentName) {
 
-        super(MESSAGE + ": " + (Objects.isNull(argumentName) ? "" : argumentName));
+        super(CODE, MESSAGE + ": " + (Objects.isNull(argumentName) ? "" : argumentName));
     }
 }

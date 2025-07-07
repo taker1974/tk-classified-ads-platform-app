@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkUserExistsException extends RuntimeException {
+public class TkUserExistsException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 957;
@@ -22,6 +22,6 @@ public class TkUserExistsException extends RuntimeException {
      */
     public TkUserExistsException(String userName) {
 
-        super(MESSAGE + ": " + (Objects.isNull(userName) ? "null" : userName));
+        super(CODE, MESSAGE + ": " + (Objects.isNull(userName) ? "null" : userName));
     }
 }

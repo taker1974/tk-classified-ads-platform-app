@@ -2,27 +2,33 @@ package ru.spb.tksoft.ads;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
 import ru.spb.tksoft.ads.dto.request.LoginRequestDto;
 import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
+import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.enumeration.UserRole;
 import ru.spb.tksoft.ads.repository.AdRepository;
+import ru.spb.tksoft.ads.repository.CommentRepository;
 import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
-import ru.spb.tksoft.ads.service.AdService;
 import ru.spb.tksoft.ads.service.AdServiceCached;
 import ru.spb.tksoft.ads.service.UserServiceCached;
 
@@ -38,7 +44,10 @@ import ru.spb.tksoft.ads.service.UserServiceCached;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Testcontainers
-class E2ETestBase {
+abstract class E2ETestBase {
+
+    protected static final String TEST_IMAGE = "test-avatar.jpg";
+    protected byte[] testImageBytes;
 
     @LocalServerPort
     protected Integer port;
@@ -54,6 +63,9 @@ class E2ETestBase {
 
     @Autowired
     protected ImageRepository imageRepository;
+
+    @Autowired
+    protected CommentRepository commentRepository;
 
     @Autowired
     protected UserServiceCached userServiceCached;
@@ -75,7 +87,8 @@ class E2ETestBase {
                     .withUsername("ads_god")
                     .withPassword("87654321")
                     .withExposedPorts(5432)
-                    .withReuse(true);
+                    .withReuse(true)
+                    .withLabel("reuse.UUID", "e06307ab-8fad-55e4-8f9d-0e5470ac7456");
 
     @DynamicPropertySource
     protected static void postgresProperties(DynamicPropertyRegistry registry) {
@@ -111,7 +124,6 @@ class E2ETestBase {
         HttpEntity<LoginRequestDto> entity = new HttpEntity<>(request, headers);
         return restTemplate.postForEntity(getBaseUrl() + "/login", entity, Void.class);
     }
-
     protected static record UserCredentials(String name, String password) {
 
         /** Base64 from name and password. */
@@ -144,5 +156,35 @@ class E2ETestBase {
         return new UserCredentials(
                 registerRequest.getUsername(),
                 registerRequest.getPassword());
+    }
+
+    protected AdResponseDto createAd(UserCredentials credentials) {
+
+        HttpHeaders headers = createBasicAuthHeaders(credentials);
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        CreateOrUpdateAdRequestDto properties = new CreateOrUpdateAdRequestDto(
+                "Test Ad",
+                1000,
+                "Test description");
+
+        ByteArrayResource resource = new ByteArrayResource(testImageBytes) {
+            @Override
+            public String getFilename() {
+                return TEST_IMAGE;
+            }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("properties", properties);
+        body.add("image", resource);
+
+        ResponseEntity<AdResponseDto> response = restTemplate.exchange(
+                getBaseUrl() + "/ads",
+                HttpMethod.POST,
+                new HttpEntity<>(body, headers),
+                AdResponseDto.class);
+
+        return response.getBody();
     }
 }

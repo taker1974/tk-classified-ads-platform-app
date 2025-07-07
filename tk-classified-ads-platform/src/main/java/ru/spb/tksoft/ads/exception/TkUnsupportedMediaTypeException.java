@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkUnsupportedMediaTypeException extends RuntimeException {
+public class TkUnsupportedMediaTypeException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 673;
@@ -22,6 +22,6 @@ public class TkUnsupportedMediaTypeException extends RuntimeException {
      */
     public TkUnsupportedMediaTypeException(String mediaType) {
 
-        super(MESSAGE + ": " + (Objects.isNull(mediaType) ? "" : mediaType));
+        super(CODE, MESSAGE + ": " + (Objects.isNull(mediaType) ? "" : mediaType));
     }
 }

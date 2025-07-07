@@ -5,7 +5,7 @@ package ru.spb.tksoft.ads.exception;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkAdNotOwnedException extends RuntimeException {
+public class TkAdNotOwnedException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 124;
@@ -20,6 +20,6 @@ public class TkAdNotOwnedException extends RuntimeException {
      */
     public TkAdNotOwnedException(long adId) {
 
-        super(MESSAGE + ": " + adId);
+        super(CODE, MESSAGE + ": " + adId);
     }
 }

@@ -5,7 +5,7 @@ package ru.spb.tksoft.ads.exception;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkCommentNotOwnedException extends RuntimeException {
+public class TkCommentNotOwnedException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 663;
@@ -20,6 +20,6 @@ public class TkCommentNotOwnedException extends RuntimeException {
      */
     public TkCommentNotOwnedException(long adId) {
 
-        super(MESSAGE + ": " + adId);
+        super(CODE, MESSAGE + ": " + adId);
     }
 }

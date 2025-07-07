@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -15,9 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.LinkedMultiValueMap;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
 import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
@@ -28,19 +25,9 @@ import org.springframework.util.MultiValueMap;
 /**
  * E2E for AdController.
  * 
- * https://www.baeldung.com/spring-boot-built-in-testcontainers
- * https://blog.jetbrains.com/idea/2024/12/testing-spring-boot-applications-using-testcontainers/
- * https://testcontainers.com/guides/testing-spring-boot-rest-api-using-testcontainers/
- * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@Testcontainers
 class AdControllerE2ETest extends E2ETestBase {
-
-    private static final String TEST_IMAGE = "test-avatar.jpg";
-    private byte[] testImageBytes;
 
     @BeforeEach
     void setupEach() throws IOException {
@@ -110,36 +97,6 @@ class AdControllerE2ETest extends E2ETestBase {
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals("Test Ad", response.getBody().getTitle());
         Assertions.assertEquals(1000, response.getBody().getPrice());
-    }
-
-    private AdResponseDto createAd(UserCredentials credentials) {
-
-        HttpHeaders headers = createBasicAuthHeaders(credentials);
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        CreateOrUpdateAdRequestDto properties = new CreateOrUpdateAdRequestDto(
-                "Test Ad",
-                1000,
-                "Test description");
-
-        ByteArrayResource resource = new ByteArrayResource(testImageBytes) {
-            @Override
-            public String getFilename() {
-                return TEST_IMAGE;
-            }
-        };
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("properties", properties);
-        body.add("image", resource);
-
-        ResponseEntity<AdResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads",
-                HttpMethod.POST,
-                new HttpEntity<>(body, headers),
-                AdResponseDto.class);
-
-        return response.getBody();
     }
 
     @DisplayName("Get user ads - should return 200 and user ads")

@@ -7,30 +7,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.spb.tksoft.ads.dto.request.LoginRequestDto;
 import ru.spb.tksoft.ads.dto.request.RegisterRequestDto;
 
 /**
  * E2E for AuthController.
  * 
- * https://www.baeldung.com/spring-boot-built-in-testcontainers
- * https://blog.jetbrains.com/idea/2024/12/testing-spring-boot-applications-using-testcontainers/
- * https://testcontainers.com/guides/testing-spring-boot-rest-api-using-testcontainers/
- * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@Testcontainers
 class AuthControllerE2ETest extends E2ETestBase {
 
     @BeforeEach
     void resetDatabase() {
+
         userRepository.deleteAll();
         userServiceCached.clearCaches();
     }

@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkSavingMediaException extends RuntimeException {
+public class TkSavingMediaException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 222;
@@ -22,6 +22,6 @@ public class TkSavingMediaException extends RuntimeException {
      */
     public TkSavingMediaException(String path) {
 
-        super(MESSAGE + ": " + (Objects.isNull(path) ? "" : path));
+        super(CODE, MESSAGE + ": " + (Objects.isNull(path) ? "" : path));
     }
 }

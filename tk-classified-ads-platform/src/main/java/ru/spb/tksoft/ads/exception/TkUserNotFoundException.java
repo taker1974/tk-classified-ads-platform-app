@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Konstantin Terskikh, kostus.online.1974@yandex.ru, 2025
  */
-public class TkUserNotFoundException extends RuntimeException {
+public class TkUserNotFoundException extends TkAdBaseException {
 
     /** Error code. */
     public static final int CODE = 885;
@@ -28,7 +28,7 @@ public class TkUserNotFoundException extends RuntimeException {
                                     // statement.
     public TkUserNotFoundException(String userName, boolean authenticationFailed) {
 
-        super(authenticationFailed ? MESSAGE_AUTH
+        super(CODE, authenticationFailed ? MESSAGE_AUTH
                 : MESSAGE + ": " + (Objects.isNull(userName) ? "null" : userName));
     }
 }
