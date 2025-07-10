@@ -78,7 +78,7 @@ public class AdController {
     @GetMapping("/image/{adId}")
     public ResponseEntity<Resource> getAdImage(@PathVariable(required = true) long adId) {
 
-        return adsServiceCached.getAdImage(adId);
+        return adsService.getAdImage(adId);
     }
 
     /**

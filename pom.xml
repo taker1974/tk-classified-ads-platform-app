@@ -6,7 +6,7 @@
 
     <groupId>ru.spb.tksoft</groupId>
     <artifactId>tk-classified-ads-platform-app</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <java.version>21</java.version>

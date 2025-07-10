@@ -144,23 +144,22 @@ public class UserService {
      * Update avatar of authenticated user.
      * 
      * @param userName Name.
-     * @param fileName Filename.
-     * @param fileSize File size.
-     * @param contentType File type.
+     * @param newFileName Filename.
+     * @param newFileSize File size.
+     * @param newContentType File type.
      * @throws TkNullArgumentException If any of arguments is null.
      */
     @Transactional
     public void updateAvatarDb(final String userName,
-            final String fileName, final long fileSize, final String contentType) {
+            final String newFileName, final long newFileSize, final String newContentType) {
 
         UserEntity user = userRepository.findOneByNameEager(userName)
                 .orElseThrow(() -> new TkUserNotFoundException(userName, false));
 
         AvatarEntity avatar = user.getAvatar();
 
-        // Planning to delete old avatar image.
-        final String oldFileName = avatar != null ? avatar.getName() : "";
-        if (oldFileName != null && !oldFileName.isBlank()) {
+        final String oldFileName = avatar == null ? "" : avatar.getName();
+        if (!oldFileName.isBlank()) {
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronization() {
                         @Override
@@ -173,9 +172,9 @@ public class UserService {
         }
 
         avatar = avatar != null ? avatar : new AvatarEntity();
-        avatar.setName(fileName);
-        avatar.setSize((int) fileSize);
-        avatar.setMediatype(contentType);
+        avatar.setName(newFileName);
+        avatar.setSize((int) newFileSize);
+        avatar.setMediatype(newContentType);
 
         user.setAvatar(avatar);
         avatar.setUser(user);
