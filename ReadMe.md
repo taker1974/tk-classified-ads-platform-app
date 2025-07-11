@@ -2,18 +2,26 @@
 
 ## О приложении
 
-Доска объявлений с возможностью использования медиа, с комментированием.  
+Сайт объявлений с возможностью использования медиа, с комментированием.  
 Поиск, CRUD.  
 Java, Spring Boot.
 
 ## Применяемые технологии
 
-Java - openjdk 21,  
-Spring Boot 3.5.3, Lombok,  
-Mockito,  
-JavaDoc, Swagger,  
-Liquibase, PostgreSQL, Caffeine,  
-Spring Security.
+Java 21, openjdk,
+Spring Boot 3.5.3, Lombok, Jakarta Validation, Jackson, Spring Security,  
+Liquibase, PostgreSQL, JPQL, SQL,  
+[Caffeine],  Redis,  
+Mockito, JUnit, Testcontainers, Docker, Docker Compose,  
+JavaDoc, Swagger,
+Fedora Linux 42, VS Code,
+GigaCode: на уровне Intellisense,  
+DeepSeek: сложный поиск и сравнение, общие вопросы, рутина (описание БД в mermaid, основы тестов по описаниям), код-ревью.  
+
+Git - командная строка, github, плагины VS Code.
+Ведение проекта - github projects. Работа над проектом велась в канбан.
+
+Более подробное описание смотри в [tk-classified-ads-platform/ReadMe.md](https://github.com/taker1974/tk-classified-ads-platform-app/blob/main/tk-classified-ads-platform/ReadMe.md)
 
 ## Подготовка к развёртыванию на узле
 
@@ -22,7 +30,7 @@ Spring Security.
 - PostgreSQL >= 15;
 - Java >= 21.
 
-Версии ПО могут быть другими. При разработке используется Postgres 15 и 17 и Java 21.  
+Версии ПО могут быть другими. При разработке используется Postgres 17 и Java 21.  
 Нет явных ограничений на использование других версий ПО.
 
 **Postgres**:

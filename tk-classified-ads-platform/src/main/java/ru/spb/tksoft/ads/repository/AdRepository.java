@@ -46,7 +46,7 @@ public interface AdRepository extends JpaRepository<AdEntity, Long> {
             JOIN a.user u
             LEFT JOIN a.image i
             WHERE u.name = :userName""")
-    List<AdResponseProjection> findManyMinimal(String userName);
+    List<AdResponseProjection> findManyMinimalByName(String userName);
 
     /**
      * @return Optional AdExtendedResponseProjection by ad ID.
@@ -77,41 +77,4 @@ public interface AdRepository extends JpaRepository<AdEntity, Long> {
      */
     @Query("SELECT a FROM AdEntity a WHERE a.user.name = :userName AND a.id = :adId")
     Optional<AdEntity> findOneByUserNameAndAdId(String userName, Long adId);
-
-    // /**
-    // * List of AdEntity.
-    // *
-    // * @return List of AdEntity.
-    // */
-    // @Query("""
-    // SELECT a FROM AdEntity a
-    // INNER JOIN FETCH a.user u
-    // INNER JOIN FETCH a.image i""")
-    // List<AdEntity> findManyEager();
-
-    // /**
-    // * List of AdEntity by user name.
-    // *
-    // * @param userName User name.
-    // * @return List of AdEntity.
-    // */
-    // @Query("""
-    // SELECT a FROM AdEntity a
-    // INNER JOIN FETCH a.user u
-    // INNER JOIN FETCH a.image i
-    // WHERE u.name = :userName""")
-    // List<AdEntity> findManyByUserNameEager(String userName);
-
-    // /**
-    // * AdEntity by ad ID.
-    // *
-    // * @param adId Ad ID.
-    // * @return Optional AdEntity.
-    // */
-    // @Query("""
-    // SELECT a FROM AdEntity a
-    // INNER JOIN FETCH a.user u
-    // INNER JOIN FETCH a.image i
-    // WHERE a.id = :adId""")
-    // Optional<AdEntity> findOneByUserNameEager(Long adId);
 }

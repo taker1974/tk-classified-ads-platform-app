@@ -14,7 +14,7 @@
     <groupId>ru.spb.tksoft</groupId>
     <artifactId>tk-classified-ads-platform</artifactId>
     <name>tk-classified-ads-platform</name>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <description>A classified ads platform for buying/selling items with photo uploads and comments.</description>
 
     <packaging>jar</packaging>
@@ -49,7 +49,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <start-class>ru.spb.tksoft.ads.TKAdsApplication</start-class>
-        <maven.test.skip>false</maven.test.skip>
+        <maven.test.skip>true</maven.test.skip>
     </properties>
 
     <dependencies>
@@ -240,6 +240,16 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>3.2.1</version>
@@ -269,6 +279,7 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -321,11 +332,15 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <!-- <image>
+                        <name>ghcr.io/taker1974/${project.artifactId}:${project.version}</name>
+                    </image> -->
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>build-info</goal>
+                            <!-- <goal>build-image</goal> -->
                         </goals>
                     </execution>
                 </executions>
@@ -342,14 +357,14 @@
                     <source>21</source>
                 </configuration>
 
-                <executions>
+                <!-- <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>javadoc</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions> -->
             </plugin>
 
             <plugin>

@@ -19,6 +19,13 @@ logging:
         data:
           jpa: WARN
 
+image:
+  avatar:
+    storage-path: /home/kostus/test/ad-avatar
+
+  ad:
+    storage-path: /home/kostus/test/ad-image
+
 # Empty list means allow from any origin.
 cors:
   allowed-origins:

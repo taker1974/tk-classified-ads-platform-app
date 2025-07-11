@@ -34,3 +34,9 @@ build/
 
 .gigaide/
 **/javadoc/
+
+### Data ###
+ad-image-data/
+avatar-image-data/
+postgres-data/
+redis-data/

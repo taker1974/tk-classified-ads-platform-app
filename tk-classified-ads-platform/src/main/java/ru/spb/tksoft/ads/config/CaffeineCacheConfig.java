@@ -17,13 +17,15 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching
 public class CaffeineCacheConfig {
 
+    public static final long ENTRY_TTL = 10;
+
     @Bean
-    public CacheManager cacheManager() {
+    public CacheManager caffeineCacheManager() {
 
         var cacheManager = new CaffeineCacheManager();
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(500)
-                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .expireAfterWrite(ENTRY_TTL, TimeUnit.MINUTES)
                 .recordStats());
         return cacheManager;
     }

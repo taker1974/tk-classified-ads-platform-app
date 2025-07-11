@@ -112,7 +112,7 @@ public class UserServiceCached {
      * @param userId User ID.
      * @return Image resource.
      */
-    @Cacheable(value = "getAvatar", key = "#userId")
+    //@Cacheable(value = "getAvatar", key = "#userId")
     public ResponseEntity<Resource> getAvatar(final Long userId) {
 
         UserEntity user = userRepository.findOneByIdEager(userId)

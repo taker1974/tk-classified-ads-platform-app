@@ -1,11 +1,17 @@
 package ru.spb.tksoft.ads.service;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -20,10 +26,12 @@ import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.ImageEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
 import ru.spb.tksoft.ads.exception.TkAdNotFoundException;
+import ru.spb.tksoft.ads.exception.TkMediaNotFoundException;
 import ru.spb.tksoft.ads.exception.TkUserNotFoundException;
 import ru.spb.tksoft.ads.mapper.AdMapper;
 import ru.spb.tksoft.ads.projection.AdResponseProjection;
 import ru.spb.tksoft.ads.repository.AdRepository;
+import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.utils.log.LogEx;
 
@@ -43,6 +51,7 @@ public class AdService {
 
     private final AdRepository adRepository;
     private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
 
     /**
      * Save ad image file.
@@ -139,39 +148,38 @@ public class AdService {
      * 
      * @param userName User name.
      * @param adId Ad ID.
-     * @param fileName Filename.
-     * @param fileSize File size.
-     * @param contentType File type.
+     * @param newFileName Filename.
+     * @param newFileSize File size.
+     * @param newContentType File type.
      */
     @Transactional
     public void updateImageEntity(final String userName, Long adId,
-            final String fileName, Long fileSize, final String contentType) {
+            final String newFileName, Long newFileSize, final String newContentType) {
 
         AdEntity ad = adRepository.findOneByUserNameAndAdId(userName, adId)
                 .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
 
-        TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
-                        if (status == STATUS_ROLLED_BACK) {
-                            resourceService.deleteAdImageFile(fileName);
-                        } else if (status == STATUS_COMMITTED) {
-                            String oldFileName =
-                                    ad.getImage() == null ? "" : ad.getImage().getName();
-                            if (!oldFileName.isBlank()) {
+        String oldFileName = ad.getImage() == null ? "" : ad.getImage().getName();
+        if (!oldFileName.isBlank()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCompletion(int status) {
+                            if (status == STATUS_ROLLED_BACK) {
+                                resourceService.deleteAdImageFile(newFileName);
+                            } else if (status == STATUS_COMMITTED) {
                                 resourceService.deleteAdImageFile(oldFileName);
+                                adsServiceCached.clearCaches();
                             }
-                            adsServiceCached.clearCaches();
                         }
-                    }
-                });
+                    });
+        }
 
         ImageEntity image = ad.getImage();
 
-        image.setName(fileName);
-        image.setSize(fileSize.intValue());
-        image.setMediatype(contentType);
+        image.setName(newFileName);
+        image.setSize(newFileSize.intValue());
+        image.setMediatype(newContentType);
     }
 
     /**
@@ -222,22 +230,54 @@ public class AdService {
                 .findOneByUserNameAndAdId(userDetails.getUsername(), adId)
                 .orElseThrow(() -> new TkAdNotFoundException(String.valueOf(adId)));
 
-        TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
-                        if (status == STATUS_COMMITTED) {
-                            String imageFileName =
-                                    ad.getImage() == null ? "" : ad.getImage().getName();
-                            if (!imageFileName.isBlank()) {
-                                resourceService.deleteAdImageFile(imageFileName);
+        String deletingFileName = ad.getImage() == null ? "" : ad.getImage().getName();
+        if (!deletingFileName.isBlank()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCompletion(int status) {
+                            if (status == STATUS_COMMITTED) {
+                                resourceService.deleteAdImageFile(deletingFileName);
+                                adsServiceCached.clearCaches();
                             }
-                            adsServiceCached.clearCaches();
                         }
-                    }
-                });
+                    });
+        }
 
         adRepository.delete(ad);
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
+    }
+
+    /**
+     * Get ad image by id.
+     * 
+     * @param adId Ad ID.
+     * @return Image resource.
+     */
+    public ResponseEntity<Resource> getAdImage(final Long adId) {
+
+        ImageEntity image = imageRepository.findById(adId)
+                .orElseThrow(() -> new TkMediaNotFoundException(String.valueOf(adId)));
+
+        String filename = image.getName();
+
+        if (filename == null || filename.isBlank()) {
+            LogEx.error(log, LogEx.getThisMethodName(),
+                    "Ad " + adId + ": " + "image file not set");
+            return resourceService.getDefaultAdImage();
+        }
+
+        Path filePath = resourceService.getAdImagePath(filename);
+        if (!Files.exists(filePath)) {
+            LogEx.error(log, LogEx.getThisMethodName(),
+                    "Ad " + adId + ": " + "image file \"" + filename + "\" not found");
+            return resourceService.getDefaultAdImage();
+        }
+
+        Resource resource = new PathResource(filePath);
+        MediaType mediaType = MediaType.parseMediaType(image.getMediatype());
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(resource);
     }
 }
