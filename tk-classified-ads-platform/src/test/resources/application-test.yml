@@ -21,40 +21,10 @@ logging:
 
 image:
   avatar:
-    min-file-size-bytes: 100
-    max-file-size-bytes: 10485760
-    min-width: 64
-    min-height: 64
-    max-width: 1920
-    max-height: 1080
-    allowed-mime-types:
-      - image/jpeg
-      - image/png
-      - image/webp
-    io-buffer-size: 10485760
-    url-base-path: /users/avatar
     storage-path: /home/kostus/test/ad-avatar
-    file-name-default: "classpath:static/watto.jpg"
-    file-size-default: 39564
-    mime-type-default: image/jpeg
 
   ad:
-    min-file-size-bytes: 512
-    max-file-size-bytes: 10485760
-    min-width: 256
-    min-height: 256
-    max-width: 2048
-    max-height: 2048
-    allowed-mime-types:
-      - image/jpeg
-      - image/png
-      - image/webp
-    io-buffer-size: 10485760
-    url-base-path: /ads/image
     storage-path: /home/kostus/test/ad-image
-    file-name-default: "classpath:static/no-image.png"
-    file-size-default: 45061
-    mime-type-default: image/png
 
 # Empty list means allow from any origin.
 cors:

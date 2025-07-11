@@ -88,8 +88,8 @@ image:
     io-buffer-size: 10485760
     url-base-path: /users/avatar
     storage-path: /home/kostus/ad-avatar
-    file-name-default: "classpath:static/watto.jpg"
-    file-size-default: 39564
+    file-name-default: "classpath:static/ai-v4.jpg"
+    file-size-default: 250243
     mime-type-default: image/jpeg
 
   ad:
