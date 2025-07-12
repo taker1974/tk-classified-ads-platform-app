@@ -13,7 +13,7 @@ Liquibase, PostgreSQL, JPQL, SQL,
 [Caffeine],  Redis,  
 Mockito, JUnit, Testcontainers, Docker, Docker Compose,  
 JavaDoc, Swagger,
-Fedora Linux 42, VS Code,
+Fedora Linux 42, VS Code,  
 GigaCode: на уровне Intellisense,  
 DeepSeek: сложный поиск и сравнение, общие вопросы, рутина (описание БД в mermaid, основы тестов по описаниям), код-ревью.  
 
