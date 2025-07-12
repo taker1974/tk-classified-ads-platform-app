@@ -48,7 +48,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Обновление пароля")
-    @PostMapping("/set_password")
+    @PatchMapping("/set_password")
     public void setPassword(@AuthenticationPrincipal UserDetails userDetails,
             @NotNull @Valid @RequestBody NewPasswordRequestDto newPasswordRequest) {
 
