@@ -6,7 +6,6 @@ import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
 import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.CommentEntity;
 import ru.spb.tksoft.ads.service.CommentService;
-import ru.spb.tksoft.ads.service.CommentServiceCached;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,7 +30,6 @@ import jakarta.validation.constraints.NotNull;
 public class CommentController {
 
     private final CommentService commentService;
-    private final CommentServiceCached commentServiceCached;
 
     /**
      * Create new comment.
@@ -62,7 +60,7 @@ public class CommentController {
     @NotNull
     public CommentsArrayResponseDto getComments(@PathVariable(required = true) long adId) {
 
-        return commentServiceCached.getComments(Long.valueOf(adId));
+        return commentService.getComments(Long.valueOf(adId));
     }
 
     /**

@@ -35,7 +35,7 @@ public class ImageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Owner user. */
+    /** Owner ad. */
     @JsonBackReference("ad-image")
     @OneToOne
     @JoinColumn(name = "ad_id", nullable = false)

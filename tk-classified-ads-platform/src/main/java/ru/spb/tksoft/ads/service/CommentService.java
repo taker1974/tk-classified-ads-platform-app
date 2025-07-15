@@ -1,14 +1,15 @@
 package ru.spb.tksoft.ads.service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateCommentRequestDto;
 import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
+import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import ru.spb.tksoft.ads.entity.AdEntity;
 import ru.spb.tksoft.ads.entity.CommentEntity;
 import ru.spb.tksoft.ads.entity.UserEntity;
@@ -33,8 +34,6 @@ public class CommentService {
     private final Logger log = LoggerFactory.getLogger(CommentService.class);
 
     private final ResourceService resourceService;
-
-    private final CommentServiceCached commentServiceCached;
 
     private final AdRepository adRepository;
     private final UserRepository userRepository;
@@ -76,20 +75,25 @@ public class CommentService {
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STARTING);
 
-        TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
-                        if (status == STATUS_COMMITTED) {
-                            commentServiceCached.clearCaches();
-                        }
-                    }
-                });
-
         CommentEntity savedComment = commentRepository.save(entity);
 
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPING);
         return CommentMapper.toDto(resourceService, savedComment);
+    }
+
+    /**
+     * Get comments for given ad.
+     * 
+     * @param adId Ad id.
+     * @return Response DTO.
+     */
+    public CommentsArrayResponseDto getComments(final Long adId) {
+
+        Set<CommentResponseDto> resultSet = commentRepository.findManyByAdId(adId).stream()
+                .map(comment -> CommentMapper.toDto(resourceService, comment))
+                .collect(Collectors.toSet());
+
+        return CommentMapper.toDto(resultSet);
     }
 
     /**
@@ -105,16 +109,6 @@ public class CommentService {
         CommentEntity comment = commentRepository.findOneByUserExact(userName, adId, commentId)
                 .orElseThrow(() -> new TkCommentNotFoundException(
                         "Comment from " + userName + " with id " + commentId + " not found"));
-
-        TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
-                        if (status == STATUS_COMMITTED) {
-                            commentServiceCached.clearCaches();
-                        }
-                    }
-                });
 
         comment.setText(requestDto.getText());
         return CommentMapper.toDto(resourceService, comment);
@@ -135,16 +129,6 @@ public class CommentService {
         CommentEntity comment = commentRepository.findOneByUserExact(userName, adId, commentId)
                 .orElseThrow(() -> new TkCommentNotFoundException(
                         "Comment from " + userName + " with id " + commentId + " not found"));
-
-        TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
-                        if (status == STATUS_COMMITTED) {
-                            commentServiceCached.clearCaches();
-                        }
-                    }
-                });
 
         commentRepository.delete(comment);
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);

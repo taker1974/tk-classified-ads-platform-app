@@ -244,6 +244,11 @@ public class AdService {
                     });
         }
 
+        // Break cyclic dependencies befor deleting.
+        ad.getComments().forEach(comment -> comment.setAd(null));
+        ad.getComments().clear();
+
+        // Ready to delete.
         adRepository.delete(ad);
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
     }
