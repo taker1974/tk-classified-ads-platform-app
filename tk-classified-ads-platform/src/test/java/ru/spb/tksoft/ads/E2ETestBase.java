@@ -72,7 +72,7 @@ abstract class E2ETestBase {
     @Autowired
     protected AdServiceCached adServiceCached;
 
-    protected String getBaseUrl() {
+    protected String api() {
         return "http://localhost:" + port;
     }
 
@@ -113,7 +113,7 @@ abstract class E2ETestBase {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<RegisterRequestDto> entity = new HttpEntity<>(request, headers);
-        return restTemplate.postForEntity(getBaseUrl() + "/register", entity, Void.class);
+        return restTemplate.postForEntity(api() + "/register", entity, Void.class);
     }
 
     protected ResponseEntity<Void> sendLoginRequest(LoginRequestDto request) {
@@ -121,7 +121,7 @@ abstract class E2ETestBase {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<LoginRequestDto> entity = new HttpEntity<>(request, headers);
-        return restTemplate.postForEntity(getBaseUrl() + "/login", entity, Void.class);
+        return restTemplate.postForEntity(api() + "/login", entity, Void.class);
     }
     protected static record UserCredentials(String name, String password) {
 
@@ -149,7 +149,7 @@ abstract class E2ETestBase {
                 registerRequest.getUsername(),
                 registerRequest.getPassword());
         ResponseEntity<Void> loginResponse = restTemplate.postForEntity(
-                getBaseUrl() + "/login", loginRequest, Void.class);
+                api() + "/login", loginRequest, Void.class);
         Assertions.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         return new UserCredentials(
@@ -179,7 +179,7 @@ abstract class E2ETestBase {
         body.add("image", resource);
 
         ResponseEntity<AdResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads",
+                api() + "/ads",
                 HttpMethod.POST,
                 new HttpEntity<>(body, headers),
                 AdResponseDto.class);
