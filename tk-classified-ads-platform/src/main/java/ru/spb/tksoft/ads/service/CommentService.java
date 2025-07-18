@@ -1,5 +1,6 @@
 package ru.spb.tksoft.ads.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -90,6 +91,21 @@ public class CommentService {
     public CommentsArrayResponseDto getComments(final Long adId) {
 
         Set<CommentResponseDto> resultSet = commentRepository.findManyByAdId(adId).stream()
+                .map(comment -> CommentMapper.toDto(resourceService, comment))
+                .collect(Collectors.toSet());
+
+        return CommentMapper.toDto(resultSet);
+    }
+
+    /**
+     * Get all comments. Test method.
+     * 
+     * @return Response DTO.
+     */
+    public CommentsArrayResponseDto getAllComments() {
+
+        List<CommentEntity> comments = commentRepository.findMany();
+        Set<CommentResponseDto> resultSet = comments.stream()
                 .map(comment -> CommentMapper.toDto(resourceService, comment))
                 .collect(Collectors.toSet());
 

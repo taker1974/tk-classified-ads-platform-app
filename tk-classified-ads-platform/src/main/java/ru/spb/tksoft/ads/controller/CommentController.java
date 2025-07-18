@@ -50,7 +50,7 @@ public class CommentController {
     }
 
     /**
-     * Get all comments.
+     * Get all comments by ad ID.
      * 
      * @return 200/OK, 401/Unauthorized, 404/NOT_FOUND.
      */
@@ -61,6 +61,20 @@ public class CommentController {
     public CommentsArrayResponseDto getComments(@PathVariable(required = true) long adId) {
 
         return commentService.getComments(Long.valueOf(adId));
+    }
+
+    /**
+     * Get all comments. Test method.
+     * 
+     * @return 200/OK, 401/Unauthorized, 404/NOT_FOUND.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Получение всех комментариев")
+    @GetMapping("/comments")
+    @NotNull
+    public CommentsArrayResponseDto getAllComments() {
+
+        return commentService.getAllComments();
     }
 
     /**
