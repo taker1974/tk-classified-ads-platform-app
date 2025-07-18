@@ -103,6 +103,16 @@ public class ResourceService {
     }
 
     /**
+     * Get directory with avatars.
+     * 
+     * @return Path to directory.
+     */
+    public Path getAvatarsDirectory() {
+
+        return Path.of(avatarImageProcessing.storagePath());
+    }
+
+    /**
      * Get avatar path.
      * 
      * @param avatarFileName Avatar file name.
@@ -111,6 +121,16 @@ public class ResourceService {
     public Path getAvatarImagePath(String avatarFileName) {
 
         return Path.of(avatarImageProcessing.storagePath(), avatarFileName);
+    }
+
+    /**
+     * Get directory with images.
+     * 
+     * @return Path to directory.
+     */
+    public Path getImagesDirectory() {
+
+        return Path.of(adImageProcessing.storagePath());
     }
 
     /**

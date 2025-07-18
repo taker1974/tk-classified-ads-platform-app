@@ -2,6 +2,7 @@ package ru.spb.tksoft.ads;
 
 import java.io.IOException;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +52,11 @@ class CommentControllerE2ETest extends E2ETestBase {
         testAd = createAd(credentials);
     }
 
+    @AfterEach
+    void tearDownAll() {
+        clearMedia();
+    }
+
     static final String COMMENT_TEXT = "Test comment";
 
     @DisplayName("Add comment - should return 200 and created comment")
@@ -65,7 +71,8 @@ class CommentControllerE2ETest extends E2ETestBase {
 
         ResponseEntity<CommentResponseDto> response = restTemplate.exchange(
                 r("{api}/ads/{id}/comments", api(), testAd.getId()),
-                HttpMethod.POST, new HttpEntity<>(request, headers), CommentResponseDto.class);
+                HttpMethod.POST, new HttpEntity<>(request, headers),
+                CommentResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
@@ -81,7 +88,8 @@ class CommentControllerE2ETest extends E2ETestBase {
 
         ResponseEntity<CommentsArrayResponseDto> response = restTemplate.exchange(
                 r("{api}/ads/{id}/comments", api(), testAd.getId()),
-                HttpMethod.GET, new HttpEntity<>(headers), CommentsArrayResponseDto.class);
+                HttpMethod.GET, new HttpEntity<>(headers),
+                CommentsArrayResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
@@ -94,7 +102,8 @@ class CommentControllerE2ETest extends E2ETestBase {
 
         ResponseEntity<CommentResponseDto> response = restTemplate.exchange(
                 r("{api}/ads/{id}/comments", api(), adId),
-                HttpMethod.POST, new HttpEntity<>(request, headers), CommentResponseDto.class);
+                HttpMethod.POST, new HttpEntity<>(request, headers),
+                CommentResponseDto.class);
 
         return response.getBody();
     }
@@ -113,7 +122,8 @@ class CommentControllerE2ETest extends E2ETestBase {
 
         ResponseEntity<CommentsArrayResponseDto> response = restTemplate.exchange(
                 r("{api}/ads/{id}/comments", api(), testAd.getId()),
-                HttpMethod.GET, new HttpEntity<>(headers), CommentsArrayResponseDto.class);
+                HttpMethod.GET, new HttpEntity<>(headers),
+                CommentsArrayResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
@@ -142,7 +152,8 @@ class CommentControllerE2ETest extends E2ETestBase {
         var updateRequest = new CreateOrUpdateCommentRequestDto("Updated comment");
 
         ResponseEntity<CommentResponseDto> response = restTemplate.exchange(
-                r("{api}/ads/{id}/comments/{commentId}", api(), testAd.getId(), comment.getId()),
+                r("{api}/ads/{id}/comments/{commentId}", api(), testAd.getId(),
+                        comment.getId()),
                 HttpMethod.PATCH, new HttpEntity<>(updateRequest, headers),
                 CommentResponseDto.class);
 
@@ -165,14 +176,16 @@ class CommentControllerE2ETest extends E2ETestBase {
                 headers);
 
         ResponseEntity<Void> deleteResponse = restTemplate.exchange(
-                r("{api}/ads/{id}/comments/{commentId}", api(), testAd.getId(), comment.getId()),
+                r("{api}/ads/{id}/comments/{commentId}", api(), testAd.getId(),
+                        comment.getId()),
                 HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
 
         Assertions.assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
 
         ResponseEntity<CommentsArrayResponseDto> getResponse = restTemplate.exchange(
                 r("{api}/ads/{id}/comments", api(), testAd.getId()),
-                HttpMethod.GET, new HttpEntity<>(headers), CommentsArrayResponseDto.class);
+                HttpMethod.GET, new HttpEntity<>(headers),
+                CommentsArrayResponseDto.class);
 
         Assertions.assertEquals(0, getResponse.getBody().getCount());
     }
@@ -190,7 +203,8 @@ class CommentControllerE2ETest extends E2ETestBase {
 
         ResponseEntity<CommentResponseDto> response = restTemplate.exchange(
                 r("{api}/ads/{id}/comments", api(), invalidAdId),
-                HttpMethod.POST, new HttpEntity<>(request, headers), CommentResponseDto.class);
+                HttpMethod.POST, new HttpEntity<>(request, headers),
+                CommentResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -207,7 +221,8 @@ class CommentControllerE2ETest extends E2ETestBase {
         long invalidCommentId = 9999L;
 
         ResponseEntity<CommentResponseDto> response = restTemplate.exchange(
-                r("{api}/ads/{id}/comments/{commentId}", api(), testAd.getId(), invalidCommentId),
+                r("{api}/ads/{id}/comments/{commentId}", api(), testAd.getId(),
+                        invalidCommentId),
                 HttpMethod.PATCH, new HttpEntity<>(updateRequest, headers),
                 CommentResponseDto.class);
 

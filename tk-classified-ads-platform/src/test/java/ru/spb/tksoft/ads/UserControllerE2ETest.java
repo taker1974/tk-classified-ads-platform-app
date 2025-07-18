@@ -1,6 +1,7 @@
 package ru.spb.tksoft.ads;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,11 @@ class UserControllerE2ETest extends E2ETestBase {
 
         userRepository.deleteAll();
         userServiceCached.clearCaches();
+    }
+
+    @AfterEach
+    void tearDownAll() {
+        clearMedia();
     }
 
     @DisplayName("Set valid password")
@@ -177,7 +183,8 @@ class UserControllerE2ETest extends E2ETestBase {
         HttpHeaders authHeaders = createBasicAuthHeaders(credentials);
         ResponseEntity<UserResponseDto> userResponse = restTemplate.exchange(
                 r("{api}/users/me", api()),
-                HttpMethod.GET, new HttpEntity<>(authHeaders), UserResponseDto.class);
+                HttpMethod.GET, new HttpEntity<>(authHeaders),
+                UserResponseDto.class);
         long userId = userResponse.getBody().getId();
 
         // Try to get user avatar without authorization.

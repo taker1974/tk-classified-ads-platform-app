@@ -2,6 +2,7 @@ package ru.spb.tksoft.ads;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,7 @@ import ru.spb.tksoft.ads.repository.CommentRepository;
 import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.ads.service.AdServiceCached;
+import ru.spb.tksoft.ads.service.ResourceService;
 import ru.spb.tksoft.ads.service.UserServiceCached;
 
 /**
@@ -71,6 +73,18 @@ abstract class E2ETestBase {
 
     @Autowired
     protected AdServiceCached adServiceCached;
+
+    @Autowired
+    protected ResourceService resourceService;
+
+    protected void clearMedia() {
+        try {
+            FileUtils.cleanDirectory(resourceService.getAvatarsDirectory().toFile());
+            FileUtils.cleanDirectory(resourceService.getImagesDirectory().toFile());
+        } catch (Exception e) {
+            Assertions.assertTrue(true);
+        }
+    }
 
     protected String api() {
         return "http://localhost:" + port;
@@ -123,6 +137,7 @@ abstract class E2ETestBase {
         HttpEntity<LoginRequestDto> entity = new HttpEntity<>(request, headers);
         return restTemplate.postForEntity(api() + "/login", entity, Void.class);
     }
+
     protected static record UserCredentials(String name, String password) {
 
         /** Base64 from name and password. */

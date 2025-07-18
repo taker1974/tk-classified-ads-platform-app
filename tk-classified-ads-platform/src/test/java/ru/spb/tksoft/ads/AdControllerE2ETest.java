@@ -2,6 +2,7 @@ package ru.spb.tksoft.ads;
 
 import java.io.IOException;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +48,11 @@ class AdControllerE2ETest extends E2ETestBase {
 
         Resource imageResource = new ClassPathResource(TEST_IMAGE);
         testImageBytes = imageResource.getInputStream().readAllBytes();
+    }
+
+    @AfterEach
+    void tearDownAll() {
+        clearMedia();
     }
 
     @DisplayName("Get all ads - should return 200 and empty list when no ads")
