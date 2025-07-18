@@ -363,14 +363,14 @@
                     <source>21</source>
                 </configuration>
 
-                <executions>
+                <!-- <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>javadoc</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions> -->
             </plugin>
 
             <plugin>

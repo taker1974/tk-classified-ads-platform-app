@@ -16,6 +16,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -109,6 +110,22 @@ abstract class E2ETestBase {
         registry.add("spring.datasource.ads.username", postgres::getUsername);
         registry.add("spring.datasource.ads.password", postgres::getPassword);
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+    }
+
+    @SuppressWarnings("resource")
+    @Container
+    @ServiceConnection
+    protected static GenericContainer<?> redis =
+
+            new GenericContainer<>(DockerImageName.parse("redis:8.0.3"))
+                    .withExposedPorts(6379)
+                    .withReuse(true)
+                    .withLabel("reuse.UUID", "594d464a-b8df-5faf-b425-694c2ebfd23a");
+
+    @DynamicPropertySource
+    static void redisProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
     }
 
     protected RegisterRequestDto createValidRegisterRequest() {
