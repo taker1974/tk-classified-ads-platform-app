@@ -9,9 +9,9 @@
 
 Java 21, openjdk,
 Spring Boot 3.5.3, Lombok, Jakarta Validation, Jackson, Spring Security,  
-Liquibase, PostgreSQL, JPQL, SQL,  
+Liquibase, PostgreSQL, JPQL, [SQL],  
 [Caffeine],  Redis,  
-Mockito, JUnit, Testcontainers, Docker, Docker Compose,  
+[Mockito], JUnit, Testcontainers, Docker, Docker Compose,  
 JavaDoc, Swagger,
 Fedora Linux 42, VS Code,  
 GigaCode: на уровне Intellisense,  
@@ -29,8 +29,7 @@ Git - командная строка, github, плагины VS Code.
 
 **Hibernate/JPA:**
 
-- точечное использование нативных запросов;
-- основная масса методов репозиториев - JPQL;
+- методы репозиториев - JPQL;
 - ограниченно применены интерфейсные проекции для сложностоставных данных.
 
 **Кэширование:**  
