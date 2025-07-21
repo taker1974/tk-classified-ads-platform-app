@@ -1,7 +1,6 @@
 package ru.spb.tksoft.ads.entity;
 
 import java.math.BigDecimal;
-import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,7 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
@@ -53,13 +51,6 @@ public class AdEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private ImageEntity image;
-
-    /** Comments. */
-    @JsonManagedReference("ad-comment")
-    @OneToMany(mappedBy = "ad", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private Set<CommentEntity> comments;
 
     /** Title. */
     @Column(nullable = false, length = 32)

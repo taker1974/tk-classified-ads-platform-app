@@ -2,6 +2,7 @@ package ru.spb.tksoft.ads;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -29,6 +31,7 @@ import ru.spb.tksoft.ads.repository.CommentRepository;
 import ru.spb.tksoft.ads.repository.ImageRepository;
 import ru.spb.tksoft.ads.repository.UserRepository;
 import ru.spb.tksoft.ads.service.AdServiceCached;
+import ru.spb.tksoft.ads.service.ResourceService;
 import ru.spb.tksoft.ads.service.UserServiceCached;
 
 /**
@@ -72,7 +75,19 @@ abstract class E2ETestBase {
     @Autowired
     protected AdServiceCached adServiceCached;
 
-    protected String getBaseUrl() {
+    @Autowired
+    protected ResourceService resourceService;
+
+    protected void clearMedia() {
+        try {
+            FileUtils.cleanDirectory(resourceService.getAvatarsDirectory().toFile());
+            FileUtils.cleanDirectory(resourceService.getImagesDirectory().toFile());
+        } catch (Exception e) {
+            Assertions.assertTrue(true);
+        }
+    }
+
+    protected String api() {
         return "http://localhost:" + port;
     }
 
@@ -97,6 +112,22 @@ abstract class E2ETestBase {
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
     }
 
+    @SuppressWarnings("resource")
+    @Container
+    @ServiceConnection
+    protected static GenericContainer<?> redis =
+
+            new GenericContainer<>(DockerImageName.parse("redis:8.0.3"))
+                    .withExposedPorts(6379)
+                    .withReuse(true)
+                    .withLabel("reuse.UUID", "594d464a-b8df-5faf-b425-694c2ebfd23a");
+
+    @DynamicPropertySource
+    static void redisProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+    }
+
     protected RegisterRequestDto createValidRegisterRequest() {
 
         return new RegisterRequestDto(
@@ -113,7 +144,7 @@ abstract class E2ETestBase {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<RegisterRequestDto> entity = new HttpEntity<>(request, headers);
-        return restTemplate.postForEntity(getBaseUrl() + "/register", entity, Void.class);
+        return restTemplate.postForEntity(api() + "/register", entity, Void.class);
     }
 
     protected ResponseEntity<Void> sendLoginRequest(LoginRequestDto request) {
@@ -121,8 +152,9 @@ abstract class E2ETestBase {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<LoginRequestDto> entity = new HttpEntity<>(request, headers);
-        return restTemplate.postForEntity(getBaseUrl() + "/login", entity, Void.class);
+        return restTemplate.postForEntity(api() + "/login", entity, Void.class);
     }
+
     protected static record UserCredentials(String name, String password) {
 
         /** Base64 from name and password. */
@@ -149,7 +181,7 @@ abstract class E2ETestBase {
                 registerRequest.getUsername(),
                 registerRequest.getPassword());
         ResponseEntity<Void> loginResponse = restTemplate.postForEntity(
-                getBaseUrl() + "/login", loginRequest, Void.class);
+                api() + "/login", loginRequest, Void.class);
         Assertions.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         return new UserCredentials(
@@ -179,7 +211,7 @@ abstract class E2ETestBase {
         body.add("image", resource);
 
         ResponseEntity<AdResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads",
+                api() + "/ads",
                 HttpMethod.POST,
                 new HttpEntity<>(body, headers),
                 AdResponseDto.class);

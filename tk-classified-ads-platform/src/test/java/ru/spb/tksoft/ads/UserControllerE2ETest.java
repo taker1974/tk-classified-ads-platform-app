@@ -1,6 +1,7 @@
 package ru.spb.tksoft.ads;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +23,8 @@ import ru.spb.tksoft.ads.dto.request.UpdateUserRequestDto;
 import ru.spb.tksoft.ads.dto.response.UpdateUserResponseDto;
 import ru.spb.tksoft.ads.dto.response.UserResponseDto;
 
+import static ru.spb.tksoft.utils.string.StringEx.r;
+
 /**
  * E2E for UserController.
  * 
@@ -34,6 +37,11 @@ class UserControllerE2ETest extends E2ETestBase {
 
         userRepository.deleteAll();
         userServiceCached.clearCaches();
+    }
+
+    @AfterEach
+    void tearDownAll() {
+        clearMedia();
     }
 
     @DisplayName("Set valid password")
@@ -50,10 +58,8 @@ class UserControllerE2ETest extends E2ETestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<Void> response = restTemplate.exchange(
-                getBaseUrl() + "/users/set_password",
-                HttpMethod.POST,
-                new HttpEntity<>(request, headers),
-                Void.class);
+                r("{api}/users/set_password", api()),
+                HttpMethod.PATCH, new HttpEntity<>(request, headers), Void.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -73,10 +79,8 @@ class UserControllerE2ETest extends E2ETestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<Void> response = restTemplate.exchange(
-                getBaseUrl() + "/users/set_password",
-                HttpMethod.POST,
-                new HttpEntity<>(request, headers),
-                Void.class);
+                r("{api}/users/set_password", api()),
+                HttpMethod.PATCH, new HttpEntity<>(request, headers), Void.class);
 
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
@@ -100,10 +104,8 @@ class UserControllerE2ETest extends E2ETestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<Void> response = restTemplate.exchange(
-                getBaseUrl() + "/users/set_password",
-                HttpMethod.POST,
-                new HttpEntity<>(request, headers),
-                Void.class);
+                r("{api}/users/set_password", api()),
+                HttpMethod.PATCH, new HttpEntity<>(request, headers), Void.class);
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -117,7 +119,7 @@ class UserControllerE2ETest extends E2ETestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<UserResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/users/me",
+                r("{api}/users/me", api()),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 UserResponseDto.class);
@@ -140,9 +142,8 @@ class UserControllerE2ETest extends E2ETestBase {
                 "Alice", "Smith", "+79998887766");
 
         ResponseEntity<UpdateUserResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/users/me",
-                HttpMethod.PATCH,
-                new HttpEntity<>(updateRequest, headers),
+                r("{api}/users/me", api()),
+                HttpMethod.PATCH, new HttpEntity<>(updateRequest, headers),
                 UpdateUserResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -166,10 +167,8 @@ class UserControllerE2ETest extends E2ETestBase {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         ResponseEntity<Void> response = restTemplate.exchange(
-                getBaseUrl() + "/users/me/image",
-                HttpMethod.PATCH,
-                new HttpEntity<>(body, headers),
-                Void.class);
+                r("{api}/users/me/image", api()),
+                HttpMethod.PATCH, new HttpEntity<>(body, headers), Void.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -183,16 +182,14 @@ class UserControllerE2ETest extends E2ETestBase {
         // Get user ID.
         HttpHeaders authHeaders = createBasicAuthHeaders(credentials);
         ResponseEntity<UserResponseDto> userResponse = restTemplate.exchange(
-                getBaseUrl() + "/users/me",
-                HttpMethod.GET,
-                new HttpEntity<>(authHeaders),
+                r("{api}/users/me", api()),
+                HttpMethod.GET, new HttpEntity<>(authHeaders),
                 UserResponseDto.class);
         long userId = userResponse.getBody().getId();
 
         // Try to get user avatar without authorization.
         ResponseEntity<Resource> response = restTemplate.getForEntity(
-                getBaseUrl() + "/users/avatar/" + userId,
-                Resource.class);
+                r("{api}/users/avatar/{id}", api(), userId), Resource.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }

@@ -49,7 +49,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <start-class>ru.spb.tksoft.ads.TKAdsApplication</start-class>
-        <maven.test.skip>true</maven.test.skip>
+        <maven.test.skip>false</maven.test.skip>
     </properties>
 
     <dependencies>
@@ -58,6 +58,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-imaging</artifactId>
             <version>1.0.0-alpha6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.19.0</version>
         </dependency>
 
         <dependency>
@@ -332,15 +338,15 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <!-- <image>
+                    <image>
                         <name>ghcr.io/taker1974/${project.artifactId}:${project.version}</name>
-                    </image> -->
+                    </image>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>build-info</goal>
-                            <!-- <goal>build-image</goal> -->
+                            <goal>build-image</goal>
                         </goals>
                     </execution>
                 </executions>

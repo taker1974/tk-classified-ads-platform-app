@@ -28,6 +28,12 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     List<CommentEntity> findManyByAdId(Long adId);
 
     /**
+     * @return List of CommentEntity. Test method.
+     */
+    @Query("SELECT c FROM CommentEntity c JOIN FETCH c.user")
+    List<CommentEntity> findMany();
+
+    /**
      * @return Optional CommentEntity by user name and ad ID.
      */
     @Query("""

@@ -17,16 +17,18 @@ public final class StringEx {
 
     /**
      * Replace "Some {text} data" with substring. Example: str = "{host}:{port}/{app}" with
-     * parameters "localhost", 8080 and "school" will be returned "localhost:8080/school".
+     * parameters "localhost", 8080 and "school" will be returned "localhost:8080/school".  
+     * 
+     * The method name is intentionally shortened to "r".
      *
      * @param str Source string in a form like "http://{host}:{port}/{app}".
      * @param objects Substrings like "myhost", 7654, "mycoolapp".
      * @return Resulting string in a form like "http://myhost:7654/mycoolapp".
      */
-    public static String replace(String str, Object... objects) {
+    public static String r(String str, Object... objects) {
 
         for (Object object : objects) {
-            if (str != null && str.isEmpty()) {
+            if (str != null && !str.isEmpty()) {
                 str = str.replaceFirst("\\{[^}]*}", object.toString());
             }
         }

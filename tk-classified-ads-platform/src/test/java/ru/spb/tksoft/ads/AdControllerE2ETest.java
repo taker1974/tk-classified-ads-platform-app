@@ -2,6 +2,7 @@ package ru.spb.tksoft.ads;
 
 import java.io.IOException;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,11 +17,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import ru.spb.tksoft.ads.dto.request.CreateOrUpdateAdRequestDto;
+import ru.spb.tksoft.ads.dto.request.CreateOrUpdateCommentRequestDto;
 import ru.spb.tksoft.ads.dto.response.AdExtendedResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdResponseDto;
 import ru.spb.tksoft.ads.dto.response.AdsArrayResponseDto;
+import ru.spb.tksoft.ads.dto.response.CommentResponseDto;
+import ru.spb.tksoft.ads.dto.response.CommentsArrayResponseDto;
 import org.springframework.core.io.Resource;
 import org.springframework.util.MultiValueMap;
+
+import static ru.spb.tksoft.utils.string.StringEx.r;
 
 /**
  * E2E for AdController.
@@ -44,6 +50,11 @@ class AdControllerE2ETest extends E2ETestBase {
         testImageBytes = imageResource.getInputStream().readAllBytes();
     }
 
+    @AfterEach
+    void tearDownAll() {
+        clearMedia();
+    }
+
     @DisplayName("Get all ads - should return 200 and empty list when no ads")
     @Test
     void getAllAds_shouldReturn200AndEmptyList_whenNoAds() {
@@ -52,9 +63,8 @@ class AdControllerE2ETest extends E2ETestBase {
         HttpHeaders headers = createBasicAuthHeaders(credentials);
 
         ResponseEntity<AdsArrayResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads",
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
+                r("{api}/ads", api()),
+                HttpMethod.GET, new HttpEntity<>(headers),
                 AdsArrayResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -88,9 +98,8 @@ class AdControllerE2ETest extends E2ETestBase {
         body.add("image", resource);
 
         ResponseEntity<AdResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads",
-                HttpMethod.POST,
-                new HttpEntity<>(body, headers),
+                r("{api}/ads", api()),
+                HttpMethod.POST, new HttpEntity<>(body, headers),
                 AdResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -109,9 +118,8 @@ class AdControllerE2ETest extends E2ETestBase {
         long adId = createAd(credentials).getId();
 
         ResponseEntity<AdsArrayResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads/me",
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
+                r("{api}/ads/me", api()),
+                HttpMethod.GET, new HttpEntity<>(headers),
                 AdsArrayResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -133,9 +141,8 @@ class AdControllerE2ETest extends E2ETestBase {
         AdResponseDto createdAd = createAd(credentials);
 
         ResponseEntity<AdExtendedResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads/" + createdAd.getId(),
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
+                r("{api}/ads/{id}", api(), createdAd.getId()),
+                HttpMethod.GET, new HttpEntity<>(headers),
                 AdExtendedResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -167,10 +174,8 @@ class AdControllerE2ETest extends E2ETestBase {
         body.add("image", resource);
 
         ResponseEntity<Void> response = restTemplate.exchange(
-                getBaseUrl() + "/ads/" + createdAd.getId() + "/image",
-                HttpMethod.PATCH,
-                new HttpEntity<>(body, headers),
-                Void.class);
+                r("{api}/ads/{id}/image", api(), createdAd.getId()),
+                HttpMethod.PATCH, new HttpEntity<>(body, headers), Void.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -191,9 +196,8 @@ class AdControllerE2ETest extends E2ETestBase {
                 "Updated description");
 
         ResponseEntity<AdResponseDto> response = restTemplate.exchange(
-                getBaseUrl() + "/ads/" + createdAd.getId(),
-                HttpMethod.PATCH,
-                new HttpEntity<>(updateRequest, headers),
+                r("{api}/ads/{id}", api(), createdAd.getId()),
+                HttpMethod.PATCH, new HttpEntity<>(updateRequest, headers),
                 AdResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -212,17 +216,14 @@ class AdControllerE2ETest extends E2ETestBase {
         AdResponseDto createdAd = createAd(credentials);
 
         ResponseEntity<Void> deleteResponse = restTemplate.exchange(
-                getBaseUrl() + "/ads/" + createdAd.getId(),
-                HttpMethod.DELETE,
-                new HttpEntity<>(headers),
-                Void.class);
+                r("{api}/ads/{id}", api(), createdAd.getId()),
+                HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
 
         Assertions.assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
 
         ResponseEntity<AdExtendedResponseDto> getResponse = restTemplate.exchange(
-                getBaseUrl() + "/ads/" + createdAd.getId(),
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
+                r("{api}/ads/{id}", api(), createdAd.getId()),
+                HttpMethod.GET, new HttpEntity<>(headers),
                 AdExtendedResponseDto.class);
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
@@ -237,12 +238,67 @@ class AdControllerE2ETest extends E2ETestBase {
         AdResponseDto createdAd = createAd(credentials);
 
         ResponseEntity<Resource> response = restTemplate.getForEntity(
-                getBaseUrl() + "/ads/image/" + createdAd.getId(),
+                r("{api}/ads/image/{id}", api(), createdAd.getId()),
                 Resource.class);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
         Assertions.assertTrue(response.getHeaders()
                 .getContentType().toString().startsWith("image/"));
+    }
+
+    @DisplayName("Delete ad with comments - should return 204 when valid")
+    @Test
+    void removeAdWithComments_shouldReturn204_whenValidAdId() {
+
+        UserCredentials credentials = registerAndLoginUser();
+        HttpHeaders headers = createBasicAuthHeaders(credentials);
+
+        AdResponseDto createdAd = createAd(credentials);
+
+        // Add some comments.
+        var comment1 = new CreateOrUpdateCommentRequestDto("Comment 1");
+        restTemplate.exchange(r("{api}/ads/{id}/comments", api(), createdAd.getId()),
+                HttpMethod.POST, new HttpEntity<>(comment1, headers),
+                CommentResponseDto.class);
+
+        var comment2 = new CreateOrUpdateCommentRequestDto("Comment 2");
+        restTemplate.exchange(r("{api}/ads/{id}/comments", api(), createdAd.getId()),
+                HttpMethod.POST, new HttpEntity<>(comment2, headers),
+                CommentResponseDto.class);
+
+        // Get all comments.
+        ResponseEntity<CommentsArrayResponseDto> response = restTemplate.exchange(
+                r("{api}/ads/comments", api()),
+                HttpMethod.GET, new HttpEntity<>(headers),
+                CommentsArrayResponseDto.class);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(2, response.getBody().getCount());
+
+        // Try to delete ad with comments.
+        ResponseEntity<Void> deleteResponse = restTemplate.exchange(
+                r("{api}/ads/{id}", api(), createdAd.getId()),
+                HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
+
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
+
+        ResponseEntity<AdExtendedResponseDto> getResponse = restTemplate.exchange(
+                r("{api}/ads/{id}", api(), createdAd.getId()),
+                HttpMethod.GET, new HttpEntity<>(headers),
+                AdExtendedResponseDto.class);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
+
+        // Get all comments againg.
+        response = restTemplate.exchange(
+                r("{api}/ads/comments", api()),
+                HttpMethod.GET, new HttpEntity<>(headers),
+                CommentsArrayResponseDto.class);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(0, response.getBody().getCount());
     }
 }

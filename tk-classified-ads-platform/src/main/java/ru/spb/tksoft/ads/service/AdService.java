@@ -124,6 +124,39 @@ public class AdService {
     }
 
     /**
+     * Get ad image by id.
+     * 
+     * @param adId Ad ID.
+     * @return Image resource.
+     */
+    public ResponseEntity<Resource> getAdImage(final Long adId) {
+
+        ImageEntity image = imageRepository.findById(adId)
+                .orElseThrow(() -> new TkMediaNotFoundException(String.valueOf(adId)));
+
+        String filename = image.getName();
+
+        if (filename == null || filename.isBlank()) {
+            LogEx.error(log, LogEx.getThisMethodName(),
+                    "Ad " + adId + ": " + "image file not set");
+            return resourceService.getDefaultAdImage();
+        }
+
+        Path filePath = resourceService.getAdImagePath(filename);
+        if (!Files.exists(filePath)) {
+            LogEx.error(log, LogEx.getThisMethodName(),
+                    "Ad " + adId + ": " + "image file \"" + filename + "\" not found");
+            return resourceService.getDefaultAdImage();
+        }
+
+        Resource resource = new PathResource(filePath);
+        MediaType mediaType = MediaType.parseMediaType(image.getMediatype());
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(resource);
+    }
+
+    /**
      * Get a list of all ads.
      * 
      * @return Resoinse DTO.
@@ -246,38 +279,5 @@ public class AdService {
 
         adRepository.delete(ad);
         LogEx.trace(log, LogEx.getThisMethodName(), LogEx.STOPPED);
-    }
-
-    /**
-     * Get ad image by id.
-     * 
-     * @param adId Ad ID.
-     * @return Image resource.
-     */
-    public ResponseEntity<Resource> getAdImage(final Long adId) {
-
-        ImageEntity image = imageRepository.findById(adId)
-                .orElseThrow(() -> new TkMediaNotFoundException(String.valueOf(adId)));
-
-        String filename = image.getName();
-
-        if (filename == null || filename.isBlank()) {
-            LogEx.error(log, LogEx.getThisMethodName(),
-                    "Ad " + adId + ": " + "image file not set");
-            return resourceService.getDefaultAdImage();
-        }
-
-        Path filePath = resourceService.getAdImagePath(filename);
-        if (!Files.exists(filePath)) {
-            LogEx.error(log, LogEx.getThisMethodName(),
-                    "Ad " + adId + ": " + "image file \"" + filename + "\" not found");
-            return resourceService.getDefaultAdImage();
-        }
-
-        Resource resource = new PathResource(filePath);
-        MediaType mediaType = MediaType.parseMediaType(image.getMediatype());
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .body(resource);
     }
 }
