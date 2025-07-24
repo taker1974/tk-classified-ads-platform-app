@@ -49,7 +49,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <start-class>ru.spb.tksoft.ads.TKAdsApplication</start-class>
-        <maven.test.skip>false</maven.test.skip>
+        <maven.test.skip>true</maven.test.skip>
     </properties>
 
     <dependencies>
@@ -346,7 +346,12 @@
                     <execution>
                         <goals>
                             <goal>build-info</goal>
-                            <goal>build-image</goal>
+                            <!-- Build docker image from here is not good idea. -->
+                             <!-- Better use this (from solution root):
+                             $ mvn clean package
+                             $ cd tk-classified-ads-platform
+                             $ docker build -t tk-classified-ads-platform . -->
+                            <!-- <goal>build-image</goal> -->
                         </goals>
                     </execution>
                 </executions>

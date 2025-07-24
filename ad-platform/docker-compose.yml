@@ -48,7 +48,9 @@ services:
       - avito-network
 
   app:
-    image: ghcr.io/taker1974/tk-classified-ads-platform:1.0.0
+    # Get latest/stable/whatever image from external/internal repository:
+    #image: ghcr.io/taker1974/tk-classified-ads-platform:1.0.0
+    image: tk-classified-ads-platform
     container_name: avito-app
     restart: unless-stopped
     ports:
